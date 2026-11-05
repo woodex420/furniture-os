@@ -1,0 +1,437 @@
+{
+  "generated": "2026-11-05",
+  "method": "Regex/static heuristics over extracted PHP/JS/HTML/JSON/SQL; no runtime execution",
+  "pattern_counts": {
+    "sql_string_interp": {
+      "matches": 456,
+      "files": 82,
+      "top_files": [
+        [
+          "os:public_html/api/sales-lib.php",
+          27
+        ],
+        [
+          "os:public_html/api/chat-lib.php",
+          26
+        ],
+        [
+          "os:public_html/api/admin.php",
+          25
+        ],
+        [
+          "os:public_html/api/sales17-lib.php",
+          23
+        ],
+        [
+          "os:public_html/api/crm-lib.php",
+          22
+        ],
+        [
+          "os:public_html/api/media-lib.php",
+          16
+        ],
+        [
+          "os:public_html/api/wahub-lib.php",
+          16
+        ],
+        [
+          "os:public_html/api/chat.php",
+          15
+        ]
+      ]
+    },
+    "dangerous_func": {
+      "matches": 14,
+      "files": 9,
+      "top_files": [
+        [
+          "os:public_html/api/admin.php",
+          4
+        ],
+        [
+          "os:public_html/api/frontend-auth.php",
+          2
+        ],
+        [
+          "site:phpmailer/src/PHPMailer.php",
+          2
+        ],
+        [
+          "os:public_html/api/booking-lib.php",
+          1
+        ],
+        [
+          "os:public_html/api/media-lib.php",
+          1
+        ],
+        [
+          "os:public_html/api/p18h-lib.php",
+          1
+        ],
+        [
+          "site:vendor/dompdf/src/PhpEvaluator.php",
+          1
+        ],
+        [
+          "site:vendor/dompdf/src/Adapter/CPDF.php",
+          1
+        ]
+      ]
+    },
+    "hash_equals": {
+      "matches": 17,
+      "files": 11,
+      "top_files": [
+        [
+          "os:public_html/api/builder.php",
+          3
+        ],
+        [
+          "os:public_html/api/admin.php",
+          2
+        ],
+        [
+          "os:public_html/api/frontend-auth.php",
+          2
+        ],
+        [
+          "os:public_html/api/security-lib.php",
+          2
+        ],
+        [
+          "os:public_html/api/whatsapp.php",
+          2
+        ],
+        [
+          "os:public_html/api/chat.php",
+          1
+        ],
+        [
+          "os:public_html/api/mcp.php",
+          1
+        ],
+        [
+          "os:public_html/api/quote-view.php",
+          1
+        ]
+      ]
+    },
+    "password_hash": {
+      "matches": 14,
+      "files": 6,
+      "top_files": [
+        [
+          "os:public_html/api/admin.php",
+          7
+        ],
+        [
+          "os:public_html/api/builder.php",
+          2
+        ],
+        [
+          "os:public_html/api/frontend-auth.php",
+          2
+        ],
+        [
+          "site:lbpanel/add-users.php",
+          1
+        ],
+        [
+          "site:lbpanel/edit-user.php",
+          1
+        ],
+        [
+          "site:lbpanel/setting.php",
+          1
+        ]
+      ]
+    },
+    "password_verify": {
+      "matches": 10,
+      "files": 5,
+      "top_files": [
+        [
+          "os:public_html/api/admin.php",
+          4
+        ],
+        [
+          "os:public_html/api/builder.php",
+          2
+        ],
+        [
+          "os:public_html/api/frontend-auth.php",
+          2
+        ],
+        [
+          "os:public_html/api/security-lib.php",
+          1
+        ],
+        [
+          "site:lbpanel/index.php",
+          1
+        ]
+      ]
+    },
+    "prepared": {
+      "matches": 288,
+      "files": 82,
+      "top_files": [
+        [
+          "frontstore:servicedetail.php",
+          18
+        ],
+        [
+          "site:servicedetail.php",
+          17
+        ],
+        [
+          "os:public_html/api/frontend-auth.php",
+          14
+        ],
+        [
+          "site:singleproduct.php",
+          8
+        ],
+        [
+          "frontstore:singleproduct.php",
+          8
+        ],
+        [
+          "site:api/search/suggest.php",
+          7
+        ],
+        [
+          "site:lbpanel/php/update_order_status.php",
+          7
+        ],
+        [
+          "frontstore:api/search/suggest.php",
+          7
+        ]
+      ]
+    },
+    "htmlspecialchars": {
+      "matches": 717,
+      "files": 77,
+      "top_files": [
+        [
+          "frontstore:index.php",
+          58
+        ],
+        [
+          "frontstore:singleproduct.php",
+          42
+        ],
+        [
+          "frontstore:footer/footer.php",
+          34
+        ],
+        [
+          "site:singleproduct.php",
+          32
+        ],
+        [
+          "frontstore:footer.php",
+          27
+        ],
+        [
+          "frontstore:servicedetail.php",
+          24
+        ],
+        [
+          "site:lbpanel/edit_product.php",
+          22
+        ],
+        [
+          "site:index.php",
+          21
+        ]
+      ]
+    },
+    "csrf": {
+      "matches": 36,
+      "files": 6,
+      "top_files": [
+        [
+          "os:public_html/api/frontend-auth.php",
+          18
+        ],
+        [
+          "os:public_html/api/builder.php",
+          7
+        ],
+        [
+          "site:lbpanel/pos/manage_pos.php",
+          7
+        ],
+        [
+          "os:public_html/api/admin.php",
+          2
+        ],
+        [
+          "os:public_html/api/media-lib.php",
+          1
+        ],
+        [
+          "site:phpmailer/get_oauth_token.php",
+          1
+        ]
+      ]
+    },
+    "upload": {
+      "matches": 11,
+      "files": 9,
+      "top_files": [
+        [
+          "site:lbpanel/category-management/add-category.php",
+          2
+        ],
+        [
+          "site:lbpanel/category-management/edit-category.php",
+          2
+        ],
+        [
+          "os:public_html/api/builder.php",
+          1
+        ],
+        [
+          "site:lbpanel/add-blog.php",
+          1
+        ],
+        [
+          "site:lbpanel/edit-blog.php",
+          1
+        ],
+        [
+          "site:lbpanel/edit_product.php",
+          1
+        ],
+        [
+          "site:lbpanel/php/hero_save_slide.php",
+          1
+        ],
+        [
+          "site:lbpanel/php/process_add_product.php",
+          1
+        ]
+      ]
+    },
+    "base64_decode": {
+      "matches": 12,
+      "files": 9,
+      "top_files": [
+        [
+          "os:public_html/api/media-lib.php",
+          2
+        ],
+        [
+          "os:public_html/api/sales-lib.php",
+          2
+        ],
+        [
+          "site:vendor/dompdf/lib/Cpdf.php",
+          2
+        ],
+        [
+          "os:public_html/api/chat-lib.php",
+          1
+        ],
+        [
+          "os:public_html/api/p18h-lib.php",
+          1
+        ],
+        [
+          "os:public_html/api/p18j-lib.php",
+          1
+        ],
+        [
+          "site:phpmailer/src/PHPMailer.php",
+          1
+        ],
+        [
+          "site:phpmailer/src/SMTP.php",
+          1
+        ]
+      ]
+    },
+    "sql_with_superglobal": {
+      "matches": 151,
+      "files": 58,
+      "top_files": [
+        [
+          "site:fetch_products.php",
+          9
+        ],
+        [
+          "frontstore:fetch_products.php",
+          9
+        ],
+        [
+          "site:servicedetail.php",
+          4
+        ],
+        [
+          "site:lbpanel/manage_reviews.php",
+          4
+        ],
+        [
+          "site:lbpanel/queries.php",
+          4
+        ],
+        [
+          "site:lbpanel/sales-report.php",
+          4
+        ],
+        [
+          "site:lbpanel/category-management/view-categories.php",
+          4
+        ],
+        [
+          "site:lbpanel/pos/manage_pos.php",
+          4
+        ]
+      ]
+    },
+    "echo_superglobal": {
+      "matches": 1,
+      "files": 1,
+      "top_files": [
+        [
+          "site:lbpanel/includes/ckeditor/upload.php",
+          1
+        ]
+      ]
+    },
+    "include_variable": {
+      "matches": 2,
+      "files": 2,
+      "top_files": [
+        [
+          "site:phpmailer/src/PHPMailer.php",
+          1
+        ],
+        [
+          "site:vendor/dompdf/src/FrameDecorator/Page.php",
+          1
+        ]
+      ]
+    }
+  },
+  "secret_scan": {
+    "literal_secret_like_assignments": 5,
+    "by_tree": {
+      "site": 5
+    },
+    "note": "Values are redacted; see SECURITY_FINDINGS.md for paths"
+  },
+  "archive_integrity": {
+    "release_manifest_entries": 182,
+    "release_manifest_verified": 182,
+    "archive_sha256": {
+      "woodex furniture os .zip": "e5980a1ae1e0e6c24ecce2a1e41cd6293c8464dfd94be4dcf9bddd1a02dd976f",
+      "woodex (1).zip": "8b34277d831401d482ecae01f316340aff98c81e2397477a78727e6a18c9d7cf",
+      "frontstore.zip": "eaa583b7f6e7ba52425266ee68d9530ec5724cfdf96e035d02b84a2d5c0c5d55",
+      "woodexfurniture.pk (1).zip (Drive metadata)": "e212c0e06b442479af6c43a2908c63fed20547494ab97fb400f79c8bb8badb71"
+    }
+  }
+}

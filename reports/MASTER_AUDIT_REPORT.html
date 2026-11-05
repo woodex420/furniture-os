@@ -1,0 +1,932 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Woodex Furniture OS — Master Audit Report</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;line-height:1.5;color:#1f2937;max-width:1100px;margin:2rem auto;padding:0 1rem}
+h1,h2,h3,h4{color:#111827;margin-top:1.8em}h1{font-size:2em;border-bottom:2px solid #e5e7eb;padding-bottom:.3em}
+table{border-collapse:collapse;width:100%;margin:1em 0}th,td{border:1px solid #d1d5db;padding:6px 8px;text-align:left;vertical-align:top}th{background:#f3f4f6}
+code{background:#f3f4f6;padding:1px 4px;border-radius:3px;font-family:Consolas,monospace;font-size:.92em}
+pre{background:#111827;color:#f9fafb;padding:12px;overflow:auto;border-radius:5px}pre code{background:none;color:inherit;padding:0}
+blockquote{border-left:4px solid #f59e0b;background:#fffbeb;margin:1em 0;padding:.5em 1em}
+a{color:#2563eb}hr{border:0;border-top:1px solid #e5e7eb;margin:2em 0}
+</style></head><body><h1 id="woodex-furniture-os-complete-master-audit-report">Woodex Furniture OS — Complete Master Audit Report</h1>
+<p><strong>Date:</strong> 2026-11-05 (UTC)<br />
+<strong>Prepared for:</strong> full-project analysis request — <em>frontend, backend, database, complete master audit report, summarize code and API</em><br />
+<strong>Source of truth:</strong> Google Drive folder <code>woodex furniture os</code> (<code>1oww6rFqvwHBqrJKKPJ5Kme4pD10BAvJ2</code>)<br />
+<strong>Repository baseline:</strong> <code>woodex420/furniture-os</code>, branch <code>arena/bd434fbd-furniture-os</code>, commit <code>63225f2 Initial commit</code> (only <code>README.md</code> tracked)<br />
+<strong>Report location:</strong> <code>/home/user/furniture-os/MASTER_AUDIT_REPORT.md</code><br />
+<strong>Companion appendices:</strong> <code>/home/user/furniture-os/reports/</code></p>
+<blockquote>
+<p><strong>Important:</strong> This is a static source audit of the three archives that could be retrieved. A fourth 150 MB archive could not be transferred through the Google Drive connector's 100 MiB workspace limit. The report is complete for all accessible sources, but the four-archive project is <strong>not fully covered</strong> until that archive is supplied in smaller parts. See <a href="#2-scope-limitations-and-coverage-gap">Scope limitation</a>. No password, token, API key, or database credential value is reproduced anywhere in this report.</p>
+</blockquote>
+<hr />
+<h2 id="1-executive-summary">1. Executive summary</h2>
+<p>The Git repository is not the project. It is a one-file stub. The real system lives in four archives in Google Drive and represents <strong>two overlapping generations of the same business</strong>:</p>
+<ol>
+<li><strong>Woodex OS</strong> — a newer, API-first PHP 8 backend plus a vanilla-JavaScript admin SPA and visual page builder. It uses a <code>wx_*</code> MySQL schema, signed admin tokens, TOTP 2FA, MCP/JSON-RPC, webhook integrations, and a release manifest.</li>
+<li><strong>Legacy PHP storefront / <code>lbpanel</code></strong> — a server-rendered ecommerce site with its own <code>mysqli</code> database, session cart/quote basket, POS module, CKEditor, PHPMailer, and dompdf. Two snapshots of this storefront exist: an older <code>site</code> ZIP and a newer <code>frontstore</code> RAR5. They share 39 identical file hashes, so <code>frontstore</code> is a derivative/newer snapshot, not an independent system.</li>
+</ol>
+<p>The newer OS code is materially better engineered than the legacy storefront: it uses prepared statements, HMAC-signed tokens, role checks, webhook signature verification, CSRF controls, hashed MCP tokens, an SSRF guard, and a verified file manifest. However, the overall project is <strong>not production-safe as shipped</strong>. The legacy archives contain hardcoded live database credentials, a credential-leaking <code>error_log</code>, <code>display_errors = On</code>, <code>upload_max_filesize = 9999M</code>, PHP session files inside the web root, an unauthenticated CKEditor upload handler, and at least 26 admin/POS write endpoints with no recognizable authentication guard. The OS installer can also be invoked unauthenticated if its private DB config is missing or broken, and demo/default credentials are documented in multiple places.</p>
+<h3 id="key-numbers">Key numbers</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th style="text-align: right;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Drive archives in folder</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td>Archives successfully downloaded / analyzed</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td>Combined Drive archive size</td>
+<td style="text-align: right;">272,506,210 bytes (~260 MiB)</td>
+</tr>
+<tr>
+<td>Accessible archive size</td>
+<td style="text-align: right;">119,047,693 bytes (~113.5 MiB)</td>
+</tr>
+<tr>
+<td>Extracted source trees analyzed</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td>Extracted files</td>
+<td style="text-align: right;">1,795</td>
+</tr>
+<tr>
+<td>Extracted bytes</td>
+<td style="text-align: right;">133,132,733 (~127 MiB)</td>
+</tr>
+<tr>
+<td>Total lines / non-blank lines</td>
+<td style="text-align: right;">163,947 / 128,801</td>
+</tr>
+<tr>
+<td>Code files / code lines</td>
+<td style="text-align: right;">784 / 125,404</td>
+</tr>
+<tr>
+<td>OS <code>wx_*</code> tables declared in <code>schema.sql</code></td>
+<td style="text-align: right;">22</td>
+</tr>
+<tr>
+<td>Foreign keys in <code>schema.sql</code></td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Additional runtime <code>CREATE TABLE</code> definitions found in PHP</td>
+<td style="text-align: right;">27</td>
+</tr>
+<tr>
+<td>OS API action strings (unique)</td>
+<td style="text-align: right;">350</td>
+</tr>
+<tr>
+<td>PHP endpoint-like files across all trees</td>
+<td style="text-align: right;">112</td>
+</tr>
+<tr>
+<td>MCP tools exposed</td>
+<td style="text-align: right;">18 (15 read, 3 draft/notes)</td>
+</tr>
+<tr>
+<td>Identical file hashes shared across trees</td>
+<td style="text-align: right;">40 (39 <code>site</code>↔<code>frontstore</code>, 1 <code>os</code>↔<code>site</code>)</td>
+</tr>
+<tr>
+<td>Release manifest entries verified</td>
+<td style="text-align: right;">182 / 182</td>
+</tr>
+</tbody>
+</table>
+<h3 id="overall-risk-rating">Overall risk rating</h3>
+<p><strong>HIGH — not production-ready without P0 remediation.</strong> The critical issues are configuration/secret leakage and missing access control in the legacy admin, not exotic code-execution bugs in the newer OS. The highest-value immediate actions are: rotate every database credential, remove hardcoded config and debug artifacts, put an auth guard in front of every <code>lbpanel</code>/POS endpoint, move secrets outside the web root, disable the unauthenticated installer, and reconcile the two divergent stacks into one versioned repository.</p>
+<hr />
+<h2 id="2-scope-limitations-and-coverage-gap">2. Scope limitations and coverage gap</h2>
+<h3 id="what-was-audited">What was audited</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Drive file</th>
+<th>ID</th>
+<th style="text-align: right;">Size (bytes)</th>
+<th>Actual format</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td><code>woodex furniture os .zip</code></td>
+<td><code>1l3ZCxRAOsKXU7Ad483_UZ3PPffpGu0gd</code></td>
+<td style="text-align: right;">2,071,098</td>
+<td>ZIP</td>
+<td>Extracted as <code>os</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td><code>woodex (1).zip</code></td>
+<td><code>1NitZf4qiLBMKB4BXMZJwXFFFG6N5sJw5</code></td>
+<td style="text-align: right;">36,787,088</td>
+<td>ZIP</td>
+<td>Extracted as <code>site</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td><code>frontstore.zip</code></td>
+<td><code>142_mg7fS-HkTppBIbN4vy6S_VCyN8rCe</code></td>
+<td style="text-align: right;">83,189,507</td>
+<td><strong>RAR5, mislabeled <code>.zip</code></strong></td>
+<td>Extracted as <code>frontstore</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td><code>woodexfurniture.pk (1).zip</code></td>
+<td><code>1wR1YlJ477N_ICp8JBe6sbePX3ThgQYyA</code></td>
+<td style="text-align: right;">150,458,517</td>
+<td>ZIP (metadata only)</td>
+<td><strong>Not downloaded</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Drive folder contains only these four direct children; no subfolders, extra pages, or native Google Workspace documents were listed. <code>woodexfurniture.pk (1).zip</code> was modified <code>2026-11-02T20:44:31Z</code>; Drive metadata reports SHA-256 <code>e212c0e06b442479af6c43a2908c63fed20547494ab97fb400f79c8bb8badb71</code>, MD5 <code>630e2119b6c2bf1d4d4fdd53f7840dc0</code>, and SHA-1 <code>2cd1d12989e53843e52d8ac9273ddad690a7c10a</code>. Its contents remain unknown.</p>
+<h3 id="why-archive-4-is-missing">Why archive 4 is missing</h3>
+<ul>
+<li><code>google_drive__download_file</code> fails above the connector's 100 MiB workspace cap.</li>
+<li><code>google_drive__read_file_text</code> fails above its 25 MiB extraction cap.</li>
+<li><code>google_drive__get_file</code> returns metadata/checksums only.</li>
+<li><code>google_drive__export_file</code> is not applicable to a stored binary ZIP.</li>
+<li>Repeated download attempts, <code>acknowledge_abuse=true</code>, and direct <code>uc?export=download</code> fetches were unsuccessful.</li>
+</ul>
+<p>Direct link: <a href="https://drive.google.com/file/d/1wR1YlJ477N_ICp8JBe6sbePX3ThgQYyA/view?usp=drivesdk">https://drive.google.com/file/d/1wR1YlJ477N_ICp8JBe6sbePX3ThgQYyA/view?usp=drivesdk</a></p>
+<p><strong>To complete the audit:</strong> provide a split/recompressed copy under 95 MB per part, or a source-only archive excluding <code>vendor/</code>, <code>node_modules/</code>, media, and backup folders. A short addendum will then reconcile any new code, routes, database schema, media, or configuration. Until then, this report must not be read as an audit of all four archives.</p>
+<h3 id="method-and-notation">Method and notation</h3>
+<ul>
+<li>Archives were extracted with Python <code>zipfile</code> and a local <code>node-unrar-js@2.0.2</code> WASM extractor for the RAR5 file.</li>
+<li>A custom Python analyzer aggregated file/extension counts, line counts, duplicate content hashes, schema DDL, PHP case labels, endpoint-like files, <code>.htaccess</code> rules, external hosts, and security regex patterns.</li>
+<li>High-risk areas were then manually reviewed: auth/session flow, SQL construction, file uploads, SSRF guards, <code>.htaccess</code>, config files, runtime artifacts, and release manifest.</li>
+<li>No live PHP/MySQL execution, no authenticated penetration test, no dynamic DAST, and no production database access were performed.</li>
+<li>Paths use <code>tree:relative/path</code>: <code>os:</code>, <code>site:</code>, <code>frontstore:</code>. For example, <code>os:public_html/api/admin.php</code> = <code>/tmp/audit/os/public_html/api/admin.php</code>.</li>
+<li>Static regex counts are indicators only; they are not confirmed vulnerabilities. Confirmed findings are called out with file/line evidence in <code>reports/SECURITY_FINDINGS.md</code>.</li>
+</ul>
+<hr />
+<h2 id="3-source-inventory-and-integrity">3. Source inventory and integrity</h2>
+<table>
+<thead>
+<tr>
+<th>Tree</th>
+<th>Archive</th>
+<th style="text-align: right;">Files</th>
+<th style="text-align: right;">Bytes</th>
+<th style="text-align: right;">Lines</th>
+<th style="text-align: right;">Non-blank</th>
+<th style="text-align: right;">Code files</th>
+<th style="text-align: right;">Code lines</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>os</code></td>
+<td><code>woodex furniture os .zip</code></td>
+<td style="text-align: right;">183</td>
+<td style="text-align: right;">5,720,595</td>
+<td style="text-align: right;">32,730</td>
+<td style="text-align: right;">29,932</td>
+<td style="text-align: right;">147</td>
+<td style="text-align: right;">26,701</td>
+<td>New backend/admin/database release; 182 files verified against <code>docs/RELEASE-MANIFEST.json</code>.</td>
+</tr>
+<tr>
+<td><code>site</code></td>
+<td><code>woodex (1).zip</code></td>
+<td style="text-align: right;">1,071</td>
+<td style="text-align: right;">36,553,080</td>
+<td style="text-align: right;">100,566</td>
+<td style="text-align: right;">71,816</td>
+<td style="text-align: right;">560</td>
+<td style="text-align: right;">71,665</td>
+<td>Older legacy storefront; ZIP entries dated <code>2026-02-19 12:23:20</code>.</td>
+</tr>
+<tr>
+<td><code>frontstore</code></td>
+<td><code>frontstore.zip</code> (RAR5)</td>
+<td style="text-align: right;">541</td>
+<td style="text-align: right;">90,859,058</td>
+<td style="text-align: right;">30,651</td>
+<td style="text-align: right;">27,053</td>
+<td style="text-align: right;">77</td>
+<td style="text-align: right;">27,038</td>
+<td>Newer-looking frontend snapshot; RAR entries dated <code>2026-11-03 10:15–10:18</code>.</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td>3 archives</td>
+<td style="text-align: right;"><strong>1,795</strong></td>
+<td style="text-align: right;"><strong>133,132,733</strong></td>
+<td style="text-align: right;"><strong>163,947</strong></td>
+<td style="text-align: right;"><strong>128,801</strong></td>
+<td style="text-align: right;"><strong>784</strong></td>
+<td style="text-align: right;"><strong>125,404</strong></td>
+<td>Includes vendored libraries and media.</td>
+</tr>
+</tbody>
+</table>
+<p>Local SHA-256 of downloaded archives:</p>
+<table>
+<thead>
+<tr>
+<th>Archive</th>
+<th>SHA-256</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>woodex furniture os .zip</code></td>
+<td><code>e5980a1ae1e0e6c24ecce2a1e41cd6293c8464dfd94be4dcf9bddd1a02dd976f</code></td>
+</tr>
+<tr>
+<td><code>woodex (1).zip</code></td>
+<td><code>8b34277d831401d482ecae01f316340aff98c81e2397477a78727e6a18c9d7cf</code></td>
+</tr>
+<tr>
+<td><code>frontstore.zip</code></td>
+<td><code>eaa583b7f6e7ba52425266ee68d9530ec5724cfdf96e035d02b84a2d5c0c5d55</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="relationship-between-trees">Relationship between trees</h3>
+<ul>
+<li><code>frontstore.zip</code> is RAR5 despite its <code>.zip</code> name and Drive MIME <code>application/x-zip-compressed</code>; filename/MIME cannot be trusted.</li>
+<li><code>site</code> contains <code>lbpanel/</code> (418 files), <code>sessions/</code> (258 files), <code>vendor/dompdf</code>, <code>phpmailer/</code>, CKEditor, and 40 root PHP pages.</li>
+<li><code>frontstore</code> contains 51 root PHP pages, 71 PHP files total, 460 image files (~90 MB), 13 <code>api/</code> scripts, <code>redirect.php</code>, and a sanitized <code>config/connection-real.php</code>.</li>
+<li>39 identical content hashes are shared between <code>site</code> and <code>frontstore</code>; 1 between <code>os</code> and <code>site</code>; 0 between <code>os</code> and <code>frontstore</code>. This strongly indicates <code>frontstore</code> is a later derivative of <code>site</code> with added quote/review/product APIs and rewritten <code>.htaccess</code>.</li>
+<li>The small <code>os</code> archive is <strong>backend/admin/database only</strong>; it is not a full public storefront.</li>
+<li>The 150 MB archive likely contains another full production snapshot (possibly <code>woodexfurniture.pk</code> v1), but its role cannot be confirmed.</li>
+</ul>
+<h3 id="git-baseline">Git baseline</h3>
+<p><code>git ls-tree -r --name-only HEAD</code> returns only <code>README.md</code>. History is shallow/grafted with one commit <code>63225f2 Initial commit</code>; <code>main</code>, <code>origin/main</code>, and <code>origin/HEAD</code> are aligned. Remote is <code>https://github.com/woodex420/furniture-os.git</code>. <strong>Do not use Git as the source of truth for this project.</strong> The Drive archives are the project; the repository should become the source of truth only after a controlled import.</p>
+<hr />
+<h2 id="4-architecture">4. Architecture</h2>
+<pre><code class="language-mermaid">flowchart LR
+  U[Browser / customer] --&gt;|server-rendered PHP| L[site / frontstore public pages]
+  L --&gt;|mysqli, sessions| LD[(Legacy ecommerce MySQL)]
+  U --&gt;|cart / quote / reviews / checkout JSON| LA[api/cart, api/quote, api/reviews, root POST handlers]
+  LA --&gt; LD
+
+  A[Admin browser] --&gt;|HTML + 67 script tags| SPA[os:public_html/admin/index.html]
+  SPA --&gt;|POST JSON action| ADM[os:public_html/api/admin.php]
+  ADM --&gt;|PDO prepared statements| WD[(wx_* MySQL)]
+  ADM --&gt;|~30 *-lib.php modules| LIBS[CRM / sales / content / media / chat / SEO / integrations]
+  LIBS --&gt; WD
+
+  B[Builder browser] --&gt;|CodeMirror / UIkit| BLD[os:public_html/builder/index.html]
+  BLD --&gt;|POST action| BAPI[os:public_html/api/builder.php]
+  BAPI --&gt;|HTML/CSS files, backups, media| FS[(public_html filesystem)]
+  BAPI --&gt;|image uploads| WD
+
+  C[MCP client] --&gt;|Bearer wxmcp_| MCP[os:public_html/api/mcp.php]
+  MCP --&gt;|18 read / draft tools| LIBS
+
+  WH[WhatsApp / Telegram / Meta] --&gt;|signed webhooks| WB[whatsapp.php / telegram.php]
+  WB --&gt; WD
+
+  CRON[wa-cron.php?key=] --&gt;|campaigns / agents / backups| WD
+  CRON --&gt; FS
+
+  PUB[Public forms / chat / quote-view / r404] --&gt;|throttled public APIs| WD
+</code></pre>
+<p>There are effectively <strong>three front doors</strong>: the public PHP storefront, the newer Admin SPA, and the Builder. They do not share one application framework, one auth system, one database schema, or one deployment pipeline. The OS backend writes both to MySQL and directly to <code>public_html</code> HTML/CSS files; the legacy storefront writes to a separate MySQL database through <code>mysqli</code>.</p>
+<hr />
+<h2 id="5-frontend-audit">5. Frontend audit</h2>
+<h3 id="51-new-os-admin-spa">5.1 New OS Admin SPA</h3>
+<ul>
+<li>Entry: <code>os:public_html/admin/index.html</code>, <code>admin.css</code>, <code>admin.js</code>.</li>
+<li><strong>67 <code>&lt;script src&gt;</code> tags</strong>, 79 JavaScript files, 3 CSS files, 8 HTML files in the OS tree.</li>
+<li>No framework, no bundler, no <code>package.json</code>, no module graph; modules are loaded as global scripts and named by delivery phase (<code>admin-p18.js</code>, <code>admin-p19f.js</code>, <code>admin-p38wa.js</code>, <code>admin-seo38.js</code>, etc.).</li>
+<li>Vendored browser libraries: Chart.js 4.4.1 (<code>admin/vendor/chart.umd.js</code>, 205 KB), <code>html2pdf.bundle.min.js</code> (906 KB), <code>qrcode.js</code>, <code>icons.js</code>, <code>quote-starter.js</code>.</li>
+<li>Functional domains visible from module names: dashboard/reports, CRM, sales/quotes/invoices, sales17, content/CMS, media, system, settings, theme, XLSX/Sheets, chat, notifications, SEO/AI, offers, Google integrations, inbox, users, redirects, templates, bookings, approvals, Telegram, WhatsApp hub, AI center, social, and SEO agent.</li>
+<li>Largest client files: <code>admin-content.js</code> 123 KB, <code>admin-sales17.js</code> 97 KB, <code>admin-sales.js</code> 81 KB, <code>admin-media.js</code> 55 KB, <code>admin-chrome.js</code> 53 KB.</li>
+</ul>
+<p><strong>Assessment:</strong> feature-rich but high maintenance risk. Global-script architecture creates ordering/global-namespace coupling, no tree-shaking, no type checking, and no automated test seams. A 67-script bootstrap is fragile; a single missing/deferred script can break unrelated modules.</p>
+<h3 id="52-builder">5.2 Builder</h3>
+<ul>
+<li>Entry: <code>os:public_html/builder/index.html</code>, <code>builder.js</code> 167 KB, 13 script tags.</li>
+<li>Uses CodeMirror, <code>icons.json</code> (565 KB), <code>google-fonts.js</code>, UIkit, <code>blocks.js</code>, <code>templates-v26.js</code>, <code>wx-css.js</code>, and phase add-ons (<code>builder-p17.js</code>, <code>builder-p18f.js</code>, <code>builder-p18k.js</code>, <code>builder-p38.js</code>).</li>
+<li>Saves generated HTML pages directly to disk, keeps up to 30 timestamped backups per page, manages media in <code>assets/media</code>, and supports theme CSS through a whitelist.</li>
+<li><code>code_guard()</code> restricts raw <code>&lt;script&gt;</code> insertion to owner role; <code>import_url</code>/<code>fetch_page</code> enforce public HTTPS, DNS resolution, private-IP blocking, and <code>CURLOPT_FOLLOWLOCATION = false</code>.</li>
+</ul>
+<p><strong>Assessment:</strong> powerful but couples content editing to filesystem writes and Apache rewrites. Without a build/CI layer, a bad save can publish broken markup; backups are the only rollback mechanism.</p>
+<h3 id="53-public-storefront">5.3 Public storefront</h3>
+<p>The legacy storefront is server-rendered PHP with mixed HTML/CSS/JS in single files.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th style="text-align: right;"><code>site</code></th>
+<th style="text-align: right;"><code>frontstore</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Root <code>.php</code> pages</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">51</td>
+</tr>
+<tr>
+<td>Total <code>.php</code> files</td>
+<td style="text-align: right;">256</td>
+<td style="text-align: right;">71</td>
+</tr>
+<tr>
+<td><code>.js</code> / <code>.css</code> / <code>.html</code></td>
+<td style="text-align: right;">231 / 25 / 27</td>
+<td style="text-align: right;">5 / 1 / 0</td>
+</tr>
+<tr>
+<td>Image files</td>
+<td style="text-align: right;">~177</td>
+<td style="text-align: right;">460</td>
+</tr>
+<tr>
+<td><code>api/</code> scripts</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">13</td>
+</tr>
+</tbody>
+</table>
+<p>Representative page groups:</p>
+<ul>
+<li><strong>Catalog:</strong> <code>index.php</code>, <code>shop.php</code>, <code>singleproduct.php</code>, <code>servicedetail.php</code>, <code>product_categories.php</code>, <code>filters_meta.php</code>, <code>fetch_products.php</code>.</li>
+<li><strong>Cart / checkout:</strong> <code>cart.php</code>, <code>checkout.php</code>, <code>api/cart/add|count|get|remove|update|save_totals.php</code>, <code>apply_coupon.php</code>, <code>process_checkout.php</code>, <code>order_success.php</code>.</li>
+<li><strong>Quotation flow:</strong> <code>equotation.php</code>, <code>quotation-basket.php</code>, <code>api/quote/*</code>, <code>submit_quote_request.php</code>, <code>generate_quotation_pdf.php</code>, <code>generate_quote_request_pdf.php</code>.</li>
+<li><strong>Content / marketing:</strong> <code>about.php</code>, <code>services.php</code>, <code>projects.php</code>, <code>sale.php</code>, <code>warranty.php</code>, <code>contact.php</code>, <code>reviews.php</code>, <code>api/reviews/submit-customer-review.php</code>, <code>api/search/suggest.php</code>, <code>redirect.php</code>.</li>
+<li><strong>State:</strong> <code>$_SESSION['cart']</code> and <code>$_SESSION['quote_basket']</code>.</li>
+</ul>
+<p>Frontend dependencies are CDN-heavy: <code>cdn.jsdelivr.net</code> (70 references), <code>cdnjs.cloudflare.com</code> (66), <code>code.jquery.com</code> (22), Google Fonts, Unsplash, Font Awesome, Owl Carousel, Bootstrap 5.3.0-alpha3, Bootstrap Icons, jQuery 3.5.1 in <code>lbpanel/login.html</code>. <strong>Zero <code>integrity=</code> attributes</strong> were found, so all CDN scripts are unpinned against tampering.</p>
+<h3 id="54-routing-and-htaccess">5.4 Routing and <code>.htaccess</code></h3>
+<table>
+<thead>
+<tr>
+<th>Tree</th>
+<th style="text-align: right;">Lines</th>
+<th style="text-align: right;">RewriteRule lines</th>
+<th>Key behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>os:public_html/.htaccess</code></td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">44</td>
+<td>Forces non-<code>www</code> HTTPS, denies <code>_private</code>, <code>_database</code>, <code>_templates</code>, installer/demo/check/log files; sets nosniff, Referrer-Policy, X-Frame-Options, Permissions-Policy, HSTS; many SEO/spam cleanup redirects; <code>coming-soon.html</code> / <code>500.html</code> error docs.</td>
+</tr>
+<tr>
+<td><code>site:.htaccess</code></td>
+<td style="text-align: right;">138</td>
+<td style="text-align: right;">24</td>
+<td>Forces <code>www</code> HTTPS, friendly URLs, CKEditor/PHP upload size hints, gzip, cache headers, security headers. <strong>Line 20 typo:</strong> redirects to <code>woodexurniture.pk</code> (missing <code>f</code>).</td>
+</tr>
+<tr>
+<td><code>frontstore:.htaccess</code></td>
+<td style="text-align: right;">225</td>
+<td style="text-align: right;">73</td>
+<td>Forces non-<code>www</code> HTTPS, extensionless friendly URLs, product/category/service/blog/project rewrites, <code>redirect.php</code> fallback for DB-driven redirects, denies hidden/sensitive extensions, includes <code>redirect.php</code> allow for <code>lbpanel|api</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Conflicting canonical-host rules are a real deployment bug: <code>site</code> forces <code>www</code>, while <code>os</code> and <code>frontstore</code> force non-<code>www</code>. <code>frontstore</code> also routes unresolved paths to <code>redirect.php</code> backed by an <code>url_redirects</code> table. Full rule-by-rule inventory: <code>reports/ROUTES.md</code>.</p>
+<h3 id="55-frontend-quality-findings">5.5 Frontend quality findings</h3>
+<ul>
+<li>Large mixed PHP/HTML/CSS/JS files: <code>frontstore:index.php</code> ~101 KB, <code>singleproduct.php</code> ~58 KB, <code>servicedetail.php</code> ~49 KB; <code>site:index.php</code> ~54 KB.</li>
+<li>Inline styles/scripts are common; no template engine or component system.</li>
+<li><code>frontstore</code> PDF endpoints expect <code>__DIR__.'/vendor/autoload.php'</code> (<code>generate_quotation_pdf.php:27</code>, <code>generate_quote_request_pdf.php:6</code>), but the <code>frontstore</code> archive contains no <code>vendor/</code> directory and no <code>autoload.php</code>. The <code>site</code> archive contains <code>vendor/dompdf</code> but also no root <code>vendor/autoload.php</code>. PDF generation will degrade to HTML fallback unless dependencies are installed separately.</li>
+<li><code>frontstore:config/connection-real.php</code> says a mock <code>connection.php</code> can be switched with <code>FRONTSTORE_USE_MOCK=0</code>; no <code>FRONTSTORE_USE_MOCK</code> reference exists anywhere in code. The actual <code>frontstore/connection.php</code> and <code>frontstore/lbpanel/config/connection.php</code> are real configs with hardcoded live fallbacks.</li>
+<li><code>site:lbpanel/login.html</code> posts to <code>login_process.php</code>, which is absent; the working login is <code>lbpanel/index.php</code>. <code>pos/manage_pos.php</code> references <code>../login.php</code>, also absent.</li>
+</ul>
+<hr />
+<h2 id="6-backend-and-api-audit">6. Backend and API audit</h2>
+<h3 id="61-new-os-endpoints">6.1 New OS endpoints</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Auth</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /api/admin.php</code></td>
+<td><code>X-WX-ADM</code> HMAC token; roles owner/admin/editor/sales/support</td>
+<td>Main action dispatcher for CRM, sales, CMS, media, security, integrations, system.</td>
+</tr>
+<tr>
+<td><code>POST /api/builder.php</code></td>
+<td><code>X-WX-CSRF</code> builder token or admin token</td>
+<td>Pages, backups, media, theme, blocks, import/fetch, uploads.</td>
+</tr>
+<tr>
+<td><code>GET/POST /api/forms.php</code></td>
+<td>Public; honeypot, IP throttle, optional Turnstile</td>
+<td>Leads, <code>wa_click</code>, booking config/slots/create.</td>
+</tr>
+<tr>
+<td><code>POST /api/frontend-auth.php</code></td>
+<td><code>wx_fe_session</code> cookie or <code>Bearer wxfe_</code>; CSRF for password</td>
+<td>Customer register/login/me/logout/password.</td>
+</tr>
+<tr>
+<td><code>POST /api/chat.php</code></td>
+<td>Visitor <code>chat_id</code> + SHA-256 token</td>
+<td>Chat cfg/send/poll/typing/file/Telegram link.</td>
+</tr>
+<tr>
+<td><code>POST /api/mcp.php</code></td>
+<td><code>Authorization: Bearer wxmcp_…</code></td>
+<td>JSON-RPC 2.0 MCP server; 18 tools.</td>
+</tr>
+<tr>
+<td><code>GET /api/quote-view.php?id=&amp;t=</code></td>
+<td>Signed HMAC link token</td>
+<td>Client quotation viewer, <code>noindex</code>.</td>
+</tr>
+<tr>
+<td><code>GET/POST /api/whatsapp.php</code></td>
+<td>Meta verify token + <code>X-Hub-Signature-256</code></td>
+<td>WhatsApp Cloud API webhook.</td>
+</tr>
+<tr>
+<td><code>POST /api/telegram.php</code></td>
+<td><code>X-Telegram-Bot-Api-Secret-Token</code></td>
+<td>Telegram bot webhook.</td>
+</tr>
+<tr>
+<td><code>GET /api/wa-cron.php?key=</code></td>
+<td>Cron key in query string</td>
+<td>WhatsApp campaigns, social/SEO agents, offsite backups.</td>
+</tr>
+<tr>
+<td><code>POST /api/r404.php</code></td>
+<td>Public beacon</td>
+<td>404 monitoring.</td>
+</tr>
+</tbody>
+</table>
+<p>Full endpoint/action inventory: <code>reports/API_INVENTORY.md</code> and <code>reports/API_INVENTORY.json</code>.</p>
+<h3 id="62-admin-action-dispatcher">6.2 Admin action dispatcher</h3>
+<p><code>os:public_html/api/admin.php</code> is a 643-line front controller with 33 direct <code>case</code> labels and a <code>default:</code> that delegates to roughly 30 <code>*-lib.php</code> action handlers. Across all OS API files, the analyzer found <strong>350 unique action strings</strong> and <strong>1,094 PHP case labels in total</strong> across all three trees (many in vendored code). The 297 admin/library action rows group as:</p>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th style="text-align: right;">Approx. actions</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Core/admin/pages/users</td>
+<td style="text-align: right;">66</td>
+<td><code>status</code>, <code>setup</code>, <code>login</code>, <code>logout</code>, <code>me</code>, <code>schema_check</code>, <code>schema_repair</code>, <code>sys_check</code>, <code>db_reconnect</code>, <code>users</code>, <code>user_save</code>, <code>dashboard</code>, <code>activity</code>, <code>pages_list</code>, <code>global_menu</code></td>
+</tr>
+<tr>
+<td>Content/CMS</td>
+<td style="text-align: right;">30</td>
+<td><code>cms_list</code>, <code>cms_get</code>, <code>cms_save</code>, <code>cms_published</code>, <code>ai_run</code>, <code>cms_ai_models</code></td>
+</tr>
+<tr>
+<td>Builder</td>
+<td style="text-align: right;">26</td>
+<td><code>pages</code>, <code>load</code>, <code>save</code>, <code>backups</code>, <code>restore</code>, <code>media</code>, <code>import_url</code>, <code>fetch_page</code>, <code>upload</code>, <code>theme</code></td>
+</tr>
+<tr>
+<td>MCP JSON-RPC / tools</td>
+<td style="text-align: right;">23</td>
+<td><code>initialize</code>, <code>ping</code>, <code>tools/list</code>, <code>tools/call</code>, plus 18 tool cases</td>
+</tr>
+<tr>
+<td>AI/SEO</td>
+<td style="text-align: right;">21</td>
+<td><code>seo_list</code>, <code>seo_page</code>, <code>seo_scores</code>, <code>sag_scan</code>, <code>sag_propose</code>, <code>aic_get</code>, <code>aia_report</code></td>
+</tr>
+<tr>
+<td>Live chat</td>
+<td style="text-align: right;">15</td>
+<td><code>chat_list</code>, <code>chat_assign</code>, <code>chat_reply</code>, <code>chat_mode</code>, <code>chat_cfg_save</code></td>
+</tr>
+<tr>
+<td>WhatsApp campaigns</td>
+<td style="text-align: right;">14</td>
+<td><code>wag_get</code>, <code>wag_audience</code>, <code>wag_camp_save</code>, <code>wag_tick</code>, <code>wag_test</code></td>
+</tr>
+<tr>
+<td>CRM leads/clients/settings</td>
+<td style="text-align: right;">27</td>
+<td><code>leads_list</code>, <code>lead_save</code>, <code>lead_note</code>, <code>clients_list</code>, <code>crm_*</code></td>
+</tr>
+<tr>
+<td>Sales quotes/invoices/projects</td>
+<td style="text-align: right;">28</td>
+<td><code>quotes_list</code>, <code>quote_save</code>, <code>invs_list</code>, <code>proj_*</code>, <code>s17_*</code></td>
+</tr>
+<tr>
+<td>Media / file manager / DB browser</td>
+<td style="text-align: right;">17</td>
+<td><code>media_list</code>, <code>fm_upload</code>, <code>fm_delete</code>, <code>dbx_tables</code>, <code>dbx_browse</code></td>
+</tr>
+<tr>
+<td>Telegram / social / notifications / redirects / bookings / integrations</td>
+<td style="text-align: right;">~45</td>
+<td><code>tg_*</code>, <code>soc_*</code>, <code>notif_*</code>, <code>rd_*</code>, <code>bk_*</code>, <code>sheets_*</code>, <code>google_*</code>, <code>gdata_*</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-authentication-and-authorization-models">6.3 Authentication and authorization models</h3>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Admin</td>
+<td><code>uid.exp.sid.sig</code> HMAC token in <code>X-WX-ADM</code>, 12-hour expiry, secret from <code>_private/config.json</code>, live-session revocation in <code>_private/security.json</code>, <code>password_hash</code>/<code>password_verify</code>, TOTP + recovery codes, IP throttle, <code>need()</code> and <code>wx_allowed()</code> role/action checks.</td>
+</tr>
+<tr>
+<td>Builder</td>
+<td><code>exp.uid.sid.sig</code> HMAC token in <code>X-WX-CSRF</code>, same 12-hour window, optional separate builder password.</td>
+</tr>
+<tr>
+<td>Customer frontend</td>
+<td><code>wx_frontend_users</code> / <code>wx_frontend_sessions</code>, SHA-256 token hashes, HttpOnly <code>wx_fe_session</code>, readable <code>wx_fe_csrf</code>, optional <code>Bearer wxfe_</code>, CSRF on password change, login/register throttles.</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td><code>wxmcp_…</code> bearer tokens hashed in <code>_private/mcp.json</code>, per-token user permissions, JSON-RPC 2.0, <code>tools/call</code> restricted to read tools and safe draft/notes.</td>
+</tr>
+<tr>
+<td>Webhooks</td>
+<td>WhatsApp <code>X-Hub-Signature-256</code> fail-closed; Telegram secret-token header; Meta verify token for GET challenge.</td>
+</tr>
+<tr>
+<td>Legacy <code>lbpanel</code></td>
+<td>Session-based <code>index.php</code> login with <code>password_verify</code>, but <strong>no centralized auth guard</strong>; only 17 of 45 session-using files contain an auth-like check.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="64-integrations">6.4 Integrations</h3>
+<p>The OS backend references WhatsApp Cloud API, Telegram Bot API, Cloudflare Turnstile, SMTP/PHPMailer, Google Sheets, Google OAuth/Analytics/Search Console, PageSpeed Insights, OpenAI-compatible AI endpoints, social posting, Meta Pixel/GTM, offsite backups, and SEO agents. Runtime secrets are expected in <code>_private/*.json</code>; <code>db.example.json</code> contains placeholders only. Production <code>db.json</code>, <code>config.json</code>, <code>security.json</code>, and <code>mcp.json</code> are correctly excluded from the small OS archive — but they are still designed to live under <code>public_html/_private/</code>, which is a deployment risk.</p>
+<h3 id="65-legacy-api-surface">6.5 Legacy API surface</h3>
+<p>112 PHP endpoint-like files were found across <code>site</code> and <code>frontstore</code>. They are mostly small, session-backed <code>mysqli</code> scripts:</p>
+<ul>
+<li><code>api/cart/add|count|get|remove|update|save_totals.php</code></li>
+<li><code>api/quote/add|count|get|remove|update.php</code></li>
+<li><code>api/search/suggest.php</code></li>
+<li><code>api/reviews/submit-customer-review.php</code></li>
+<li><code>api/product/quick-view.php</code></li>
+<li>Root handlers: <code>apply_coupon.php</code>, <code>submit_contact.php</code>, <code>subscribe.php</code>, <code>process_checkout.php</code>, <code>fetch_products.php</code>, <code>filters_meta.php</code>, <code>submit_quote_request.php</code>, <code>generate_quotation_pdf.php</code>, <code>generate_quote_request_pdf.php</code>, <code>redirect.php</code>, <code>session_test.php</code>.</li>
+</ul>
+<p>Many use prepared statements; targeted review found <strong>no high-confidence direct <code>$_GET</code>/<code>$_POST</code>/<code>$_REQUEST</code> interpolation into SQL strings</strong>. However, dynamic SQL builders exist in <code>fetch_products.php</code>, <code>filters_meta.php</code>, <code>footer.php</code>, <code>header.php</code>, and redirect/auto-migration helpers. These need runtime testing. No CSRF tokens, no shared rate limiting, and no centralized authorization were found in the legacy layer.</p>
+<h3 id="66-cron-webhooks-and-filesystem-writes">6.6 Cron, webhooks, and filesystem writes</h3>
+<ul>
+<li><code>wa-cron.php?key=</code> is guarded by a cron key stored in <code>wx_settings</code>; the key travels in the URL.</li>
+<li><code>whatsapp.php</code> fails closed when the signature header or app secret is missing.</li>
+<li><code>telegram.php</code> requires the secret-token header when configured.</li>
+<li><code>forms.php</code> deliberately accepts a lead if Cloudflare Turnstile is unreachable (<code>forms.php:80</code>) to avoid losing leads — a fail-open decision.</li>
+<li><code>builder.php</code> writes HTML/CSS, keeps 30 backups, uploads verified images with random filenames, and can enter maintenance mode by rewriting <code>.htaccess</code>.</li>
+<li><code>p18h-lib.php</code> implements a file manager under <code>assets/</code> with path normalization, but permits <code>.svg</code> uploads and uses a regex <code>&lt;script&gt;</code> strip.</li>
+</ul>
+<hr />
+<h2 id="7-database-audit">7. Database audit</h2>
+<h3 id="71-two-database-worlds">7.1 Two database worlds</h3>
+<table>
+<thead>
+<tr>
+<th>World</th>
+<th>Access</th>
+<th>Schema source</th>
+<th>Tables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Woodex OS</td>
+<td>PDO, config in <code>_private/db.json</code></td>
+<td><code>os:database/schema.sql</code>, <code>os:database/demo-seed.sql</code>, runtime PHP DDL</td>
+<td>22 <code>wx_*</code> tables declared</td>
+</tr>
+<tr>
+<td>Legacy storefront</td>
+<td><code>mysqli</code>, hardcoded PHP config</td>
+<td><strong>No schema file found</strong></td>
+<td>~35 tables referenced in code</td>
+</tr>
+</tbody>
+</table>
+<p>The legacy config points to a different database than the <code>wx_*</code> schema. <code>schema.sql</code> comments mention an installer <code>wx-install.php</code> that is not included in the OS archive. <code>demo-seed.sql</code> inserts staging-only demo admin/customer accounts with bcrypt hashes; credentials are documented in <code>README.md</code>/<code>FRONTEND-INTEGRATION.md</code> but intentionally not reproduced here.</p>
+<h3 id="72-wx_-schema-summary">7.2 <code>wx_*</code> schema summary</h3>
+<p>All 22 tables use <code>ENGINE=InnoDB DEFAULT CHARSET=utf8mb4</code>, <code>CREATE TABLE IF NOT EXISTS</code>, and <strong>zero foreign keys</strong>. Every table has a primary key (inline or table-level), but logical relationships are enforced only in PHP.</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Tables</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Identity / security</td>
+<td><code>wx_users</code>, <code>wx_frontend_users</code>, <code>wx_frontend_sessions</code>, <code>wx_throttle</code>, <code>wx_settings</code>, <code>wx_activity</code></td>
+<td>Admin + customer identity are separate. <code>wx_throttle</code> is a generic key-prefixed rate-limit table. <code>wx_settings</code> stores config/secrets as plaintext <code>TEXT</code>.</td>
+</tr>
+<tr>
+<td>CRM</td>
+<td><code>wx_leads</code> (32 cols), <code>wx_lead_notes</code>, <code>wx_clients</code></td>
+<td><code>wx_leads.fields</code> is JSON in <code>TEXT</code>; 4 indexes on stage/created/client/next.</td>
+</tr>
+<tr>
+<td>Sales</td>
+<td><code>wx_quotes</code>, <code>wx_invoices</code>, <code>wx_projects</code>, <code>wx_templates</code></td>
+<td>Whole documents stored as JSON in <code>LONGTEXT</code>; <code>wx_invoices.quote_id</code> is unique but not a FK; <code>wx_quotes.no</code> indexed but not unique.</td>
+</tr>
+<tr>
+<td>Chat / AI</td>
+<td><code>wx_chats</code> (20 cols), <code>wx_chat_msgs</code>, <code>wx_ai_events</code>, <code>wx_ai_unans</code></td>
+<td><code>wx_chats.token</code> has no index; <code>wx_chat_msgs</code> has <code>(chat_id, id)</code>.</td>
+</tr>
+<tr>
+<td>Messaging / dedupe</td>
+<td><code>wx_wa_seen</code>, <code>wx_tg_seen</code>, <code>wx_tg_map</code>, <code>wx_notify_log</code></td>
+<td>WhatsApp/Telegram message dedupe and notification log.</td>
+</tr>
+<tr>
+<td>Bookings</td>
+<td><code>wx_bookings</code></td>
+<td>17 columns, single index on <code>d</code>.</td>
+</tr>
+<tr>
+<td>Leads follow-up</td>
+<td><code>wx_lead_notes</code>, <code>wx_notify_log</code></td>
+<td>Notes and outbound notification audit.</td>
+</tr>
+</tbody>
+</table>
+<p>Top table references in OS PHP: <code>wx_leads</code> 78, <code>wx_chats</code> 77, <code>wx_users</code> 58, <code>wx_invoices</code> 35, <code>wx_clients</code> 34, <code>wx_projects</code> 30, <code>wx_quotes</code> 29, <code>wx_chat_msgs</code> 28, <code>wx_throttle</code> 26, <code>wx_bookings</code> 22.</p>
+<h3 id="73-schema-drift">7.3 Schema drift</h3>
+<ul>
+<li><code>admin.php::schema_requirements()</code> expects <code>wx_chats.handoff</code>, <code>ext</code>, <code>assigned_to</code>, and <code>tags</code>; none are in <code>schema.sql</code>. <code>schema_repair()</code> adds missing columns at runtime.</li>
+<li>27 additional <code>CREATE TABLE IF NOT EXISTS</code> definitions were found inside PHP, including legacy tables (<code>customer_reviews</code>, <code>footer_settings</code>, <code>footer_links</code>, <code>topbar_settings</code>, <code>sale_page_settings</code>, <code>quotation_requests</code>, <code>quotation_request_items</code>, <code>product_categories</code>, <code>projects</code>).</li>
+<li>Runtime migrators exist in <code>admin.php</code>, <code>crm-lib.php</code>, <code>sales-lib.php</code>, <code>chat-lib.php</code>, <code>booking-lib.php</code>, <code>frontend-auth.php</code>, <code>p18h-lib.php</code>, and in <code>frontstore</code> footer/header/review/category helpers.</li>
+<li><code>CREATE TABLE IF NOT EXISTS</code> does not reconcile changed column types or indexes. There is no migration version table, no down migration, and no rollback script.</li>
+</ul>
+<h3 id="74-design-gaps">7.4 Design gaps</h3>
+<ul>
+<li>No <code>FOREIGN KEY</code> constraints; no database-level cascade/consistency.</li>
+<li>JSON-in-<code>LONGTEXT</code> prevents indexed queries on quote/invoice/project fields and complicates reporting.</li>
+<li>Missing useful indexes: <code>wx_chats.token</code>, <code>wx_leads.email</code>, <code>wx_clients.email</code>, composite <code>(lead_id, created_at)</code>, broader <code>wx_bookings</code> indexes.</li>
+<li>No soft deletes, no tenant/company scoping, no row-level audit metadata on several tables.</li>
+<li><code>wx_settings</code> plaintext key/value store may hold integration secrets; no encryption at rest.</li>
+<li>No row counts, no ERD, no production schema dump, and no live DB access in this audit.</li>
+</ul>
+<p>Full column-by-column schema, indexes, drift, and legacy table references: <code>reports/DATABASE_SCHEMA.md</code> and <code>reports/DATABASE_AUDIT.json</code>.</p>
+<hr />
+<h2 id="8-security-audit">8. Security audit</h2>
+<p>The full findings table is in <code>reports/SECURITY_FINDINGS.md</code>. Summary:</p>
+<table>
+<thead>
+<tr>
+<th>Severity</th>
+<th style="text-align: right;">Count</th>
+<th>Headline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Critical</td>
+<td style="text-align: right;">3</td>
+<td>Hardcoded live DB credentials; unauthenticated legacy admin writes; unrestricted CKEditor upload</td>
+</tr>
+<tr>
+<td>High</td>
+<td style="text-align: right;">5</td>
+<td>Debug artifacts in web root; unauthenticated installer/reconnect; default/demo credentials; web-root private secrets; legacy CSRF</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td style="text-align: right;">10</td>
+<td>Conflicting rewrites, missing CSP/HSTS, wildcard MCP CORS, cron secret in URL, fail-open Turnstile, SSRF surface, SVG upload, no legacy rate limiting, CDN without SRI, EOL/unlocked dependencies</td>
+</tr>
+<tr>
+<td>Low</td>
+<td style="text-align: right;">4</td>
+<td>Status fingerprinting, no CI/secret scanning, inconsistent config copies, schema drift</td>
+</tr>
+</tbody>
+</table>
+<h3 id="most-urgent-evidence">Most urgent evidence</h3>
+<ul>
+<li><code>site:lbpanel/config/connection.php:3-6</code>, <code>frontstore:connection.php:23-25</code>, <code>frontstore:lbpanel/config/connection.php:23-25</code>: hardcoded live DB fallbacks. <code>site:error_log:1-2</code>: a second DB username/password appears inside uncaught <code>mysqli</code> stack traces. Values are redacted in this report.</li>
+<li><code>site:php.ini:6,14</code> and <code>.user.ini:7,14,15</code>: <code>display_errors = On</code>, <code>upload_max_filesize = 9999M</code>, session path inside public web root. <code>site:sessions/</code> contains 258 session files; <code>session_test.php</code> prints session data.</li>
+<li><code>site:lbpanel/includes/ckeditor/upload.php:1-26</code>: no auth, no extension/MIME allowlist, original filename, writes under <code>DocumentRoot</code>, and echoes <code>$_GET[CKEditorFuncNum]</code> into JavaScript.</li>
+<li>45 <code>lbpanel</code> files call <code>session_start()</code>; only 17 have a recognizable authorization check; 26 write-capable endpoints lack one, including <code>php/process_add_product.php</code>, <code>php/process_add_coupon.php</code>, <code>pos/api/save_transaction.php</code>, and <code>edit_product.php</code>.</li>
+<li><code>os:public_html/api/admin.php:387-410</code>: <code>setup</code>/<code>db_reconnect</code> are reachable without a normal admin session when DB config is missing/broken; builder password is optional. Line 401 references <code>admin / admin</code>.</li>
+<li><code>os:public_html/_private/</code> is inside <code>DocumentRoot</code>; protection depends on <code>mod_rewrite</code>/<code>AllowOverride</code>. If either is off, DB config, HMAC secret, TOTP seeds, MCP token hashes, and approval settings may be downloadable.</li>
+<li><code>site:.htaccess:16,20</code> forces <code>www</code> and contains a misspelled canonical host; <code>os</code> and <code>frontstore</code> force non-<code>www</code>.</li>
+<li><code>os:public_html/api/mcp.php:17</code> sends <code>Access-Control-Allow-Origin: *</code>.</li>
+</ul>
+<h3 id="positive-controls-to-preserve">Positive controls to preserve</h3>
+<p>HMAC-signed admin/builder tokens with revocation, TOTP/recovery codes, <code>password_hash</code>/<code>password_verify</code>, role/action checks, hashed frontend session tokens, CSRF on frontend password change, fail-closed WhatsApp/Telegram signature checks, hashed MCP tokens, 18 MCP tools limited to read/drafts, image-content verification and random upload names, public-HTTPS-only SSRF guards, <code>JSON_HEX_*</code> escaping in <code>quote-view.php</code>, upload-directory PHP disabling, and a release manifest that verified 182/182 file hashes.</p>
+<h3 id="static-scan-interpretation">Static scan interpretation</h3>
+<p><code>reports/STATIC_SCAN.json</code> records 456 SQL string-interpolation candidates (82 files), 151 SQL strings near superglobals (58 files), 288 prepared-statement markers (82 files), 717 <code>htmlspecialchars</code> calls (77 files), 17 <code>hash_equals</code>, 14 <code>password_hash</code>, 10 <code>password_verify</code>, and 5 high-confidence literal secret-like assignments. These are <strong>grep heuristics</strong>. Manual review of cart, quote, review, checkout, search, and admin handlers found extensive prepared-statement use and no confirmed direct superglobal-to-SQL injection. Dynamic SQL builders and all upload/SSRF guards still require staging DAST.</p>
+<hr />
+<h2 id="9-code-quality-dependencies-and-maintainability">9. Code quality, dependencies, and maintainability</h2>
+<table>
+<thead>
+<tr>
+<th>Observation</th>
+<th>Evidence</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Two divergent stacks, no shared kernel</td>
+<td><code>os</code> vs <code>site</code>/<code>frontstore</code></td>
+<td>Duplicate business logic, divergent auth/DB/config, high integration cost.</td>
+</tr>
+<tr>
+<td>Monolithic dispatcher</td>
+<td><code>admin.php</code> 643 lines; 350 actions; ~30 libraries</td>
+<td>Hard to test, easy to miss permission checks, large blast radius.</td>
+</tr>
+<tr>
+<td>Monolithic frontend files</td>
+<td><code>builder.js</code> 167 KB; <code>admin-content.js</code> 123 KB; <code>index.php</code> 101 KB; 67 script tags</td>
+<td>Slow load, global namespace coupling, no type safety.</td>
+</tr>
+<tr>
+<td>Phase-based naming</td>
+<td><code>p18</code>, <code>p19</code>, <code>p38</code>, <code>sales17</code>, <code>seo38</code></td>
+<td>History is encoded in filenames, not Git tags/migrations; hard onboarding.</td>
+</tr>
+<tr>
+<td>No tests / CI / build</td>
+<td>No PHPUnit, Playwright, GitHub Actions, Dockerfile, lint config, or app lock files found</td>
+<td>Regressions and secret leaks are undetectable before deploy.</td>
+</tr>
+<tr>
+<td>Vendored dependencies</td>
+<td>PHPMailer 6.9.3, dompdf git snapshot <code>&lt;3beae5028&gt;</code>, CKEditor 4.25.0-lts, Chart.js 4.4.1, html2pdf, qrcode, CodeMirror, UIkit, Bootstrap 5.3.0-alpha3, jQuery 3.5.1</td>
+<td>No update path; CKEditor 4 open-source edition is explicitly EOL; Bootstrap alpha and old jQuery are risky.</td>
+</tr>
+<tr>
+<td>External host noise</td>
+<td>Vendored CKEditor docs dominate: <code>ckeditor.com</code> 1,475, <code>github.com</code> 836, <code>dev.ckeditor.com</code> 800, <code>www.w3.org</code> 227, <code>cdn.jsdelivr.net</code> 223, <code>cdnjs.cloudflare.com</code> 169</td>
+<td>Large vendored trees inflate archive size and audit surface without being application code.</td>
+</tr>
+<tr>
+<td>Inconsistent config</td>
+<td><code>frontstore/connection.php</code>, <code>frontstore/lbpanel/config/connection.php</code>, <code>frontstore/config/connection-real.php</code></td>
+<td>Three copies with different credential handling and a dead <code>FRONTSTORE_USE_MOCK</code> comment.</td>
+</tr>
+<tr>
+<td>Missing runtime dependencies</td>
+<td><code>frontstore</code> PDF endpoints expect <code>vendor/autoload.php</code> not shipped</td>
+<td>PDF features fail or fall back to HTML.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10-deployment-and-operations">10. Deployment and operations</h2>
+<ul>
+<li><strong>Platform:</strong> Apache / cPanel / Hostinger-style shared hosting, PHP 7.4+ compatibility shims in OS, PHP 8.1 session path in legacy <code>.user.ini</code>, MySQL/MariaDB.</li>
+<li><strong>Config:</strong> OS uses <code>_private/db.json</code> + <code>_private/config.json</code>; legacy uses hardcoded PHP constants/arrays. No <code>.env</code>, no secret manager, no environment separation.</li>
+<li><strong>Content deployment:</strong> Builder writes directly to <code>public_html</code>; maintenance mode rewrites <code>.htaccess</code>; admin backups and builder 30-version backups are the only rollback mechanism.</li>
+<li><strong>Canonical host:</strong> three conflicting <code>.htaccess</code> policies plus a typo. Must be unified before SEO/redirect work.</li>
+<li><strong>Observability:</strong> <code>wx_activity</code> and <code>wx_notify_log</code> in OS; <code>site:error_log</code> and <code>os:public_html/_private/logs</code> in filesystem. No structured logging, SIEM, uptime checks, or alerting.</li>
+<li><strong>Backups:</strong> admin <code>backup_get</code>/<code>backup_*</code>, builder page backups, <code>mt_offsite_backup</code> in cron. No documented retention, encryption, or restore test.</li>
+<li><strong>Source control:</strong> Git repo is empty; Drive ZIP/RAR snapshots are the de-facto version control. This is the single biggest process risk.</li>
+</ul>
+<hr />
+<h2 id="11-prioritized-remediation-roadmap">11. Prioritized remediation roadmap</h2>
+<h3 id="p0-immediate-same-day">P0 — immediate (same day)</h3>
+<ol>
+<li><strong>Rotate all database credentials</strong> found in the legacy configs and <code>error_log</code>; rotate any API keys that may have been stored alongside them. Purge/replace the Drive archives with sanitized copies.</li>
+<li><strong>Remove hardcoded config and debug artifacts</strong> from deployable trees: <code>site:lbpanel/config/connection.php</code>, <code>frontstore:connection.php</code>, <code>frontstore:lbpanel/config/connection.php</code>, <code>php.ini</code>, <code>.user.ini</code>, <code>session_test.php</code>, <code>error_log</code>, <code>.DS_Store</code>, <code>sessions/</code>. Move config outside <code>DocumentRoot</code> into env vars/secret store.</li>
+<li><strong>Shut down or gate <code>lbpanel</code> and <code>pos/api</code></strong> behind a mandatory auth include and web-server deny rules. Disable <code>includes/ckeditor/upload.php</code>; scan its upload directory for PHP/JS payloads.</li>
+<li><strong>Harden PHP runtime:</strong> <code>display_errors = Off</code>, <code>log_errors = On</code>, <code>upload_max_filesize</code>/<code>post_max_size</code> to 10–20 MB, sessions outside web root, <code>session.cookie_secure/httponly/samesite</code>.</li>
+<li><strong>Disable OS <code>setup</code>/<code>db_reconnect</code></strong> after install; require bootstrap secret from environment; remove <code>admin / admin</code> hint and demo seed from production.</li>
+<li><strong>Move <code>_private</code> outside <code>DocumentRoot</code></strong> and add server-level deny that does not depend on <code>.htaccess</code>.</li>
+<li><strong>Unify canonical host</strong>, fix <code>woodexurniture.pk</code> typo, enable HSTS, add CSP.</li>
+<li><strong>Supply the missing 150 MB archive</strong> in parts under 95 MB; issue the audit addendum.</li>
+</ol>
+<h3 id="p1-12-weeks">P1 — 1–2 weeks</h3>
+<ul>
+<li>Import one canonical tree into Git on <code>arena/bd434fbd-furniture-os</code>; delete duplicate snapshots; add <code>.gitignore</code> for archives, runtime logs, sessions, <code>_private</code>.</li>
+<li>Add <code>.env.example</code>, a single config loader, and secret scanning in pre-commit/CI.</li>
+<li>Introduce versioned migrations; reconcile <code>wx_chats</code> drift; add FKs/indexes; obtain <code>mysqldump --no-data</code> for the legacy DB.</li>
+<li>Add CSRF tokens, <code>SameSite</code> cookies, and rate limiting to every legacy state-changing endpoint.</li>
+<li>Add automated tests: PHPUnit for API/auth/SQL, integration tests for cart/quote/checkout, Playwright smoke tests for admin/builder/public site.</li>
+<li>Replace CKEditor 4 / old Bootstrap / old jQuery; add Composer/npm lock files and SCA scanning.</li>
+<li>Add SRI or self-host pinned CDN assets; add CSP nonces.</li>
+<li>Replace query-string cron key with a header and short-lived token; restrict MCP CORS to known origins.</li>
+<li>Add structured logging, uptime monitoring, backup encryption, retention, and a documented restore drill.</li>
+</ul>
+<h3 id="p2-13-months">P2 — 1–3 months</h3>
+<ul>
+<li>Consolidate the two stacks into one domain model, one auth system, one database, and one versioned API (OpenAPI contract).</li>
+<li>Replace direct HTML-file publishing with a database-backed CMS or a build pipeline that produces immutable artifacts.</li>
+<li>Normalize JSON-in-<code>LONGTEXT</code> document tables where reporting requires it; add soft deletes, audit fields, and encryption for sensitive PII.</li>
+<li>Add role/permission integration tests, WAF, SAST/DAST, and dependency-update automation.</li>
+<li>Create staging/production parity with blue/green or atomic symlink deploys.</li>
+<li>Decommission <code>lbpanel</code> or wrap it behind the new OS admin until migration is complete.</li>
+</ul>
+<hr />
+<h2 id="12-recommended-target-architecture">12. Recommended target architecture</h2>
+<pre><code class="language-mermaid">flowchart TB
+  FE[React/Next.js or static-generated storefront + admin] --&gt;|HTTPS, versioned /api/v1| GW[API gateway / PHP 8.3 app]
+  GW --&gt; AUTH[Unified auth: sessions + scoped tokens + RBAC]
+  GW --&gt; SVC[Domain services: catalog, CRM, quotes, orders, content, messaging]
+  SVC --&gt; DB[(MySQL 8 / MariaDB with migrations + FKs)]
+  SVC --&gt; OBJ[(Object storage: media, PDFs, backups)]
+  SVC --&gt; Q[(Queue + workers: webhooks, campaigns, AI, PDF, email)]
+  Q --&gt; EXT[WhatsApp / Telegram / Email / Google / AI / Sheets]
+  OBS[Logs, metrics, traces, alerts] --- GW
+  OBS --- SVC
+  CI[Git + CI + tests + SAST + secret scan] --&gt;|deploy| FE
+  CI --&gt;|deploy| GW
+</code></pre>
+<p>The goal is not to rewrite everything at once. First make the current deployment safe (P0), then make it reproducible (P1), then converge the two stacks (P2).</p>
+<hr />
+<h2 id="13-appendices">13. Appendices</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reports/API_INVENTORY.md</code></td>
+<td>Endpoint table, admin action groups, MCP tools, legacy endpoint groups, route pointers.</td>
+</tr>
+<tr>
+<td><code>reports/API_INVENTORY.json</code></td>
+<td>Machine-readable list of 350 unique OS API actions with file/line, plus endpoints and legacy endpoint paths.</td>
+</tr>
+<tr>
+<td><code>reports/DATABASE_SCHEMA.md</code></td>
+<td>All 22 <code>wx_*</code> tables column-by-column, keys/indexes, drift, demo seed, legacy DB notes.</td>
+</tr>
+<tr>
+<td><code>reports/DATABASE_AUDIT.json</code></td>
+<td>Machine-readable schema, keys, drift, runtime migrators, legacy table references.</td>
+</tr>
+<tr>
+<td><code>reports/SECURITY_FINDINGS.md</code></td>
+<td>22 findings with severity, evidence paths/lines, impact, remediation, positive controls, static-scan interpretation.</td>
+</tr>
+<tr>
+<td><code>reports/STATIC_SCAN.json</code></td>
+<td>Regex counts, secret-scan summary (values redacted), archive SHA-256, manifest verification.</td>
+</tr>
+<tr>
+<td><code>reports/ROUTES.md</code></td>
+<td>All <code>RewriteRule</code> lines from the three <code>.htaccess</code> files with line numbers.</td>
+</tr>
+<tr>
+<td><code>reports/SOURCE_INVENTORY.csv</code></td>
+<td>Per-tree, per-extension file and byte counts.</td>
+</tr>
+<tr>
+<td><code>reports/AUDIT_INDEX.md</code></td>
+<td>Index and reading order for the appendices.</td>
+</tr>
+<tr>
+<td><code>reports/MASTER_AUDIT_REPORT.html</code></td>
+<td>Print-friendly HTML rendition used for the Google Doc copy.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="14-quick-code-api-summary">14. Quick code / API summary</h2>
+<ul>
+<li><strong>Frontend:</strong> 3 UIs — legacy server-rendered PHP storefront (<code>site</code>/<code>frontstore</code>), vanilla-JS Admin SPA (67 scripts), and visual Builder (13 scripts). No framework, no bundler, no SRI, no CSP.</li>
+<li><strong>Backend:</strong> 11 OS public/API endpoints; <code>admin.php</code> is a 350-action dispatcher; <code>builder.php</code> has 26 actions; <code>mcp.php</code> exposes 18 JSON-RPC tools; ~112 legacy PHP endpoint-like files.</li>
+<li><strong>Auth:</strong> strong HMAC/TOTP/RBAC in OS; weak/incomplete session auth in legacy <code>lbpanel</code>; separate customer identity in <code>wx_frontend_*</code>.</li>
+<li><strong>Database:</strong> 22 <code>wx_*</code> tables, 0 foreign keys, 27 runtime DDL definitions, 4 missing <code>wx_chats</code> columns in <code>schema.sql</code>, plus an undocumented legacy ecommerce DB with no schema file.</li>
+<li><strong>Greatest strengths:</strong> signed tokens, prepared statements, webhook signature verification, MCP draft-only writes, release manifest integrity, SSRF/upload guards.</li>
+<li><strong>Greatest risks:</strong> hardcoded DB credentials, credential-leaking logs, unauthenticated legacy admin/upload endpoints, debug artifacts in web root, private secrets under <code>DocumentRoot</code>, two divergent stacks, no CI/tests/migrations.</li>
+<li><strong>Coverage:</strong> complete for 3 of 4 Drive archives; 150 MB <code>woodexfurniture.pk (1).zip</code> still required for a fully complete four-archive audit.</li>
+</ul></body></html>

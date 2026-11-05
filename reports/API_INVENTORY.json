@@ -1,0 +1,2676 @@
+{
+  "generated": "2026-11-05",
+  "source": "Static analysis of accessible Drive archives; no runtime verification",
+  "new_backend_endpoints": {
+    "admin.php": {
+      "path": "POST /api/admin.php",
+      "auth": "X-WX-ADM signed token; roles owner/admin/editor/sales/support; per-action permissions",
+      "purpose": "Main Admin API dispatcher",
+      "source": "os:public_html/api/admin.php"
+    },
+    "builder.php": {
+      "path": "POST /api/builder.php",
+      "auth": "X-WX-CSRF builder token or X-WX-ADM admin token",
+      "purpose": "Live page builder: pages, backups, media, theme, blocks",
+      "source": "os:public_html/api/builder.php"
+    },
+    "forms.php": {
+      "path": "GET/POST /api/forms.php",
+      "auth": "Public; honeypot, IP rate limit, optional Cloudflare Turnstile",
+      "purpose": "Contact/lead, booking config/slots/create, WhatsApp click stats",
+      "source": "os:public_html/api/forms.php"
+    },
+    "frontend-auth.php": {
+      "path": "POST /api/frontend-auth.php",
+      "auth": "Cookie wx_fe_session or Bearer wxfe_; X-WX-FE-CSRF for password change",
+      "purpose": "Customer registration/login/session/password",
+      "source": "os:public_html/api/frontend-auth.php"
+    },
+    "chat.php": {
+      "path": "POST /api/chat.php",
+      "auth": "Public visitor chat_id + token",
+      "purpose": "Live chat cfg/send/poll/typing/file/Telegram link",
+      "source": "os:public_html/api/chat.php"
+    },
+    "mcp.php": {
+      "path": "POST /api/mcp.php",
+      "auth": "Authorization: Bearer wxmcp_\u2026",
+      "purpose": "Model Context Protocol JSON-RPC server; read tools + safe drafts",
+      "source": "os:public_html/api/mcp.php"
+    },
+    "quote-view.php": {
+      "path": "GET /api/quote-view.php?id=&t=",
+      "auth": "Signed HMAC link token",
+      "purpose": "Client-facing quotation viewer",
+      "source": "os:public_html/api/quote-view.php"
+    },
+    "whatsapp.php": {
+      "path": "GET/POST /api/whatsapp.php",
+      "auth": "Meta verify token + X-Hub-Signature-256",
+      "purpose": "WhatsApp Cloud API webhook",
+      "source": "os:public_html/api/whatsapp.php"
+    },
+    "telegram.php": {
+      "path": "POST /api/telegram.php",
+      "auth": "X-Telegram-Bot-Api-Secret-Token",
+      "purpose": "Telegram bot webhook",
+      "source": "os:public_html/api/telegram.php"
+    },
+    "wa-cron.php": {
+      "path": "GET /api/wa-cron.php?key=",
+      "auth": "Cron key in query string",
+      "purpose": "WhatsApp campaigns, social/SEO agents, offsite backups",
+      "source": "os:public_html/api/wa-cron.php"
+    },
+    "r404.php": {
+      "path": "POST /api/r404.php",
+      "auth": "Public beacon",
+      "purpose": "404 monitor logging",
+      "source": "os:public_html/api/r404.php"
+    }
+  },
+  "admin_action_count": 297,
+  "unique_action_strings": 350,
+  "action_groups": {
+    "Core/admin/pages": 66,
+    "Content/CMS": 30,
+    "Builder": 26,
+    "MCP JSON-RPC": 23,
+    "AI/SEO": 21,
+    "Live chat": 15,
+    "WhatsApp campaigns": 14,
+    "CRM/leads": 11,
+    "CRM/settings": 10,
+    "Sales/projects": 10,
+    "Social": 10,
+    "Sales/quotes": 9,
+    "Telegram": 9,
+    "File manager": 8,
+    "Sales/invoices": 7,
+    "WhatsApp automation": 7,
+    "Bookings": 6,
+    "CRM/clients": 6,
+    "Google/MCP": 6,
+    "MCP/API keys": 6,
+    "Notifications": 5,
+    "Visitor chat": 5,
+    "Frontend auth": 5,
+    "Media/library": 5,
+    "Estimator/forms": 5,
+    "Redirects": 5,
+    "Google data": 4,
+    "Database browser": 4,
+    "Sales/templates": 4,
+    "Sheets": 4,
+    "WhatsApp webhook": 4,
+    "Other": 2,
+    "Maintenance": 2,
+    "Sales/company": 2,
+    "Sales/payments": 2,
+    "WhatsApp": 1,
+    "Sales17": 1
+  },
+  "actions": [
+    {
+      "action": "appr_count",
+      "file": "public_html/api/admin.php",
+      "line": 308
+    },
+    {
+      "action": "appr_list",
+      "file": "public_html/api/admin.php",
+      "line": 309
+    },
+    {
+      "action": "appr_get",
+      "file": "public_html/api/admin.php",
+      "line": 310
+    },
+    {
+      "action": "appr_reject",
+      "file": "public_html/api/admin.php",
+      "line": 311
+    },
+    {
+      "action": "appr_cancel",
+      "file": "public_html/api/admin.php",
+      "line": 313
+    },
+    {
+      "action": "appr_cfg_get",
+      "file": "public_html/api/admin.php",
+      "line": 314
+    },
+    {
+      "action": "appr_cfg_save",
+      "file": "public_html/api/admin.php",
+      "line": 315
+    },
+    {
+      "action": "status",
+      "file": "public_html/api/admin.php",
+      "line": 329
+    },
+    {
+      "action": "schema_check",
+      "file": "public_html/api/admin.php",
+      "line": 335
+    },
+    {
+      "action": "schema_repair",
+      "file": "public_html/api/admin.php",
+      "line": 339
+    },
+    {
+      "action": "sys_check",
+      "file": "public_html/api/admin.php",
+      "line": 345
+    },
+    {
+      "action": "db_reconnect",
+      "file": "public_html/api/admin.php",
+      "line": 367
+    },
+    {
+      "action": "setup",
+      "file": "public_html/api/admin.php",
+      "line": 387
+    },
+    {
+      "action": "login",
+      "file": "public_html/api/admin.php",
+      "line": 412
+    },
+    {
+      "action": "pw_forgot",
+      "file": "public_html/api/admin.php",
+      "line": 419
+    },
+    {
+      "action": "pw_reset",
+      "file": "public_html/api/admin.php",
+      "line": 429
+    },
+    {
+      "action": "me",
+      "file": "public_html/api/admin.php",
+      "line": 438
+    },
+    {
+      "action": "logout",
+      "file": "public_html/api/admin.php",
+      "line": 441
+    },
+    {
+      "action": "profile",
+      "file": "public_html/api/admin.php",
+      "line": 444
+    },
+    {
+      "action": "password",
+      "file": "public_html/api/admin.php",
+      "line": 449
+    },
+    {
+      "action": "users",
+      "file": "public_html/api/admin.php",
+      "line": 457
+    },
+    {
+      "action": "user_save",
+      "file": "public_html/api/admin.php",
+      "line": 460
+    },
+    {
+      "action": "dashboard",
+      "file": "public_html/api/admin.php",
+      "line": 487
+    },
+    {
+      "action": "activity",
+      "file": "public_html/api/admin.php",
+      "line": 498
+    },
+    {
+      "action": "pages_list",
+      "file": "public_html/api/admin.php",
+      "line": 507
+    },
+    {
+      "action": "page_meta_save",
+      "file": "public_html/api/admin.php",
+      "line": 514
+    },
+    {
+      "action": "page_delete",
+      "file": "public_html/api/admin.php",
+      "line": 536
+    },
+    {
+      "action": "backup_get",
+      "file": "public_html/api/admin.php",
+      "line": 547
+    },
+    {
+      "action": "global_menu",
+      "file": "public_html/api/admin.php",
+      "line": 557
+    },
+    {
+      "action": "chrome_versions",
+      "file": "public_html/api/admin.php",
+      "line": 577
+    },
+    {
+      "action": "chrome_save",
+      "file": "public_html/api/admin.php",
+      "line": 580
+    },
+    {
+      "action": "global_chrome",
+      "file": "public_html/api/admin.php",
+      "line": 587
+    },
+    {
+      "action": "global_replace",
+      "file": "public_html/api/admin.php",
+      "line": 626
+    },
+    {
+      "action": "chat_suggest",
+      "file": "public_html/api/ai-agent-lib.php",
+      "line": 103
+    },
+    {
+      "action": "ai_report",
+      "file": "public_html/api/ai-agent-lib.php",
+      "line": 109
+    },
+    {
+      "action": "ai_unans_list",
+      "file": "public_html/api/ai-agent-lib.php",
+      "line": 127
+    },
+    {
+      "action": "ai_unans_add",
+      "file": "public_html/api/ai-agent-lib.php",
+      "line": 130
+    },
+    {
+      "action": "ai_unans_ignore",
+      "file": "public_html/api/ai-agent-lib.php",
+      "line": 135
+    },
+    {
+      "action": "aic_get",
+      "file": "public_html/api/ai-center-lib.php",
+      "line": 77
+    },
+    {
+      "action": "aic_health",
+      "file": "public_html/api/ai-center-lib.php",
+      "line": 82
+    },
+    {
+      "action": "aic_save",
+      "file": "public_html/api/ai-center-lib.php",
+      "line": 84
+    },
+    {
+      "action": "bk_list",
+      "file": "public_html/api/booking-lib.php",
+      "line": 144
+    },
+    {
+      "action": "bk_slots",
+      "file": "public_html/api/booking-lib.php",
+      "line": 152
+    },
+    {
+      "action": "bk_save",
+      "file": "public_html/api/booking-lib.php",
+      "line": 155
+    },
+    {
+      "action": "bk_status",
+      "file": "public_html/api/booking-lib.php",
+      "line": 182
+    },
+    {
+      "action": "bk_cfg",
+      "file": "public_html/api/booking-lib.php",
+      "line": 193
+    },
+    {
+      "action": "bk_cfg_save",
+      "file": "public_html/api/booking-lib.php",
+      "line": 195
+    },
+    {
+      "action": "status",
+      "file": "public_html/api/builder.php",
+      "line": 198
+    },
+    {
+      "action": "setup",
+      "file": "public_html/api/builder.php",
+      "line": 201
+    },
+    {
+      "action": "login",
+      "file": "public_html/api/builder.php",
+      "line": 208
+    },
+    {
+      "action": "logout",
+      "file": "public_html/api/builder.php",
+      "line": 217
+    },
+    {
+      "action": "password",
+      "file": "public_html/api/builder.php",
+      "line": 220
+    },
+    {
+      "action": "pages",
+      "file": "public_html/api/builder.php",
+      "line": 229
+    },
+    {
+      "action": "load",
+      "file": "public_html/api/builder.php",
+      "line": 232
+    },
+    {
+      "action": "save",
+      "file": "public_html/api/builder.php",
+      "line": 237
+    },
+    {
+      "action": "backups",
+      "file": "public_html/api/builder.php",
+      "line": 253
+    },
+    {
+      "action": "backup_get",
+      "file": "public_html/api/builder.php",
+      "line": 259
+    },
+    {
+      "action": "restore",
+      "file": "public_html/api/builder.php",
+      "line": 266
+    },
+    {
+      "action": "media",
+      "file": "public_html/api/builder.php",
+      "line": 277
+    },
+    {
+      "action": "media_usage",
+      "file": "public_html/api/builder.php",
+      "line": 285
+    },
+    {
+      "action": "media_delete",
+      "file": "public_html/api/builder.php",
+      "line": 286
+    },
+    {
+      "action": "import_url",
+      "file": "public_html/api/builder.php",
+      "line": 297
+    },
+    {
+      "action": "fetch_page",
+      "file": "public_html/api/builder.php",
+      "line": 325
+    },
+    {
+      "action": "upload",
+      "file": "public_html/api/builder.php",
+      "line": 340
+    },
+    {
+      "action": "theme",
+      "file": "public_html/api/builder.php",
+      "line": 356
+    },
+    {
+      "action": "page_new",
+      "file": "public_html/api/builder.php",
+      "line": 394
+    },
+    {
+      "action": "blocks_list",
+      "file": "public_html/api/builder.php",
+      "line": 410
+    },
+    {
+      "action": "blocks_save",
+      "file": "public_html/api/builder.php",
+      "line": 415
+    },
+    {
+      "action": "blocks_delete",
+      "file": "public_html/api/builder.php",
+      "line": 416
+    },
+    {
+      "action": "blocks_import",
+      "file": "public_html/api/builder.php",
+      "line": 417
+    },
+    {
+      "action": "blocks_usage",
+      "file": "public_html/api/builder.php",
+      "line": 439
+    },
+    {
+      "action": "blocks_sync",
+      "file": "public_html/api/builder.php",
+      "line": 445
+    },
+    {
+      "action": "theme_get",
+      "file": "public_html/api/builder.php",
+      "line": 459
+    },
+    {
+      "action": "chat_list",
+      "file": "public_html/api/chat-lib.php",
+      "line": 214
+    },
+    {
+      "action": "chat_assign",
+      "file": "public_html/api/chat-lib.php",
+      "line": 221
+    },
+    {
+      "action": "chat_note",
+      "file": "public_html/api/chat-lib.php",
+      "line": 226
+    },
+    {
+      "action": "chat_tags",
+      "file": "public_html/api/chat-lib.php",
+      "line": 229
+    },
+    {
+      "action": "chat_get",
+      "file": "public_html/api/chat-lib.php",
+      "line": 233
+    },
+    {
+      "action": "chat_typing",
+      "file": "public_html/api/chat-lib.php",
+      "line": 237
+    },
+    {
+      "action": "chat_file",
+      "file": "public_html/api/chat-lib.php",
+      "line": 239
+    },
+    {
+      "action": "chat_reply",
+      "file": "public_html/api/chat-lib.php",
+      "line": 246
+    },
+    {
+      "action": "chat_mode",
+      "file": "public_html/api/chat-lib.php",
+      "line": 252
+    },
+    {
+      "action": "chat_close",
+      "file": "public_html/api/chat-lib.php",
+      "line": 257
+    },
+    {
+      "action": "chat_lead",
+      "file": "public_html/api/chat-lib.php",
+      "line": 261
+    },
+    {
+      "action": "chat_cfg_get",
+      "file": "public_html/api/chat-lib.php",
+      "line": 266
+    },
+    {
+      "action": "chat_cfg_save",
+      "file": "public_html/api/chat-lib.php",
+      "line": 268
+    },
+    {
+      "action": "chat_test",
+      "file": "public_html/api/chat-lib.php",
+      "line": 281
+    },
+    {
+      "action": "notif_poll",
+      "file": "public_html/api/chat-lib.php",
+      "line": 291
+    },
+    {
+      "action": "tglink",
+      "file": "public_html/api/chat.php",
+      "line": 36
+    },
+    {
+      "action": "poll",
+      "file": "public_html/api/chat.php",
+      "line": 38
+    },
+    {
+      "action": "typing",
+      "file": "public_html/api/chat.php",
+      "line": 40
+    },
+    {
+      "action": "file",
+      "file": "public_html/api/chat.php",
+      "line": 42
+    },
+    {
+      "action": "send",
+      "file": "public_html/api/chat.php",
+      "line": 49
+    },
+    {
+      "action": "outline",
+      "file": "public_html/api/content-lib.php",
+      "line": 85
+    },
+    {
+      "action": "article",
+      "file": "public_html/api/content-lib.php",
+      "line": 86
+    },
+    {
+      "action": "fix",
+      "file": "public_html/api/content-lib.php",
+      "line": 87
+    },
+    {
+      "action": "meta",
+      "file": "public_html/api/content-lib.php",
+      "line": 88
+    },
+    {
+      "action": "alt",
+      "file": "public_html/api/content-lib.php",
+      "line": 89
+    },
+    {
+      "action": "improve",
+      "file": "public_html/api/content-lib.php",
+      "line": 90
+    },
+    {
+      "action": "excerpt",
+      "file": "public_html/api/content-lib.php",
+      "line": 91
+    },
+    {
+      "action": "city",
+      "file": "public_html/api/content-lib.php",
+      "line": 92
+    },
+    {
+      "action": "faqs",
+      "file": "public_html/api/content-lib.php",
+      "line": 94
+    },
+    {
+      "action": "cms_tpl_list",
+      "file": "public_html/api/content-lib.php",
+      "line": 127
+    },
+    {
+      "action": "cms_tpl_save",
+      "file": "public_html/api/content-lib.php",
+      "line": 128
+    },
+    {
+      "action": "cms_tpl_delete",
+      "file": "public_html/api/content-lib.php",
+      "line": 136
+    },
+    {
+      "action": "cms_page_kinds",
+      "file": "public_html/api/content-lib.php",
+      "line": 140
+    },
+    {
+      "action": "cms_sitemap_add",
+      "file": "public_html/api/content-lib.php",
+      "line": 146
+    },
+    {
+      "action": "cms_announce_get",
+      "file": "public_html/api/content-lib.php",
+      "line": 148
+    },
+    {
+      "action": "cms_announce_save",
+      "file": "public_html/api/content-lib.php",
+      "line": 150
+    },
+    {
+      "action": "cms_biz_get",
+      "file": "public_html/api/content-lib.php",
+      "line": 156
+    },
+    {
+      "action": "cms_biz_save",
+      "file": "public_html/api/content-lib.php",
+      "line": 157
+    },
+    {
+      "action": "cms_biz_assets",
+      "file": "public_html/api/content-lib.php",
+      "line": 166
+    },
+    {
+      "action": "cms_list",
+      "file": "public_html/api/content-lib.php",
+      "line": 171
+    },
+    {
+      "action": "cms_get",
+      "file": "public_html/api/content-lib.php",
+      "line": 175
+    },
+    {
+      "action": "cms_save",
+      "file": "public_html/api/content-lib.php",
+      "line": 176
+    },
+    {
+      "action": "cms_published",
+      "file": "public_html/api/content-lib.php",
+      "line": 211
+    },
+    {
+      "action": "cms_status",
+      "file": "public_html/api/content-lib.php",
+      "line": 216
+    },
+    {
+      "action": "cms_reorder",
+      "file": "public_html/api/content-lib.php",
+      "line": 220
+    },
+    {
+      "action": "cms_delete",
+      "file": "public_html/api/content-lib.php",
+      "line": 224
+    },
+    {
+      "action": "cms_placements",
+      "file": "public_html/api/content-lib.php",
+      "line": 227
+    },
+    {
+      "action": "cms_placements_save",
+      "file": "public_html/api/content-lib.php",
+      "line": 228
+    },
+    {
+      "action": "cms_ai_get",
+      "file": "public_html/api/content-lib.php",
+      "line": 236
+    },
+    {
+      "action": "cms_ai_save",
+      "file": "public_html/api/content-lib.php",
+      "line": 237
+    },
+    {
+      "action": "ai_run",
+      "file": "public_html/api/content-lib.php",
+      "line": 243
+    },
+    {
+      "action": "cms_ai_models",
+      "file": "public_html/api/content-lib.php",
+      "line": 247
+    },
+    {
+      "action": "ai_test",
+      "file": "public_html/api/content-lib.php",
+      "line": 266
+    },
+    {
+      "action": "leads_list",
+      "file": "public_html/api/crm-lib.php",
+      "line": 147
+    },
+    {
+      "action": "leads_count",
+      "file": "public_html/api/crm-lib.php",
+      "line": 154
+    },
+    {
+      "action": "lead_save",
+      "file": "public_html/api/crm-lib.php",
+      "line": 156
+    },
+    {
+      "action": "lead_note",
+      "file": "public_html/api/crm-lib.php",
+      "line": 173
+    },
+    {
+      "action": "lead_delete",
+      "file": "public_html/api/crm-lib.php",
+      "line": 176
+    },
+    {
+      "action": "leads_import",
+      "file": "public_html/api/crm-lib.php",
+      "line": 179
+    },
+    {
+      "action": "lead_convert",
+      "file": "public_html/api/crm-lib.php",
+      "line": 188
+    },
+    {
+      "action": "clients_list",
+      "file": "public_html/api/crm-lib.php",
+      "line": 197
+    },
+    {
+      "action": "client_save",
+      "file": "public_html/api/crm-lib.php",
+      "line": 203
+    },
+    {
+      "action": "client_delete",
+      "file": "public_html/api/crm-lib.php",
+      "line": 210
+    },
+    {
+      "action": "crm_settings",
+      "file": "public_html/api/crm-lib.php",
+      "line": 213
+    },
+    {
+      "action": "crm_settings_save",
+      "file": "public_html/api/crm-lib.php",
+      "line": 215
+    },
+    {
+      "action": "crm_wa_status",
+      "file": "public_html/api/crm-lib.php",
+      "line": 222
+    },
+    {
+      "action": "crm_wa_connect",
+      "file": "public_html/api/crm-lib.php",
+      "line": 225
+    },
+    {
+      "action": "crm_wa_disconnect",
+      "file": "public_html/api/crm-lib.php",
+      "line": 230
+    },
+    {
+      "action": "crm_offers",
+      "file": "public_html/api/crm-lib.php",
+      "line": 233
+    },
+    {
+      "action": "crm_offer_save",
+      "file": "public_html/api/crm-lib.php",
+      "line": 235
+    },
+    {
+      "action": "crm_offer_delete",
+      "file": "public_html/api/crm-lib.php",
+      "line": 242
+    },
+    {
+      "action": "crm_offer_send",
+      "file": "public_html/api/crm-lib.php",
+      "line": 244
+    },
+    {
+      "action": "crm_test",
+      "file": "public_html/api/crm-lib.php",
+      "line": 257
+    },
+    {
+      "action": "dash_target_save",
+      "file": "public_html/api/dash-lib.php",
+      "line": 11
+    },
+    {
+      "action": "dash_data",
+      "file": "public_html/api/dash-lib.php",
+      "line": 14
+    },
+    {
+      "action": "register",
+      "file": "public_html/api/frontend-auth.php",
+      "line": 94
+    },
+    {
+      "action": "login",
+      "file": "public_html/api/frontend-auth.php",
+      "line": 99
+    },
+    {
+      "action": "me",
+      "file": "public_html/api/frontend-auth.php",
+      "line": 102
+    },
+    {
+      "action": "logout",
+      "file": "public_html/api/frontend-auth.php",
+      "line": 104
+    },
+    {
+      "action": "password",
+      "file": "public_html/api/frontend-auth.php",
+      "line": 106
+    },
+    {
+      "action": "gdata_status",
+      "file": "public_html/api/google-data-lib.php",
+      "line": 80
+    },
+    {
+      "action": "gdata_save",
+      "file": "public_html/api/google-data-lib.php",
+      "line": 83
+    },
+    {
+      "action": "gdata_clear",
+      "file": "public_html/api/google-data-lib.php",
+      "line": 94
+    },
+    {
+      "action": "gdata_report",
+      "file": "public_html/api/google-data-lib.php",
+      "line": 96
+    },
+    {
+      "action": "initialize",
+      "file": "public_html/api/mcp.php",
+      "line": 126
+    },
+    {
+      "action": "ping",
+      "file": "public_html/api/mcp.php",
+      "line": 131
+    },
+    {
+      "action": "tools/list",
+      "file": "public_html/api/mcp.php",
+      "line": 132
+    },
+    {
+      "action": "resources/list",
+      "file": "public_html/api/mcp.php",
+      "line": 135
+    },
+    {
+      "action": "prompts/list",
+      "file": "public_html/api/mcp.php",
+      "line": 136
+    },
+    {
+      "action": "tools/call",
+      "file": "public_html/api/mcp.php",
+      "line": 137
+    },
+    {
+      "action": "list_leads",
+      "file": "public_html/api/mcp.php",
+      "line": 147
+    },
+    {
+      "action": "get_lead",
+      "file": "public_html/api/mcp.php",
+      "line": 154
+    },
+    {
+      "action": "add_lead_note",
+      "file": "public_html/api/mcp.php",
+      "line": 159
+    },
+    {
+      "action": "list_quotes",
+      "file": "public_html/api/mcp.php",
+      "line": 162
+    },
+    {
+      "action": "get_quote",
+      "file": "public_html/api/mcp.php",
+      "line": 169
+    },
+    {
+      "action": "create_quote_draft",
+      "file": "public_html/api/mcp.php",
+      "line": 171
+    },
+    {
+      "action": "list_clients",
+      "file": "public_html/api/mcp.php",
+      "line": 175
+    },
+    {
+      "action": "list_pages",
+      "file": "public_html/api/mcp.php",
+      "line": 180
+    },
+    {
+      "action": "site_stats",
+      "file": "public_html/api/mcp.php",
+      "line": 182
+    },
+    {
+      "action": "monthly_report",
+      "file": "public_html/api/mcp.php",
+      "line": 187
+    },
+    {
+      "action": "whatsapp_stats",
+      "file": "public_html/api/mcp.php",
+      "line": 198
+    },
+    {
+      "action": "list_content",
+      "file": "public_html/api/mcp.php",
+      "line": 200
+    },
+    {
+      "action": "get_content",
+      "file": "public_html/api/mcp.php",
+      "line": 206
+    },
+    {
+      "action": "list_templates",
+      "file": "public_html/api/mcp.php",
+      "line": 209
+    },
+    {
+      "action": "save_content_draft",
+      "file": "public_html/api/mcp.php",
+      "line": 212
+    },
+    {
+      "action": "create_city_draft",
+      "file": "public_html/api/mcp.php",
+      "line": 230
+    },
+    {
+      "action": "create_blog_draft",
+      "file": "public_html/api/mcp.php",
+      "line": 240
+    },
+    {
+      "action": "media_list",
+      "file": "public_html/api/media-lib.php",
+      "line": 209
+    },
+    {
+      "action": "media_sizes",
+      "file": "public_html/api/media-lib.php",
+      "line": 221
+    },
+    {
+      "action": "media_folder",
+      "file": "public_html/api/media-lib.php",
+      "line": 228
+    },
+    {
+      "action": "media_upload",
+      "file": "public_html/api/media-lib.php",
+      "line": 231
+    },
+    {
+      "action": "media_replace",
+      "file": "public_html/api/media-lib.php",
+      "line": 232
+    },
+    {
+      "action": "media_alt",
+      "file": "public_html/api/media-lib.php",
+      "line": 248
+    },
+    {
+      "action": "media_move",
+      "file": "public_html/api/media-lib.php",
+      "line": 260
+    },
+    {
+      "action": "media_trash",
+      "file": "public_html/api/media-lib.php",
+      "line": 270
+    },
+    {
+      "action": "media_trash_list",
+      "file": "public_html/api/media-lib.php",
+      "line": 279
+    },
+    {
+      "action": "media_restore",
+      "file": "public_html/api/media-lib.php",
+      "line": 280
+    },
+    {
+      "action": "media_purge",
+      "file": "public_html/api/media-lib.php",
+      "line": 281
+    },
+    {
+      "action": "backup_list",
+      "file": "public_html/api/media-lib.php",
+      "line": 289
+    },
+    {
+      "action": "backup_run",
+      "file": "public_html/api/media-lib.php",
+      "line": 290
+    },
+    {
+      "action": "backup_delete",
+      "file": "public_html/api/media-lib.php",
+      "line": 291
+    },
+    {
+      "action": "backup_restore",
+      "file": "public_html/api/media-lib.php",
+      "line": 294
+    },
+    {
+      "action": "health_get",
+      "file": "public_html/api/media-lib.php",
+      "line": 297
+    },
+    {
+      "action": "health_scan",
+      "file": "public_html/api/media-lib.php",
+      "line": 298
+    },
+    {
+      "action": "health_settings",
+      "file": "public_html/api/media-lib.php",
+      "line": 299
+    },
+    {
+      "action": "health_speed",
+      "file": "public_html/api/media-lib.php",
+      "line": 302
+    },
+    {
+      "action": "health_psi",
+      "file": "public_html/api/media-lib.php",
+      "line": 303
+    },
+    {
+      "action": "notify_get",
+      "file": "public_html/api/notify-lib.php",
+      "line": 114
+    },
+    {
+      "action": "notify_save",
+      "file": "public_html/api/notify-lib.php",
+      "line": 118
+    },
+    {
+      "action": "notify_proj_send",
+      "file": "public_html/api/notify-lib.php",
+      "line": 128
+    },
+    {
+      "action": "notify_test",
+      "file": "public_html/api/notify-lib.php",
+      "line": 137
+    },
+    {
+      "action": "est_save",
+      "file": "public_html/api/p18e-lib.php",
+      "line": 50
+    },
+    {
+      "action": "est_tpls",
+      "file": "public_html/api/p18e-lib.php",
+      "line": 53
+    },
+    {
+      "action": "est_tpl_save",
+      "file": "public_html/api/p18e-lib.php",
+      "line": 55
+    },
+    {
+      "action": "forms_get",
+      "file": "public_html/api/p18e-lib.php",
+      "line": 60
+    },
+    {
+      "action": "forms_save",
+      "file": "public_html/api/p18e-lib.php",
+      "line": 74
+    },
+    {
+      "action": "wag_get",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 235
+    },
+    {
+      "action": "wag_audience",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 244
+    },
+    {
+      "action": "wag_seg_save",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 247
+    },
+    {
+      "action": "wag_seg_delete",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 252
+    },
+    {
+      "action": "wag_tpl_save",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 254
+    },
+    {
+      "action": "wag_tpl_delete",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 263
+    },
+    {
+      "action": "wag_camp_save",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 268
+    },
+    {
+      "action": "wag_camp_get",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 282
+    },
+    {
+      "action": "wag_camp_action",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 284
+    },
+    {
+      "action": "wag_flows_save",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 298
+    },
+    {
+      "action": "wag_optout",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 307
+    },
+    {
+      "action": "wag_optout_list",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 310
+    },
+    {
+      "action": "wag_tick",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 312
+    },
+    {
+      "action": "wag_test",
+      "file": "public_html/api/p18g-lib.php",
+      "line": 314
+    },
+    {
+      "action": "mt_get",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 67
+    },
+    {
+      "action": "mt_set",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 70
+    },
+    {
+      "action": "fm_list",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 83
+    },
+    {
+      "action": "fm_upload",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 93
+    },
+    {
+      "action": "fm_mkdir",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 102
+    },
+    {
+      "action": "fm_rename",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 106
+    },
+    {
+      "action": "fm_delete",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 114
+    },
+    {
+      "action": "fm_trash",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 124
+    },
+    {
+      "action": "fm_restore",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 127
+    },
+    {
+      "action": "fm_zip",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 131
+    },
+    {
+      "action": "dbx_tables",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 140
+    },
+    {
+      "action": "dbx_browse",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 144
+    },
+    {
+      "action": "dbx_row",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 153
+    },
+    {
+      "action": "dbx_export",
+      "file": "public_html/api/p18h-lib.php",
+      "line": 156
+    },
+    {
+      "action": "me_get",
+      "file": "public_html/api/p18j-lib.php",
+      "line": 15
+    },
+    {
+      "action": "me_save",
+      "file": "public_html/api/p18j-lib.php",
+      "line": 35
+    },
+    {
+      "action": "me_avatar",
+      "file": "public_html/api/p18j-lib.php",
+      "line": 44
+    },
+    {
+      "action": "me_avatars",
+      "file": "public_html/api/p18j-lib.php",
+      "line": 59
+    },
+    {
+      "action": "google_cfg",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 30
+    },
+    {
+      "action": "google_login",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 33
+    },
+    {
+      "action": "google_me",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 42
+    },
+    {
+      "action": "google_link",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 44
+    },
+    {
+      "action": "google_unlink",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 49
+    },
+    {
+      "action": "google_save",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 52
+    },
+    {
+      "action": "mcp_tokens",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 57
+    },
+    {
+      "action": "mcp_token_new",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 59
+    },
+    {
+      "action": "mcp_token_revoke",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 66
+    },
+    {
+      "action": "mcp_token_toggle",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 70
+    },
+    {
+      "action": "mcp_token_regen",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 75
+    },
+    {
+      "action": "mcp_log",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 80
+    },
+    {
+      "action": "wa_stats",
+      "file": "public_html/api/phase8-lib.php",
+      "line": 83
+    },
+    {
+      "action": "redirects",
+      "file": "public_html/api/redirects-lib.php",
+      "line": 124
+    },
+    {
+      "action": "redirects_save",
+      "file": "public_html/api/redirects-lib.php",
+      "line": 127
+    },
+    {
+      "action": "redirects_plan",
+      "file": "public_html/api/redirects-lib.php",
+      "line": 132
+    },
+    {
+      "action": "r404_list",
+      "file": "public_html/api/redirects-lib.php",
+      "line": 136
+    },
+    {
+      "action": "r404_clear",
+      "file": "public_html/api/redirects-lib.php",
+      "line": 138
+    },
+    {
+      "action": "company_get",
+      "file": "public_html/api/sales-lib.php",
+      "line": 134
+    },
+    {
+      "action": "company_save",
+      "file": "public_html/api/sales-lib.php",
+      "line": 135
+    },
+    {
+      "action": "tpl_list",
+      "file": "public_html/api/sales-lib.php",
+      "line": 143
+    },
+    {
+      "action": "tpl_save",
+      "file": "public_html/api/sales-lib.php",
+      "line": 144
+    },
+    {
+      "action": "tpl_import",
+      "file": "public_html/api/sales-lib.php",
+      "line": 150
+    },
+    {
+      "action": "tpl_delete",
+      "file": "public_html/api/sales-lib.php",
+      "line": 157
+    },
+    {
+      "action": "quotes_list",
+      "file": "public_html/api/sales-lib.php",
+      "line": 162
+    },
+    {
+      "action": "quote_get",
+      "file": "public_html/api/sales-lib.php",
+      "line": 165
+    },
+    {
+      "action": "quote_save",
+      "file": "public_html/api/sales-lib.php",
+      "line": 170
+    },
+    {
+      "action": "quote_copy",
+      "file": "public_html/api/sales-lib.php",
+      "line": 184
+    },
+    {
+      "action": "quote_status",
+      "file": "public_html/api/sales-lib.php",
+      "line": 199
+    },
+    {
+      "action": "quote_link",
+      "file": "public_html/api/sales-lib.php",
+      "line": 215
+    },
+    {
+      "action": "quote_send",
+      "file": "public_html/api/sales-lib.php",
+      "line": 217
+    },
+    {
+      "action": "quote_delete",
+      "file": "public_html/api/sales-lib.php",
+      "line": 237
+    },
+    {
+      "action": "quote_invoice",
+      "file": "public_html/api/sales-lib.php",
+      "line": 241
+    },
+    {
+      "action": "invs_list",
+      "file": "public_html/api/sales-lib.php",
+      "line": 263
+    },
+    {
+      "action": "inv_get",
+      "file": "public_html/api/sales-lib.php",
+      "line": 264
+    },
+    {
+      "action": "inv_save",
+      "file": "public_html/api/sales-lib.php",
+      "line": 265
+    },
+    {
+      "action": "pay_add",
+      "file": "public_html/api/sales-lib.php",
+      "line": 272
+    },
+    {
+      "action": "pay_delete",
+      "file": "public_html/api/sales-lib.php",
+      "line": 281
+    },
+    {
+      "action": "projs_list",
+      "file": "public_html/api/sales-lib.php",
+      "line": 288
+    },
+    {
+      "action": "proj_save",
+      "file": "public_html/api/sales-lib.php",
+      "line": 294
+    },
+    {
+      "action": "proj_update",
+      "file": "public_html/api/sales-lib.php",
+      "line": 308
+    },
+    {
+      "action": "proj_photo",
+      "file": "public_html/api/sales-lib.php",
+      "line": 311
+    },
+    {
+      "action": "proj_photo_delete",
+      "file": "public_html/api/sales-lib.php",
+      "line": 321
+    },
+    {
+      "action": "proj_delete",
+      "file": "public_html/api/sales-lib.php",
+      "line": 326
+    },
+    {
+      "action": "s17_meta",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 130
+    },
+    {
+      "action": "lead_activity",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 133
+    },
+    {
+      "action": "leads_followups",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 148
+    },
+    {
+      "action": "leads_stats",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 157
+    },
+    {
+      "action": "leads_import2",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 171
+    },
+    {
+      "action": "clients_master",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 202
+    },
+    {
+      "action": "client_360",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 219
+    },
+    {
+      "action": "inv_new",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 239
+    },
+    {
+      "action": "inv_track",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 255
+    },
+    {
+      "action": "invs_tracker",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 264
+    },
+    {
+      "action": "invs_import",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 274
+    },
+    {
+      "action": "projs_table",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 295
+    },
+    {
+      "action": "proj_meta",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 304
+    },
+    {
+      "action": "proj_milestones",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 312
+    },
+    {
+      "action": "proj_bill",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 319
+    },
+    {
+      "action": "clients_merge",
+      "file": "public_html/api/sales17-lib.php",
+      "line": 338
+    },
+    {
+      "action": "login_2fa",
+      "file": "public_html/api/security-lib.php",
+      "line": 70
+    },
+    {
+      "action": "sec_get",
+      "file": "public_html/api/security-lib.php",
+      "line": 80
+    },
+    {
+      "action": "sec_2fa_begin",
+      "file": "public_html/api/security-lib.php",
+      "line": 87
+    },
+    {
+      "action": "sec_2fa_enable",
+      "file": "public_html/api/security-lib.php",
+      "line": 90
+    },
+    {
+      "action": "sec_2fa_disable",
+      "file": "public_html/api/security-lib.php",
+      "line": 95
+    },
+    {
+      "action": "sec_recovery_new",
+      "file": "public_html/api/security-lib.php",
+      "line": 96
+    },
+    {
+      "action": "sec_2fa_reset",
+      "file": "public_html/api/security-lib.php",
+      "line": 100
+    },
+    {
+      "action": "sec_revoke",
+      "file": "public_html/api/security-lib.php",
+      "line": 104
+    },
+    {
+      "action": "sec_alerts",
+      "file": "public_html/api/security-lib.php",
+      "line": 114
+    },
+    {
+      "action": "set_get",
+      "file": "public_html/api/security-lib.php",
+      "line": 118
+    },
+    {
+      "action": "set_general_save",
+      "file": "public_html/api/security-lib.php",
+      "line": 124
+    },
+    {
+      "action": "set_tracking_save",
+      "file": "public_html/api/security-lib.php",
+      "line": 130
+    },
+    {
+      "action": "set_ts_test",
+      "file": "public_html/api/security-lib.php",
+      "line": 139
+    },
+    {
+      "action": "sag_get",
+      "file": "public_html/api/seo-agent-lib.php",
+      "line": 141
+    },
+    {
+      "action": "sag_cfg_save",
+      "file": "public_html/api/seo-agent-lib.php",
+      "line": 143
+    },
+    {
+      "action": "sag_scan",
+      "file": "public_html/api/seo-agent-lib.php",
+      "line": 149
+    },
+    {
+      "action": "sag_propose",
+      "file": "public_html/api/seo-agent-lib.php",
+      "line": 152
+    },
+    {
+      "action": "sag_fix_save",
+      "file": "public_html/api/seo-agent-lib.php",
+      "line": 155
+    },
+    {
+      "action": "seo_list",
+      "file": "public_html/api/seo-lib.php",
+      "line": 68
+    },
+    {
+      "action": "seo_page",
+      "file": "public_html/api/seo-lib.php",
+      "line": 74
+    },
+    {
+      "action": "seo_save",
+      "file": "public_html/api/seo-lib.php",
+      "line": 78
+    },
+    {
+      "action": "seo_scores",
+      "file": "public_html/api/seo-lib.php",
+      "line": 89
+    },
+    {
+      "action": "seo_ai",
+      "file": "public_html/api/seo-lib.php",
+      "line": 93
+    },
+    {
+      "action": "seo_robots_save",
+      "file": "public_html/api/seo-lib.php",
+      "line": 101
+    },
+    {
+      "action": "seo_sitemap",
+      "file": "public_html/api/seo-lib.php",
+      "line": 105
+    },
+    {
+      "action": "sheets_get",
+      "file": "public_html/api/sheets-lib.php",
+      "line": 32
+    },
+    {
+      "action": "sheets_save",
+      "file": "public_html/api/sheets-lib.php",
+      "line": 33
+    },
+    {
+      "action": "sheets_test",
+      "file": "public_html/api/sheets-lib.php",
+      "line": 37
+    },
+    {
+      "action": "sheets_sync",
+      "file": "public_html/api/sheets-lib.php",
+      "line": 41
+    },
+    {
+      "action": "soc_get",
+      "file": "public_html/api/social-lib.php",
+      "line": 202
+    },
+    {
+      "action": "soc_cfg_save",
+      "file": "public_html/api/social-lib.php",
+      "line": 206
+    },
+    {
+      "action": "soc_post_save",
+      "file": "public_html/api/social-lib.php",
+      "line": 218
+    },
+    {
+      "action": "soc_post_delete",
+      "file": "public_html/api/social-lib.php",
+      "line": 225
+    },
+    {
+      "action": "soc_post_send",
+      "file": "public_html/api/social-lib.php",
+      "line": 228
+    },
+    {
+      "action": "soc_comments_sync",
+      "file": "public_html/api/social-lib.php",
+      "line": 233
+    },
+    {
+      "action": "soc_comment_read",
+      "file": "public_html/api/social-lib.php",
+      "line": 236
+    },
+    {
+      "action": "soc_comment_reply",
+      "file": "public_html/api/social-lib.php",
+      "line": 240
+    },
+    {
+      "action": "soc_ai_reply",
+      "file": "public_html/api/social-lib.php",
+      "line": 249
+    },
+    {
+      "action": "soc_ai_caption",
+      "file": "public_html/api/social-lib.php",
+      "line": 254
+    },
+    {
+      "action": "tg_get",
+      "file": "public_html/api/tg-lib.php",
+      "line": 182
+    },
+    {
+      "action": "tg_save",
+      "file": "public_html/api/tg-lib.php",
+      "line": 184
+    },
+    {
+      "action": "tg_connect",
+      "file": "public_html/api/tg-lib.php",
+      "line": 192
+    },
+    {
+      "action": "tg_disconnect",
+      "file": "public_html/api/tg-lib.php",
+      "line": 203
+    },
+    {
+      "action": "tg_test",
+      "file": "public_html/api/tg-lib.php",
+      "line": 206
+    },
+    {
+      "action": "tg_link_code",
+      "file": "public_html/api/tg-lib.php",
+      "line": 209
+    },
+    {
+      "action": "tg_test_me",
+      "file": "public_html/api/tg-lib.php",
+      "line": 214
+    },
+    {
+      "action": "tg_dm_set",
+      "file": "public_html/api/tg-lib.php",
+      "line": 217
+    },
+    {
+      "action": "tg_unlink",
+      "file": "public_html/api/tg-lib.php",
+      "line": 221
+    },
+    {
+      "action": "wah_overview",
+      "file": "public_html/api/wahub-lib.php",
+      "line": 120
+    },
+    {
+      "action": "wah_rule_save",
+      "file": "public_html/api/wahub-lib.php",
+      "line": 134
+    },
+    {
+      "action": "wah_rule_delete",
+      "file": "public_html/api/wahub-lib.php",
+      "line": 140
+    },
+    {
+      "action": "wah_cfg_save",
+      "file": "public_html/api/wahub-lib.php",
+      "line": 143
+    },
+    {
+      "action": "wah_insights",
+      "file": "public_html/api/wahub-lib.php",
+      "line": 149
+    },
+    {
+      "action": "wah_tpl_submit",
+      "file": "public_html/api/wahub-lib.php",
+      "line": 170
+    },
+    {
+      "action": "wah_tpl_sync",
+      "file": "public_html/api/wahub-lib.php",
+      "line": 186
+    },
+    {
+      "action": "text",
+      "file": "public_html/api/whatsapp.php",
+      "line": 55
+    },
+    {
+      "action": "button",
+      "file": "public_html/api/whatsapp.php",
+      "line": 56
+    },
+    {
+      "action": "interactive",
+      "file": "public_html/api/whatsapp.php",
+      "line": 57
+    },
+    {
+      "action": "location",
+      "file": "public_html/api/whatsapp.php",
+      "line": 58
+    }
+  ],
+  "mcp_tools": [
+    {
+      "name": "list_leads",
+      "mode": "read",
+      "purpose": "List leads by stage/search"
+    },
+    {
+      "name": "get_lead",
+      "mode": "read",
+      "purpose": "Full lead + notes"
+    },
+    {
+      "name": "add_lead_note",
+      "mode": "write",
+      "purpose": "Add AI-attributed lead note"
+    },
+    {
+      "name": "list_quotes",
+      "mode": "read",
+      "purpose": "List quotations"
+    },
+    {
+      "name": "get_quote",
+      "mode": "read",
+      "purpose": "Full quotation"
+    },
+    {
+      "name": "create_quote_draft",
+      "mode": "write",
+      "purpose": "Create quotation draft only"
+    },
+    {
+      "name": "list_clients",
+      "mode": "read",
+      "purpose": "List clients"
+    },
+    {
+      "name": "list_pages",
+      "mode": "read",
+      "purpose": "List published pages/SEO"
+    },
+    {
+      "name": "site_stats",
+      "mode": "read",
+      "purpose": "Dashboard stats"
+    },
+    {
+      "name": "monthly_report",
+      "mode": "read",
+      "purpose": "Monthly lead/quote report"
+    },
+    {
+      "name": "whatsapp_stats",
+      "mode": "read",
+      "purpose": "WhatsApp click stats"
+    },
+    {
+      "name": "list_content",
+      "mode": "read",
+      "purpose": "List articles/studies/city pages"
+    },
+    {
+      "name": "get_content",
+      "mode": "read",
+      "purpose": "Full content item"
+    },
+    {
+      "name": "list_templates",
+      "mode": "read",
+      "purpose": "List page templates"
+    },
+    {
+      "name": "save_content_draft",
+      "mode": "write",
+      "purpose": "Create/update content draft"
+    },
+    {
+      "name": "create_city_draft",
+      "mode": "write",
+      "purpose": "Create city page draft"
+    },
+    {
+      "name": "create_blog_draft",
+      "mode": "write",
+      "purpose": "Create blog draft"
+    }
+  ],
+  "legacy_php_endpoints": [
+    {
+      "tree": "site",
+      "path": "about.php",
+      "size": 13188,
+      "lines": 286
+    },
+    {
+      "tree": "site",
+      "path": "all-blogs.php",
+      "size": 9916,
+      "lines": 291
+    },
+    {
+      "tree": "site",
+      "path": "allservices.php",
+      "size": 11770,
+      "lines": 261
+    },
+    {
+      "tree": "site",
+      "path": "apply_coupon.php",
+      "size": 2508,
+      "lines": 81
+    },
+    {
+      "tree": "site",
+      "path": "b2b.php",
+      "size": 18663,
+      "lines": 604
+    },
+    {
+      "tree": "site",
+      "path": "blog-single.php",
+      "size": 9169,
+      "lines": 280
+    },
+    {
+      "tree": "site",
+      "path": "cancel.php",
+      "size": 703,
+      "lines": 20
+    },
+    {
+      "tree": "site",
+      "path": "checkout.php",
+      "size": 7752,
+      "lines": 172
+    },
+    {
+      "tree": "site",
+      "path": "contact.php",
+      "size": 24159,
+      "lines": 678
+    },
+    {
+      "tree": "site",
+      "path": "default.php",
+      "size": 16369,
+      "lines": 195
+    },
+    {
+      "tree": "site",
+      "path": "deliveryandinstallation.php",
+      "size": 14568,
+      "lines": 382
+    },
+    {
+      "tree": "site",
+      "path": "equotation.php",
+      "size": 34837,
+      "lines": 963
+    },
+    {
+      "tree": "site",
+      "path": "factorydirect.php",
+      "size": 13495,
+      "lines": 336
+    },
+    {
+      "tree": "site",
+      "path": "faqs.php",
+      "size": 12610,
+      "lines": 329
+    },
+    {
+      "tree": "site",
+      "path": "fetch_products.php",
+      "size": 9854,
+      "lines": 245
+    },
+    {
+      "tree": "site",
+      "path": "filters_meta.php",
+      "size": 9841,
+      "lines": 271
+    },
+    {
+      "tree": "site",
+      "path": "generate_quotation_pdf.php",
+      "size": 8381,
+      "lines": 266
+    },
+    {
+      "tree": "site",
+      "path": "index.php",
+      "size": 62633,
+      "lines": 1629
+    },
+    {
+      "tree": "site",
+      "path": "material.php",
+      "size": 15656,
+      "lines": 453
+    },
+    {
+      "tree": "site",
+      "path": "order_success.php",
+      "size": 2196,
+      "lines": 47
+    },
+    {
+      "tree": "site",
+      "path": "privacypolicy.php",
+      "size": 11350,
+      "lines": 222
+    },
+    {
+      "tree": "site",
+      "path": "process_checkout.php",
+      "size": 13029,
+      "lines": 342
+    },
+    {
+      "tree": "site",
+      "path": "product-card.php",
+      "size": 1767,
+      "lines": 42
+    },
+    {
+      "tree": "site",
+      "path": "projectbased.php",
+      "size": 16102,
+      "lines": 432
+    },
+    {
+      "tree": "site",
+      "path": "review.php",
+      "size": 5586,
+      "lines": 173
+    },
+    {
+      "tree": "site",
+      "path": "review_thanks.php",
+      "size": 2187,
+      "lines": 82
+    },
+    {
+      "tree": "site",
+      "path": "search_results.php",
+      "size": 15041,
+      "lines": 387
+    },
+    {
+      "tree": "site",
+      "path": "servicedetail.php",
+      "size": 41250,
+      "lines": 1031
+    },
+    {
+      "tree": "site",
+      "path": "servicelist.php",
+      "size": 21127,
+      "lines": 635
+    },
+    {
+      "tree": "site",
+      "path": "session_test.php",
+      "size": 59,
+      "lines": 4
+    },
+    {
+      "tree": "site",
+      "path": "shipping.php",
+      "size": 13298,
+      "lines": 241
+    },
+    {
+      "tree": "site",
+      "path": "shop.php",
+      "size": 30642,
+      "lines": 674
+    },
+    {
+      "tree": "site",
+      "path": "shopppingcart.php",
+      "size": 9278,
+      "lines": 222
+    },
+    {
+      "tree": "site",
+      "path": "showrooms.php",
+      "size": 21526,
+      "lines": 659
+    },
+    {
+      "tree": "site",
+      "path": "single.php",
+      "size": 19843,
+      "lines": 615
+    },
+    {
+      "tree": "site",
+      "path": "singleproduct.php",
+      "size": 42340,
+      "lines": 1115
+    },
+    {
+      "tree": "site",
+      "path": "space_planing.php",
+      "size": 24027,
+      "lines": 727
+    },
+    {
+      "tree": "site",
+      "path": "submit_contact.php",
+      "size": 7970,
+      "lines": 202
+    },
+    {
+      "tree": "site",
+      "path": "subscribe.php",
+      "size": 1154,
+      "lines": 39
+    },
+    {
+      "tree": "site",
+      "path": "terms.php",
+      "size": 7773,
+      "lines": 178
+    },
+    {
+      "tree": "site",
+      "path": "api/cart/add.php",
+      "size": 5008,
+      "lines": 135
+    },
+    {
+      "tree": "site",
+      "path": "api/cart/count.php",
+      "size": 380,
+      "lines": 11
+    },
+    {
+      "tree": "site",
+      "path": "api/cart/get.php",
+      "size": 880,
+      "lines": 29
+    },
+    {
+      "tree": "site",
+      "path": "api/cart/remove.php",
+      "size": 542,
+      "lines": 19
+    },
+    {
+      "tree": "site",
+      "path": "api/cart/save_totals.php",
+      "size": 537,
+      "lines": 20
+    },
+    {
+      "tree": "site",
+      "path": "api/cart/update.php",
+      "size": 2061,
+      "lines": 66
+    },
+    {
+      "tree": "site",
+      "path": "api/search/suggest.php",
+      "size": 7452,
+      "lines": 184
+    },
+    {
+      "tree": "frontstore",
+      "path": "about.php",
+      "size": 22114,
+      "lines": 531
+    },
+    {
+      "tree": "frontstore",
+      "path": "all-blogs.php",
+      "size": 12604,
+      "lines": 294
+    },
+    {
+      "tree": "frontstore",
+      "path": "allservices.php",
+      "size": 10987,
+      "lines": 256
+    },
+    {
+      "tree": "frontstore",
+      "path": "apply_coupon.php",
+      "size": 2488,
+      "lines": 82
+    },
+    {
+      "tree": "frontstore",
+      "path": "b2b.php",
+      "size": 18418,
+      "lines": 602
+    },
+    {
+      "tree": "frontstore",
+      "path": "blog-single.php",
+      "size": 10045,
+      "lines": 222
+    },
+    {
+      "tree": "frontstore",
+      "path": "cancel.php",
+      "size": 684,
+      "lines": 20
+    },
+    {
+      "tree": "frontstore",
+      "path": "checkout.php",
+      "size": 9504,
+      "lines": 217
+    },
+    {
+      "tree": "frontstore",
+      "path": "connection.php",
+      "size": 5451,
+      "lines": 130
+    },
+    {
+      "tree": "frontstore",
+      "path": "contact.php",
+      "size": 28443,
+      "lines": 869
+    },
+    {
+      "tree": "frontstore",
+      "path": "default.php",
+      "size": 16087,
+      "lines": 193
+    },
+    {
+      "tree": "frontstore",
+      "path": "deliveryandinstallation.php",
+      "size": 14397,
+      "lines": 380
+    },
+    {
+      "tree": "frontstore",
+      "path": "equotation.php",
+      "size": 36799,
+      "lines": 1017
+    },
+    {
+      "tree": "frontstore",
+      "path": "factorydirect.php",
+      "size": 13308,
+      "lines": 334
+    },
+    {
+      "tree": "frontstore",
+      "path": "faqs.php",
+      "size": 12358,
+      "lines": 327
+    },
+    {
+      "tree": "frontstore",
+      "path": "fetch_products.php",
+      "size": 11340,
+      "lines": 297
+    },
+    {
+      "tree": "frontstore",
+      "path": "filters_meta.php",
+      "size": 9650,
+      "lines": 273
+    },
+    {
+      "tree": "frontstore",
+      "path": "footer.php",
+      "size": 31302,
+      "lines": 743
+    },
+    {
+      "tree": "frontstore",
+      "path": "generate_quotation_pdf.php",
+      "size": 14481,
+      "lines": 349
+    },
+    {
+      "tree": "frontstore",
+      "path": "generate_quote_request_pdf.php",
+      "size": 11992,
+      "lines": 315
+    },
+    {
+      "tree": "frontstore",
+      "path": "index.php",
+      "size": 100020,
+      "lines": 2785
+    },
+    {
+      "tree": "frontstore",
+      "path": "material.php",
+      "size": 15369,
+      "lines": 451
+    },
+    {
+      "tree": "frontstore",
+      "path": "order_success.php",
+      "size": 1897,
+      "lines": 44
+    },
+    {
+      "tree": "frontstore",
+      "path": "privacypolicy.php",
+      "size": 10914,
+      "lines": 220
+    },
+    {
+      "tree": "frontstore",
+      "path": "process_checkout.php",
+      "size": 14582,
+      "lines": 374
+    },
+    {
+      "tree": "frontstore",
+      "path": "product-card.php",
+      "size": 2355,
+      "lines": 54
+    },
+    {
+      "tree": "frontstore",
+      "path": "project-detail.php",
+      "size": 10792,
+      "lines": 239
+    },
+    {
+      "tree": "frontstore",
+      "path": "projectbased.php",
+      "size": 15915,
+      "lines": 430
+    },
+    {
+      "tree": "frontstore",
+      "path": "projects.php",
+      "size": 9842,
+      "lines": 212
+    },
+    {
+      "tree": "frontstore",
+      "path": "quotation-basket.php",
+      "size": 8612,
+      "lines": 160
+    },
+    {
+      "tree": "frontstore",
+      "path": "quotation-success.php",
+      "size": 1656,
+      "lines": 37
+    },
+    {
+      "tree": "frontstore",
+      "path": "redirect.php",
+      "size": 3713,
+      "lines": 127
+    },
+    {
+      "tree": "frontstore",
+      "path": "review.php",
+      "size": 5508,
+      "lines": 174
+    },
+    {
+      "tree": "frontstore",
+      "path": "review_thanks.php",
+      "size": 2296,
+      "lines": 87
+    },
+    {
+      "tree": "frontstore",
+      "path": "sale.php",
+      "size": 6498,
+      "lines": 167
+    },
+    {
+      "tree": "frontstore",
+      "path": "search_results.php",
+      "size": 14734,
+      "lines": 387
+    },
+    {
+      "tree": "frontstore",
+      "path": "servicedetail.php",
+      "size": 49165,
+      "lines": 1219
+    },
+    {
+      "tree": "frontstore",
+      "path": "servicelist.php",
+      "size": 20994,
+      "lines": 633
+    },
+    {
+      "tree": "frontstore",
+      "path": "session_test.php",
+      "size": 119,
+      "lines": 5
+    },
+    {
+      "tree": "frontstore",
+      "path": "shipping.php",
+      "size": 12842,
+      "lines": 239
+    },
+    {
+      "tree": "frontstore",
+      "path": "shop.php",
+      "size": 31002,
+      "lines": 860
+    },
+    {
+      "tree": "frontstore",
+      "path": "shopppingcart.php",
+      "size": 7732,
+      "lines": 192
+    },
+    {
+      "tree": "frontstore",
+      "path": "showrooms.php",
+      "size": 21301,
+      "lines": 657
+    },
+    {
+      "tree": "frontstore",
+      "path": "single.php",
+      "size": 19229,
+      "lines": 615
+    },
+    {
+      "tree": "frontstore",
+      "path": "singleproduct.php",
+      "size": 58583,
+      "lines": 1606
+    },
+    {
+      "tree": "frontstore",
+      "path": "space_planing.php",
+      "size": 21303,
+      "lines": 645
+    },
+    {
+      "tree": "frontstore",
+      "path": "submit_contact.php",
+      "size": 8956,
+      "lines": 225
+    },
+    {
+      "tree": "frontstore",
+      "path": "submit_quote_request.php",
+      "size": 3813,
+      "lines": 99
+    },
+    {
+      "tree": "frontstore",
+      "path": "subscribe.php",
+      "size": 1176,
+      "lines": 40
+    },
+    {
+      "tree": "frontstore",
+      "path": "terms.php",
+      "size": 7520,
+      "lines": 176
+    },
+    {
+      "tree": "frontstore",
+      "path": "warranty.php",
+      "size": 10536,
+      "lines": 277
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/cart/add.php",
+      "size": 5969,
+      "lines": 173
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/cart/count.php",
+      "size": 434,
+      "lines": 12
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/cart/get.php",
+      "size": 916,
+      "lines": 30
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/cart/remove.php",
+      "size": 588,
+      "lines": 20
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/cart/save_totals.php",
+      "size": 582,
+      "lines": 21
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/cart/update.php",
+      "size": 2060,
+      "lines": 67
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/product/quick-view.php",
+      "size": 3868,
+      "lines": 115
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/quote/add.php",
+      "size": 4494,
+      "lines": 135
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/quote/count.php",
+      "size": 386,
+      "lines": 14
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/quote/get.php",
+      "size": 919,
+      "lines": 31
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/quote/remove.php",
+      "size": 567,
+      "lines": 19
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/quote/update.php",
+      "size": 1116,
+      "lines": 36
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/reviews/submit-customer-review.php",
+      "size": 2900,
+      "lines": 81
+    },
+    {
+      "tree": "frontstore",
+      "path": "api/search/suggest.php",
+      "size": 7542,
+      "lines": 189
+    }
+  ]
+}

@@ -1,0 +1,1302 @@
+{
+  "generated": "2026-11-05",
+  "schema_file": "os:database/schema.sql",
+  "table_count": 22,
+  "tables": [
+    {
+      "table": "wx_users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(120)",
+          "definition": "name VARCHAR(120) NOT NULL"
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(190)",
+          "definition": "email VARCHAR(190) NOT NULL UNIQUE"
+        },
+        {
+          "name": "role",
+          "type": "VARCHAR(20)",
+          "definition": "role VARCHAR(20) NOT NULL DEFAULT 'editor'"
+        },
+        {
+          "name": "pass_hash",
+          "type": "VARCHAR(255)",
+          "definition": "pass_hash VARCHAR(255) NOT NULL"
+        },
+        {
+          "name": "active",
+          "type": "TINYINT(1)",
+          "definition": "active TINYINT(1) NOT NULL DEFAULT 1"
+        },
+        {
+          "name": "pw_ver",
+          "type": "INT",
+          "definition": "pw_ver INT NOT NULL DEFAULT 1"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "definition": "created_at DATETIME NOT NULL"
+        },
+        {
+          "name": "last_login",
+          "type": "DATETIME",
+          "definition": "last_login DATETIME NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [
+        "email"
+      ],
+      "table_keys": [],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_activity",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "user_id",
+          "type": "INT",
+          "definition": "user_id INT NULL"
+        },
+        {
+          "name": "user_name",
+          "type": "VARCHAR(120)",
+          "definition": "user_name VARCHAR(120) NULL"
+        },
+        {
+          "name": "action",
+          "type": "VARCHAR(60)",
+          "definition": "action VARCHAR(60) NOT NULL"
+        },
+        {
+          "name": "target",
+          "type": "VARCHAR(255)",
+          "definition": "target VARCHAR(255) NULL"
+        },
+        {
+          "name": "ip",
+          "type": "VARCHAR(64)",
+          "definition": "ip VARCHAR(64) NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "definition": "created_at DATETIME NOT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "INDEX(created_at)"
+      ],
+      "indexes": [
+        "INDEX(created_at)"
+      ],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_settings",
+      "columns": [
+        {
+          "name": "k",
+          "type": "VARCHAR(80)",
+          "definition": "k VARCHAR(80) PRIMARY KEY"
+        },
+        {
+          "name": "v",
+          "type": "TEXT",
+          "definition": "v TEXT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "k"
+      ],
+      "unique_inline": [],
+      "table_keys": [],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_throttle",
+      "columns": [
+        {
+          "name": "ip",
+          "type": "VARCHAR(64)",
+          "definition": "ip VARCHAR(64) PRIMARY KEY"
+        },
+        {
+          "name": "n",
+          "type": "INT",
+          "definition": "n INT NOT NULL"
+        },
+        {
+          "name": "t",
+          "type": "INT",
+          "definition": "t INT NOT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "ip"
+      ],
+      "unique_inline": [],
+      "table_keys": [],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_leads",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "definition": "created_at DATETIME NOT NULL"
+        },
+        {
+          "name": "source",
+          "type": "VARCHAR(30)",
+          "definition": "source VARCHAR(30) NOT NULL"
+        },
+        {
+          "name": "page",
+          "type": "VARCHAR(200)",
+          "definition": "page VARCHAR(200) NULL"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(120)",
+          "definition": "name VARCHAR(120) NOT NULL"
+        },
+        {
+          "name": "phone",
+          "type": "VARCHAR(40)",
+          "definition": "phone VARCHAR(40) NULL"
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(190)",
+          "definition": "email VARCHAR(190) NULL"
+        },
+        {
+          "name": "service",
+          "type": "VARCHAR(190)",
+          "definition": "service VARCHAR(190) NULL"
+        },
+        {
+          "name": "message",
+          "type": "TEXT",
+          "definition": "message TEXT NULL"
+        },
+        {
+          "name": "fields",
+          "type": "TEXT",
+          "definition": "fields TEXT NULL"
+        },
+        {
+          "name": "stage",
+          "type": "VARCHAR(20)",
+          "definition": "stage VARCHAR(20) NOT NULL DEFAULT 'new'"
+        },
+        {
+          "name": "assigned_to",
+          "type": "INT",
+          "definition": "assigned_to INT NULL"
+        },
+        {
+          "name": "followup",
+          "type": "DATE",
+          "definition": "followup DATE NULL"
+        },
+        {
+          "name": "value",
+          "type": "BIGINT",
+          "definition": "value BIGINT NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "lost_reason",
+          "type": "VARCHAR(190)",
+          "definition": "lost_reason VARCHAR(190) NULL"
+        },
+        {
+          "name": "client_id",
+          "type": "INT",
+          "definition": "client_id INT NULL"
+        },
+        {
+          "name": "tags",
+          "type": "VARCHAR(400)",
+          "definition": "tags VARCHAR(400) NULL"
+        },
+        {
+          "name": "is_read",
+          "type": "TINYINT(1)",
+          "definition": "is_read TINYINT(1) NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "ip",
+          "type": "VARCHAR(64)",
+          "definition": "ip VARCHAR(64) NULL"
+        },
+        {
+          "name": "company",
+          "type": "VARCHAR(120)",
+          "definition": "company VARCHAR(120) NULL"
+        },
+        {
+          "name": "designation",
+          "type": "VARCHAR(80)",
+          "definition": "designation VARCHAR(80) NULL"
+        },
+        {
+          "name": "location",
+          "type": "VARCHAR(160)",
+          "definition": "location VARCHAR(160) NULL"
+        },
+        {
+          "name": "line",
+          "type": "VARCHAR(20)",
+          "definition": "line VARCHAR(20) NULL"
+        },
+        {
+          "name": "lead_type",
+          "type": "VARCHAR(20)",
+          "definition": "lead_type VARCHAR(20) NULL"
+        },
+        {
+          "name": "project_type",
+          "type": "VARCHAR(60)",
+          "definition": "project_type VARCHAR(60) NULL"
+        },
+        {
+          "name": "budget",
+          "type": "VARCHAR(60)",
+          "definition": "budget VARCHAR(60) NULL"
+        },
+        {
+          "name": "area",
+          "type": "VARCHAR(30)",
+          "definition": "area VARCHAR(30) NULL"
+        },
+        {
+          "name": "priority",
+          "type": "VARCHAR(10)",
+          "definition": "priority VARCHAR(10) NULL"
+        },
+        {
+          "name": "quote_status",
+          "type": "VARCHAR(20)",
+          "definition": "quote_status VARCHAR(20) NULL"
+        },
+        {
+          "name": "last_contact",
+          "type": "DATETIME",
+          "definition": "last_contact DATETIME NULL"
+        },
+        {
+          "name": "next_at",
+          "type": "DATETIME",
+          "definition": "next_at DATETIME NULL"
+        },
+        {
+          "name": "next_type",
+          "type": "VARCHAR(20)",
+          "definition": "next_type VARCHAR(20) NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "INDEX(stage)",
+        "INDEX(created_at)",
+        "INDEX(client_id)",
+        "INDEX wx_leads_next (next_at)"
+      ],
+      "indexes": [
+        "INDEX(stage)",
+        "INDEX(created_at)",
+        "INDEX(client_id)",
+        "INDEX wx_leads_next (next_at)"
+      ],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_lead_notes",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "lead_id",
+          "type": "INT",
+          "definition": "lead_id INT NOT NULL"
+        },
+        {
+          "name": "t",
+          "type": "DATETIME",
+          "definition": "t DATETIME NOT NULL"
+        },
+        {
+          "name": "user_name",
+          "type": "VARCHAR(120)",
+          "definition": "user_name VARCHAR(120) NULL"
+        },
+        {
+          "name": "text",
+          "type": "TEXT",
+          "definition": "text TEXT NOT NULL"
+        },
+        {
+          "name": "sys",
+          "type": "TINYINT(1)",
+          "definition": "sys TINYINT(1) NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "kind",
+          "type": "VARCHAR(20)",
+          "definition": "kind VARCHAR(20) NULL"
+        },
+        {
+          "name": "outcome",
+          "type": "VARCHAR(190)",
+          "definition": "outcome VARCHAR(190) NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "INDEX(lead_id)"
+      ],
+      "indexes": [
+        "INDEX(lead_id)"
+      ],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_clients",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(120)",
+          "definition": "name VARCHAR(120) NOT NULL"
+        },
+        {
+          "name": "phone",
+          "type": "VARCHAR(40)",
+          "definition": "phone VARCHAR(40) NULL"
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(190)",
+          "definition": "email VARCHAR(190) NULL"
+        },
+        {
+          "name": "company",
+          "type": "VARCHAR(120)",
+          "definition": "company VARCHAR(120) NULL"
+        },
+        {
+          "name": "city",
+          "type": "VARCHAR(80)",
+          "definition": "city VARCHAR(80) NULL"
+        },
+        {
+          "name": "address",
+          "type": "VARCHAR(300)",
+          "definition": "address VARCHAR(300) NULL"
+        },
+        {
+          "name": "notes",
+          "type": "TEXT",
+          "definition": "notes TEXT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "definition": "created_at DATETIME NOT NULL"
+        },
+        {
+          "name": "type",
+          "type": "VARCHAR(20)",
+          "definition": "type VARCHAR(20) NULL"
+        },
+        {
+          "name": "source",
+          "type": "VARCHAR(40)",
+          "definition": "source VARCHAR(40) NULL"
+        },
+        {
+          "name": "tags",
+          "type": "VARCHAR(400)",
+          "definition": "tags VARCHAR(400) NULL"
+        },
+        {
+          "name": "line",
+          "type": "VARCHAR(20)",
+          "definition": "line VARCHAR(20) NULL"
+        },
+        {
+          "name": "designation",
+          "type": "VARCHAR(80)",
+          "definition": "designation VARCHAR(80) NULL"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "definition": "updated_at DATETIME NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_notify_log",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "t",
+          "type": "DATETIME",
+          "definition": "t DATETIME NOT NULL"
+        },
+        {
+          "name": "event",
+          "type": "VARCHAR(12)",
+          "definition": "event VARCHAR(12) NOT NULL"
+        },
+        {
+          "name": "ref",
+          "type": "VARCHAR(120)",
+          "definition": "ref VARCHAR(120) NULL"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(160)",
+          "definition": "name VARCHAR(160) NULL"
+        },
+        {
+          "name": "channel",
+          "type": "VARCHAR(8)",
+          "definition": "channel VARCHAR(8) NOT NULL"
+        },
+        {
+          "name": "dest",
+          "type": "VARCHAR(190)",
+          "definition": "dest VARCHAR(190) NOT NULL"
+        },
+        {
+          "name": "result",
+          "type": "VARCHAR(255)",
+          "definition": "result VARCHAR(255) NOT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "INDEX(t)"
+      ],
+      "indexes": [
+        "INDEX(t)"
+      ],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_wa_seen",
+      "columns": [
+        {
+          "name": "mid",
+          "type": "VARCHAR(190)",
+          "definition": "mid VARCHAR(190) PRIMARY KEY"
+        },
+        {
+          "name": "t",
+          "type": "DATETIME",
+          "definition": "t DATETIME NOT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "mid"
+      ],
+      "unique_inline": [],
+      "table_keys": [],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_templates",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(80)",
+          "definition": "name VARCHAR(80) NOT NULL"
+        },
+        {
+          "name": "data",
+          "type": "LONGTEXT",
+          "definition": "data LONGTEXT NOT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "UNIQUE(name)"
+      ],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_quotes",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "no",
+          "type": "VARCHAR(30)",
+          "definition": "no VARCHAR(30) NOT NULL"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "definition": "status VARCHAR(20) NOT NULL"
+        },
+        {
+          "name": "data",
+          "type": "LONGTEXT",
+          "definition": "data LONGTEXT NOT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "INDEX(no)"
+      ],
+      "indexes": [
+        "INDEX(no)"
+      ],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_invoices",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "no",
+          "type": "VARCHAR(30)",
+          "definition": "no VARCHAR(30) NOT NULL"
+        },
+        {
+          "name": "quote_id",
+          "type": "INT",
+          "definition": "quote_id INT NULL"
+        },
+        {
+          "name": "data",
+          "type": "LONGTEXT",
+          "definition": "data LONGTEXT NOT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "UNIQUE(quote_id)"
+      ],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_projects",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "data",
+          "type": "LONGTEXT",
+          "definition": "data LONGTEXT NOT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_chats",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "token",
+          "type": "CHAR(64)",
+          "definition": "token CHAR(64) NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "definition": "created_at DATETIME NOT NULL"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "definition": "updated_at DATETIME NOT NULL"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(120)",
+          "definition": "name VARCHAR(120) NULL"
+        },
+        {
+          "name": "phone",
+          "type": "VARCHAR(40)",
+          "definition": "phone VARCHAR(40) NULL"
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(190)",
+          "definition": "email VARCHAR(190) NULL"
+        },
+        {
+          "name": "page",
+          "type": "VARCHAR(200)",
+          "definition": "page VARCHAR(200) NULL"
+        },
+        {
+          "name": "ip",
+          "type": "VARCHAR(64)",
+          "definition": "ip VARCHAR(64) NULL"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(10)",
+          "definition": "status VARCHAR(10) NOT NULL DEFAULT 'open'"
+        },
+        {
+          "name": "mode",
+          "type": "VARCHAR(10)",
+          "definition": "mode VARCHAR(10) NOT NULL DEFAULT 'ai'"
+        },
+        {
+          "name": "agent_name",
+          "type": "VARCHAR(120)",
+          "definition": "agent_name VARCHAR(120) NULL"
+        },
+        {
+          "name": "unread",
+          "type": "INT",
+          "definition": "unread INT NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "needs",
+          "type": "TINYINT",
+          "definition": "needs TINYINT NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "last_text",
+          "type": "VARCHAR(255)",
+          "definition": "last_text VARCHAR(255) NULL"
+        },
+        {
+          "name": "lead_id",
+          "type": "INT",
+          "definition": "lead_id INT NULL"
+        },
+        {
+          "name": "alerted",
+          "type": "TINYINT",
+          "definition": "alerted TINYINT NOT NULL DEFAULT 0"
+        },
+        {
+          "name": "channel",
+          "type": "VARCHAR(8)",
+          "definition": "channel VARCHAR(8) NOT NULL DEFAULT 'web'"
+        },
+        {
+          "name": "vtype",
+          "type": "DATETIME",
+          "definition": "vtype DATETIME NULL"
+        },
+        {
+          "name": "atype",
+          "type": "DATETIME",
+          "definition": "atype DATETIME NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "INDEX(updated_at)"
+      ],
+      "indexes": [
+        "INDEX(updated_at)"
+      ],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_chat_msgs",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "chat_id",
+          "type": "INT",
+          "definition": "chat_id INT NOT NULL"
+        },
+        {
+          "name": "t",
+          "type": "DATETIME",
+          "definition": "t DATETIME NOT NULL"
+        },
+        {
+          "name": "who",
+          "type": "VARCHAR(8)",
+          "definition": "who VARCHAR(8) NOT NULL"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(120)",
+          "definition": "name VARCHAR(120) NULL"
+        },
+        {
+          "name": "text",
+          "type": "TEXT",
+          "definition": "text TEXT NOT NULL"
+        },
+        {
+          "name": "att",
+          "type": "TEXT",
+          "definition": "att TEXT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "INDEX(chat_id, id)"
+      ],
+      "indexes": [
+        "INDEX(chat_id, id)"
+      ],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_bookings",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "definition": "created_at DATETIME NOT NULL"
+        },
+        {
+          "name": "lead_id",
+          "type": "INT",
+          "definition": "lead_id INT NULL"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(120)",
+          "definition": "name VARCHAR(120) NOT NULL"
+        },
+        {
+          "name": "phone",
+          "type": "VARCHAR(40)",
+          "definition": "phone VARCHAR(40) NOT NULL"
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(190)",
+          "definition": "email VARCHAR(190) NULL"
+        },
+        {
+          "name": "type",
+          "type": "VARCHAR(20)",
+          "definition": "type VARCHAR(20) NOT NULL"
+        },
+        {
+          "name": "city",
+          "type": "VARCHAR(80)",
+          "definition": "city VARCHAR(80) NULL"
+        },
+        {
+          "name": "address",
+          "type": "VARCHAR(300)",
+          "definition": "address VARCHAR(300) NULL"
+        },
+        {
+          "name": "d",
+          "type": "DATE",
+          "definition": "d DATE NOT NULL"
+        },
+        {
+          "name": "tm",
+          "type": "CHAR(5)",
+          "definition": "tm CHAR(5) NOT NULL"
+        },
+        {
+          "name": "dur",
+          "type": "SMALLINT",
+          "definition": "dur SMALLINT NOT NULL DEFAULT 60"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(12)",
+          "definition": "status VARCHAR(12) NOT NULL DEFAULT 'pending'"
+        },
+        {
+          "name": "staff_id",
+          "type": "INT",
+          "definition": "staff_id INT NULL"
+        },
+        {
+          "name": "note",
+          "type": "VARCHAR(1000)",
+          "definition": "note VARCHAR(1000) NULL"
+        },
+        {
+          "name": "src",
+          "type": "VARCHAR(12)",
+          "definition": "src VARCHAR(12) NULL"
+        },
+        {
+          "name": "reminded",
+          "type": "TINYINT",
+          "definition": "reminded TINYINT NOT NULL DEFAULT 0"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "INDEX (d)"
+      ],
+      "indexes": [
+        "INDEX (d)"
+      ],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_ai_events",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "t",
+          "type": "DATETIME",
+          "definition": "t DATETIME NOT NULL"
+        },
+        {
+          "name": "chat_id",
+          "type": "INT",
+          "definition": "chat_id INT NOT NULL"
+        },
+        {
+          "name": "kind",
+          "type": "VARCHAR(12)",
+          "definition": "kind VARCHAR(12) NOT NULL"
+        },
+        {
+          "name": "reason",
+          "type": "VARCHAR(20)",
+          "definition": "reason VARCHAR(20) NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "INDEX(t)",
+        "INDEX(chat_id)"
+      ],
+      "indexes": [
+        "INDEX(t)",
+        "INDEX(chat_id)"
+      ],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_ai_unans",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "t",
+          "type": "DATETIME",
+          "definition": "t DATETIME NOT NULL"
+        },
+        {
+          "name": "last_t",
+          "type": "DATETIME",
+          "definition": "last_t DATETIME NOT NULL"
+        },
+        {
+          "name": "chat_id",
+          "type": "INT",
+          "definition": "chat_id INT NULL"
+        },
+        {
+          "name": "q",
+          "type": "VARCHAR(500)",
+          "definition": "q VARCHAR(500) NOT NULL"
+        },
+        {
+          "name": "qkey",
+          "type": "VARCHAR(120)",
+          "definition": "qkey VARCHAR(120) NOT NULL"
+        },
+        {
+          "name": "n",
+          "type": "INT",
+          "definition": "n INT NOT NULL DEFAULT 1"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(10)",
+          "definition": "status VARCHAR(10) NOT NULL DEFAULT 'open'"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [],
+      "table_keys": [
+        "INDEX(status)",
+        "INDEX(qkey)"
+      ],
+      "indexes": [
+        "INDEX(status)",
+        "INDEX(qkey)"
+      ],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_tg_seen",
+      "columns": [
+        {
+          "name": "uid",
+          "type": "BIGINT",
+          "definition": "uid BIGINT PRIMARY KEY"
+        },
+        {
+          "name": "t",
+          "type": "DATETIME",
+          "definition": "t DATETIME NOT NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "uid"
+      ],
+      "unique_inline": [],
+      "table_keys": [],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_tg_map",
+      "columns": [
+        {
+          "name": "msg_id",
+          "type": "BIGINT",
+          "definition": "msg_id BIGINT NOT NULL"
+        },
+        {
+          "name": "chat_id",
+          "type": "INT",
+          "definition": "chat_id INT NOT NULL"
+        },
+        {
+          "name": "t",
+          "type": "DATETIME",
+          "definition": "t DATETIME NOT NULL"
+        }
+      ],
+      "primary_key_inline": [],
+      "unique_inline": [],
+      "table_keys": [
+        "PRIMARY KEY(msg_id)"
+      ],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_frontend_users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "definition": "id INT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(120)",
+          "definition": "name VARCHAR(120) NOT NULL"
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(190)",
+          "definition": "email VARCHAR(190) NOT NULL UNIQUE"
+        },
+        {
+          "name": "phone",
+          "type": "VARCHAR(40)",
+          "definition": "phone VARCHAR(40) NULL"
+        },
+        {
+          "name": "pass_hash",
+          "type": "VARCHAR(255)",
+          "definition": "pass_hash VARCHAR(255) NOT NULL"
+        },
+        {
+          "name": "active",
+          "type": "TINYINT(1)",
+          "definition": "active TINYINT(1) NOT NULL DEFAULT 1"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "definition": "created_at DATETIME NOT NULL"
+        },
+        {
+          "name": "last_login",
+          "type": "DATETIME",
+          "definition": "last_login DATETIME NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [
+        "email"
+      ],
+      "table_keys": [],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    {
+      "table": "wx_frontend_sessions",
+      "columns": [
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "definition": "id BIGINT AUTO_INCREMENT PRIMARY KEY"
+        },
+        {
+          "name": "user_id",
+          "type": "INT",
+          "definition": "user_id INT NOT NULL"
+        },
+        {
+          "name": "token_hash",
+          "type": "CHAR(64)",
+          "definition": "token_hash CHAR(64) NOT NULL UNIQUE"
+        },
+        {
+          "name": "csrf_hash",
+          "type": "CHAR(64)",
+          "definition": "csrf_hash CHAR(64) NOT NULL"
+        },
+        {
+          "name": "expires_at",
+          "type": "DATETIME",
+          "definition": "expires_at DATETIME NOT NULL"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "definition": "created_at DATETIME NOT NULL"
+        },
+        {
+          "name": "last_seen",
+          "type": "DATETIME",
+          "definition": "last_seen DATETIME NULL"
+        },
+        {
+          "name": "ip",
+          "type": "VARCHAR(64)",
+          "definition": "ip VARCHAR(64) NULL"
+        },
+        {
+          "name": "user_agent",
+          "type": "VARCHAR(255)",
+          "definition": "user_agent VARCHAR(255) NULL"
+        }
+      ],
+      "primary_key_inline": [
+        "id"
+      ],
+      "unique_inline": [
+        "token_hash"
+      ],
+      "table_keys": [
+        "INDEX(user_id)",
+        "INDEX(expires_at)"
+      ],
+      "indexes": [
+        "INDEX(user_id)",
+        "INDEX(expires_at)"
+      ],
+      "foreign_keys": []
+    }
+  ],
+  "foreign_key_count": 0,
+  "schema_drift": {
+    "code_requires_but_schema_missing": {
+      "wx_chats": [
+        "handoff",
+        "ext",
+        "assigned_to",
+        "tags"
+      ]
+    },
+    "runtime_migrators": [
+      "admin.php:migrate",
+      "admin.php:schema_repair",
+      "crm-lib.php:crm_migrate",
+      "sales-lib.php:sales_migrate",
+      "chat-lib.php:chat_migrate",
+      "booking-lib.php:bk_migrate",
+      "frontend-auth.php:wx_fe_schema",
+      "p18h-lib.php:dbx_actions",
+      "frontstore:footer.php",
+      "frontstore:header.php",
+      "frontstore:api/reviews/submit-customer-review.php",
+      "frontstore:config/product_categories.php"
+    ],
+    "dynamic_table_definitions_found": 27
+  },
+  "demo_seed": {
+    "file": "os:database/demo-seed.sql",
+    "accounts": [
+      "demo@woodex.com",
+      "customer-demo@woodex.com"
+    ],
+    "note": "Credentials intentionally omitted; rotate/remove before production"
+  },
+  "legacy_ecommerce": {
+    "schema_documented": false,
+    "connection_config": [
+      "site:lbpanel/config/connection.php",
+      "frontstore:connection.php",
+      "frontstore:lbpanel/config/connection.php"
+    ],
+    "referenced_tables": [
+      "products",
+      "categories",
+      "product_variations",
+      "orders",
+      "order_items",
+      "product_categories",
+      "brands",
+      "attributes",
+      "attribute_values",
+      "blogs",
+      "faqs",
+      "reviews",
+      "customer_reviews",
+      "coupons",
+      "subscribers",
+      "contact_forms",
+      "hero_slides",
+      "hero_sliders",
+      "topbar_settings",
+      "sale_page_settings",
+      "footer_settings",
+      "footer_links",
+      "projects",
+      "url_redirects",
+      "quotation_requests",
+      "quotation_request_items",
+      "pos_transactions",
+      "pos_transaction_items",
+      "pos_refunds",
+      "pos_refund_items",
+      "users"
+    ]
+  }
+}

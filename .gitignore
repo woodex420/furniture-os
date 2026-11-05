@@ -1,0 +1,21 @@
+# Downloaded source archives / extracted working trees (keep out of Git)
+/google_drive/
+/audit_sources/
+*.zip
+*.rar
+*.7z
+
+# Runtime/debug artifacts that must never be committed
+*.log
+/sessions/
+/_private/
+.DS_Store
+php.ini
+.user.ini
+session_test.php
+error_log
+
+# Local tooling
+/.venv/
+/node_modules/
+/home/user/furniture-os/.audit_upload/
