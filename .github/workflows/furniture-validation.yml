@@ -51,7 +51,15 @@ jobs:
       - name: Complete current PHPUnit suite
         run: php vendor/bin/phpunit
       - name: Dependency advisory check
-        run: composer audit --locked --no-interaction
+        run: |
+          set +e
+          composer audit --locked --format=json --no-interaction > "$RUNNER_TEMP/furniture-composer-audit.json"
+          result=$?
+          set -e
+          if [ "$result" -ne 0 ]; then
+            node ../../scripts/report-composer-audit.mjs "$RUNNER_TEMP/furniture-composer-audit.json"
+            exit "$result"
+          fi
 
   frontend:
     name: Locked Furniture asset build and preview tests
@@ -74,3 +82,4 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           npm test
           npm run test:preflight
+          node --test scripts/report-composer-audit.test.mjs
