@@ -1,0 +1,76 @@
+name: Furniture foundation validation
+
+# Validation only. No deployment, hosting credentials, provider calls or real data.
+# A passing run is evidence for the checked-out SHA, not a staging approval.
+on:
+  push:
+    branches: [arena/c3010afd-furniture-os]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: Locked native PHP and synthetic SQLite
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/furniture-platform
+    env:
+      APP_ENV: testing
+      APP_KEY: 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+      APP_URL: 'http://localhost'
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+      DB_URL: ''
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      MAIL_MAILER: array
+      QUEUE_CONNECTION: sync
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          extensions: curl, dom, fileinfo, mbstring, pdo_sqlite, sqlite3, xml, xmlwriter, zip
+          tools: composer:v2
+          coverage: none
+      - name: Validate and install locked dependencies
+        run: |
+          php --version
+          composer validate --no-check-publish
+          composer install --no-interaction --prefer-dist --no-progress --no-scripts --no-plugins
+          composer check-platform-reqs
+      - name: Discover packages in synthetic environment
+        run: php artisan package:discover --ansi
+      - name: Complete current PHPUnit suite
+        run: php vendor/bin/phpunit
+      - name: Dependency advisory check
+        run: composer audit --locked --no-interaction
+
+  frontend:
+    name: Locked Furniture asset build and preview tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.2'
+      - name: Furniture foundation asset build
+        working-directory: apps/furniture-platform
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+      - name: Preview and preflight regression tests
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm test
+          npm run test:preflight

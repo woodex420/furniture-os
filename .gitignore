@@ -1,0 +1,19 @@
+node_modules/
+dist/
+# Rebuilt locally; release assets must come from a reviewed artifact, not this working tree.
+/apps/laravel-admin-source/platform/public/build/
+.DS_Store
+
+# Keep local configuration, credentials and disposable databases out of source.
+# This is a safeguard, not a substitute for reviewing staged files for secrets.
+.env
+.env.*
+!.env.example
+!.env.*.example
+auth.json
+*.pem
+*.key
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.db

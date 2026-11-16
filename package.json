@@ -1,0 +1,25 @@
+{
+  "name": "woodex-admin-preview",
+  "private": true,
+  "scripts": {
+    "dev": "vite --config apps/dashboard/vite.config.js --host 0.0.0.0",
+    "build": "vite build --config apps/dashboard/vite.config.js",
+    "test": "vitest run apps/dashboard/src",
+    "preflight": "node scripts/release-preflight.mjs",
+    "test:preflight": "node --test scripts/release-preflight.test.mjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "recharts": "^2.15.0",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.12",
+    "jsdom": "^31.0.1",
+    "vitest": "^5.1.0"
+  }
+}
