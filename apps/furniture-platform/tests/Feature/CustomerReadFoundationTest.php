@@ -27,9 +27,9 @@ class CustomerReadFoundationTest extends TestCase
         return DB::table('contacts')->insertGetId(['name' => $name, 'email' => $email, 'phone' => $phone, 'created_at' => now(), 'updated_at' => now()]);
     }
 
-    private function lead(string $title, ?int $contact = null): void
+    private function lead(string $title, ?int $contact = null, string $status = 'new'): void
     {
-        DB::table('leads')->insert(['title' => $title, 'contact_id' => $contact, 'source' => null, 'status' => 'new', 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('leads')->insert(['title' => $title, 'contact_id' => $contact, 'source' => null, 'status' => $status, 'created_at' => now(), 'updated_at' => now()]);
     }
 
     public function test_owner_can_read_pages_and_see_empty_states_without_example_records(): void
@@ -112,6 +112,36 @@ class CustomerReadFoundationTest extends TestCase
         Livewire::actingAs($owner)->test(LeadsIndex::class)->assertSee('Enquiry 12')->assertDontSee('Enquiry 1<', false)
             ->call('nextPage')->assertSee('Enquiry 1')->assertDontSee('Enquiry 12')
             ->set('search', 'Enquiry 12')->assertSee('Enquiry 12');
+    }
+
+    public function test_livewire_lead_status_filter_is_literal_bounded_and_combines_with_search(): void
+    {
+        $this->lead('Wood desk request', status: 'new');
+        $this->lead('Wood chair request', status: 'qualified');
+        $this->lead('Other request', status: '<script>');
+        $owner = $this->owner();
+
+        Livewire::actingAs($owner)->test(LeadsIndex::class)
+            ->assertSee('All statuses')->assertSee('&lt;script&gt;', false)->assertDontSee('<script>', false)
+            ->set('status', 'qualified')->assertSee('Wood chair request')->assertDontSee('Wood desk request')
+            ->set('search', 'desk')->assertDontSee('Wood chair request')->assertSee('No leads found')
+            ->set('status', 'new')->assertSee('Wood desk request')->assertDontSee('Wood chair request')
+            ->set('status', "' OR 1=1 --")->assertDontSee('Wood desk request')->assertSee('No leads found')
+            ->set('status', str_repeat('a', 51))->assertHasErrors(['status'])->assertDontSee('Wood desk request')
+            ->set('status', ['unexpected'])->assertHasErrors(['status'])->assertDontSee('Wood desk request')
+            ->set('status', 'new')->assertHasNoErrors(['status'])->assertSee('Wood desk request');
+        $this->assertDatabaseCount('leads', 3);
+    }
+
+    public function test_changing_status_filter_resets_lead_pagination(): void
+    {
+        for ($i = 1; $i <= 11; $i++) {
+            $this->lead('New enquiry '.$i);
+        }
+        $this->lead('Qualified special', status: 'qualified');
+        Livewire::actingAs($this->owner())->test(LeadsIndex::class)
+            ->call('nextPage')->assertDontSee('Qualified special')
+            ->set('status', 'qualified')->assertSee('Qualified special')->assertDontSee('New enquiry 11');
     }
 
     public function test_no_default_business_records_and_unimplemented_writes_are_unavailable(): void

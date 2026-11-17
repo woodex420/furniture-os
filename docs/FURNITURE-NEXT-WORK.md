@@ -1,0 +1,19 @@
+# WOODEX Furniture — next work list
+
+Furniture is a separate application and database from Interior. The current staging candidate is an incomplete, protected-test build; `woodexfurniture.pk` is the existing real website and is not a staging target. No real customers, orders, messages or payment services should be used in the test build.
+
+## Work order
+
+1. **Staging setup and evidence** — Use the matching candidate ZIP and SQL from a successful GitHub Actions run. Protect the whole staging site, pause the old Git auto-deployment, confirm the private-app/public-root layout, rotate any exposed database password, and follow the packaged `INSTALL.txt`. Test the real host's PHP/CLI extensions, MariaDB version, HTTPS, rewrites, owner login, Livewire, media, backup and rollback with synthetic data. Hostinger has not yet been tested by this session. Keep the existing website untouched.
+2. **Safety and build reliability** — Identify and replace or disable inherited demo checkout/forms, fabricated success, placeholder business facts, external adapters and default/demo credentials in the staged storefront. Fix Reimagin's missing build/sitemap scripts, TypeScript errors and dependency advisories; add clean-checkout build, accessibility and security tests. The preview build is not an approved production renderer.
+3. **Website and visual editor** — Complete the approved Astro/React/Tailwind storefront and Laravel/Livewire integration, with a Hostinger-compatible publishing strategy. Extend the existing limited homepage editor into the actual multi-page visual builder with selection toolbar, immediate updates, revision history and restore. Implement pages, headers/footers, design, SEO, media, service/city pages, blog, portfolio and forms.
+4. **CRM and sales** — Finish leads/contacts, approved statuses and transitions, follow-ups, assignments, quotations, estimations, invoices and payments, with authorization, audit history and reliable data validation. Work started: owner-only Livewire leads can now filter existing records by their stored status; this is read-only and does not define or change the business lifecycle.
+5. **Commerce and operations** — Build products, categories, shop, orders, delivery, support, vendors, procurement, production, stock and project workflows. Replace demo catalog and actions with authoritative Furniture data and tested Laravel contracts.
+6. **Accounts, growth and integrations** — Implement accounting/reporting and approved automation, AI and messaging integrations with safe defaults, consent and provider-specific configuration; do not activate real providers without approval.
+7. **Security, data and release** — Complete owner recovery and secure sessions, add staff permissions later as requested, review uploads and all exposed paths, reconcile approved Furniture data sources, rehearse backup/restore, and perform browser, mobile, accessibility, SEO, performance and security checks. Production requires separate approval after staging acceptance.
+
+## Evidence and boundaries
+
+- The [first candidate run](https://github.com/woodex420/furniture-os/actions/runs/44149141412) tested the ZIP, matching MariaDB SQL, owner login, Livewire search and homepage editing in synthetic CI. GitHub artifacts expire; use files from one successful run at the same commit.
+- The status filter reads a bounded list of existing statuses; it does not introduce or edit statuses and does not replace approval of CRM workflow rules. Feature coverage and real Hostinger behavior are still incomplete.
+- The master readiness plan and Website Studio plan contain the detailed requirements; some older historical notes predate the authorized staging test. No production sign-off is implied by a passing CI run.

@@ -27,7 +27,12 @@ try {
   const livewireUpdate = page.waitForResponse((response) => response.url().startsWith(`${origin}/workspace/livewire/update`) && response.request().method() === 'POST' && response.status() === 200);
   await page.type('input[placeholder="Search leads..."]', 'synthetic-search');
   await livewireUpdate;
-  await page.waitForFunction(() => document.body.textContent.includes('Try another search.'));
+  await page.waitForFunction(() => document.body.textContent.includes('Try another search or status.'));
+  await page.goto(`${origin}/admin/leads`, { waitUntil: 'networkidle2' });
+  const statusUpdate = page.waitForResponse((response) => response.url().startsWith(`${origin}/workspace/livewire/update`) && response.request().method() === 'POST' && response.status() === 200);
+  await page.select('select[name="status"]', 'qualified');
+  await statusUpdate;
+  await page.waitForFunction(() => document.body.textContent.includes('Synthetic qualified enquiry') && !document.body.textContent.includes('Synthetic new enquiry'));
 
   await page.goto(`${origin}/admin/website/home`, { waitUntil: 'networkidle2' });
   await page.$eval('#hero-title', (el) => { el.value = ''; });

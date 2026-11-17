@@ -19,7 +19,14 @@ class LeadsIndex extends Component
 
     public $search = '';
 
+    public $status = '';
+
     public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatus(): void
     {
         $this->resetPage();
     }
@@ -48,8 +55,21 @@ class LeadsIndex extends Component
             $this->resetErrorBag('search');
         }
 
+        if (! is_string($this->status) || ! mb_check_encoding($this->status, 'UTF-8') || mb_strlen($this->status) > 50) {
+            $this->addError('status', 'Status must be text of at most 50 characters.');
+            $query->whereRaw('1 = 0');
+        } else {
+            $this->resetErrorBag('status');
+            if ($this->status !== '') {
+                $query->where('status', $this->status);
+            }
+        }
+
         return view('livewire.workspace.leads-index', [
             'leads' => $query->orderByDesc('created_at')->orderByDesc('id')->paginate(10),
+            // Existing data determines options; this does not define a CRM lifecycle.
+            // Bound the list until statuses have an approved managed vocabulary.
+            'statuses' => Lead::query()->select('status')->where('status', '!=', '')->distinct()->orderBy('status')->limit(100)->pluck('status'),
             'canViewContacts' => $canViewContacts,
         ]);
     }
