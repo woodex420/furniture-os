@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Workspace;
 
+use App\Support\Website\StorefrontCanvasUrl;
 use App\Support\Website\StorefrontHomeRevisions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -33,6 +34,7 @@ final class StorefrontHomeController
 
         return view('workspace.storefront-home', [
             'content' => $content,
+            'canvasUrl' => StorefrontCanvasUrl::configured(),
             'versions' => DB::table('storefront_home_versions')->orderByDesc('revision')->limit(20)->get(),
         ]);
     }

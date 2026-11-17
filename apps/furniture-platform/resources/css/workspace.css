@@ -67,3 +67,14 @@
 @media(max-width:900px) {
   .no-js .sidebar { transform: none; position: static; width: 100% !important; max-height: 330px; }
 }
+
+.home-editor-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 18px; max-width: 1100px; margin-bottom: 20px; }
+@media(min-width: 1250px) { .home-editor-grid { grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); } }
+.home-canvas { min-width: 0; padding: 22px; }
+.home-canvas h2 { font-size: 15px; margin-bottom: 10px; }
+.home-canvas p, .home-canvas-status { color: #748179; font-size: 12px; line-height: 1.6; margin-bottom: 12px; }
+.home-canvas-badge { color: #568f3f; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-left: 8px; }
+.home-canvas-frame { border: 1px solid #d8e2d9; border-radius: 8px; overflow: hidden; background: #f5f8f4; }
+.home-canvas-status { padding: 10px 12px; margin: 0; }
+.home-canvas-frame iframe { display: block; width: 100%; height: 520px; border: 0; background: #fff; }
+.home-canvas .home-canvas-unavailable { color: #8b6436; }

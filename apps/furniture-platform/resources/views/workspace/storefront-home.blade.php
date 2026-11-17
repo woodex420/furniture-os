@@ -12,6 +12,20 @@
         <div class="demo-banner"><span>STOREFRONT INTEGRATION</span> First homepage slide only. Full visual editing and other pages are still in progress.</div>
         <div class="page-heading list-heading"><div><div class="eyebrow">WEBSITE STUDIO <span>/</span> HOME</div><h1>Storefront home</h1><p>Edit the first slide of the actual Reimagin v1 homepage.</p></div></div>
         @if(session('status'))<div class="form-success" role="status">{{ session('status') }}</div>@endif
+        <div class="home-editor-grid">
+        <section class="card home-canvas" aria-labelledby="home-canvas-heading">
+            <h2 id="home-canvas-heading">Storefront canvas <span class="home-canvas-badge">Preview</span></h2>
+            <p>Click the first slide’s title or subtitle in the actual storefront to select it. Edit the text below to see an unsaved preview; use Update storefront preview to save.</p>
+            @if ($canvasUrl)
+                <div class="home-canvas-frame" data-home-canvas data-storefront-origin="{{ $canvasUrl }}">
+                    <div class="home-canvas-status" role="status" data-canvas-status>Loading storefront canvas…</div>
+                    <iframe title="Reimagin homepage visual preview" data-canvas-frame sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer" loading="lazy"></iframe>
+                </div>
+                <noscript><p>Enable JavaScript to use the canvas. You can still save the fields below.</p></noscript>
+            @else
+                <p class="home-canvas-unavailable">Canvas not configured. Text editing and version history remain available below.</p>
+            @endif
+        </section>
         <section class="card customer-detail contact-create" aria-labelledby="home-editor-heading">
             <h2 id="home-editor-heading">Homepage hero</h2>
             <p class="form-help">Saving makes these two fields available to the connected storefront preview immediately. Other slides, images and layout are unchanged.</p>
@@ -24,6 +38,7 @@
                 <div class="form-actions"><button type="submit">Update storefront preview</button></div>
             </form>
         </section>
+        </div>
         <section class="card customer-detail contact-create" aria-labelledby="home-history-heading">
             <h2 id="home-history-heading">Recent versions</h2>
             <p class="form-help">The latest 20 versions of these two fields are shown. Restoring creates a new version and updates the preview immediately.</p>

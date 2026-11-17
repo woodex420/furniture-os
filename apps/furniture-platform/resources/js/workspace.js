@@ -25,3 +25,53 @@ if (toggle && close && sidebar && backdrop) {
         if (event.matches && toggle.getAttribute('aria-expanded') === 'true') setOpen(false);
     });
 }
+
+// The frame renders the actual public Reimagin homepage. Messages only affect its
+// temporary visual state; the existing authenticated form is the only writer.
+const homeCanvas = document.querySelector('[data-home-canvas]');
+if (homeCanvas) {
+    const frame = homeCanvas.querySelector('[data-canvas-frame]');
+    const status = homeCanvas.querySelector('[data-canvas-status]');
+    const title = document.getElementById('hero-title');
+    const subtitle = document.getElementById('hero-subtitle');
+    try {
+        const storefront = new URL(homeCanvas.dataset.storefrontOrigin);
+        if (!frame || !status || !title || !subtitle || !['http:', 'https:'].includes(storefront.protocol) || storefront.origin === window.location.origin) throw new Error('Canvas must use a separate origin');
+        const targetOrigin = storefront.origin;
+        storefront.searchParams.set('furniture-canvas', 'home');
+        storefront.searchParams.set('parent-origin', window.location.origin);
+        let connected = false;
+        let attempt = 0;
+        const waitForCanvas = () => {
+            connected = false;
+            const thisAttempt = ++attempt;
+            status.textContent = 'Loading storefront canvas…';
+            window.setTimeout(() => {
+                if (!connected && thisAttempt === attempt) status.textContent = 'Canvas unavailable or blocked. You can still save using the fields below.';
+            }, 12000);
+        };
+        const sendValues = () => {
+            frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-values', hero_title: title.value, hero_subtitle: subtitle.value }, targetOrigin);
+        };
+        window.addEventListener('message', (event) => {
+            if (event.source !== frame.contentWindow || event.origin !== targetOrigin || !event.data || typeof event.data !== 'object') return;
+            if (event.data.type === 'furniture-home-canvas-ready') {
+                connected = true;
+                status.textContent = 'Canvas connected · Changes here are not saved until you update the storefront.';
+                sendValues();
+            } else if (event.data.type === 'furniture-home-canvas-select') {
+                if (event.data.field === 'hero_title') title.focus();
+                if (event.data.field === 'hero_subtitle') subtitle.focus();
+            }
+        });
+        for (const input of [title, subtitle]) input.addEventListener('input', sendValues);
+        frame.addEventListener('load', () => {
+            waitForCanvas();
+            frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-ping' }, targetOrigin);
+        });
+        waitForCanvas();
+        frame.src = storefront.href;
+    } catch {
+        if (status) status.textContent = 'Canvas configuration is invalid. You can still use the fields below.';
+    }
+}
