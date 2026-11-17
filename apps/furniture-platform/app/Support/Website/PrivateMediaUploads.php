@@ -42,7 +42,9 @@ final class PrivateMediaUploads
                 throw ValidationException::withMessages(['image' => 'JPEG upload requires the server EXIF extension. PNG is available.']);
             }
             $exif = @exif_read_data($file->getRealPath(), 'IFD0', true);
-            if ($exif === false || (isset($exif['IFD0']['Orientation']) && (int) $exif['IFD0']['Orientation'] !== 1)) {
+            // exif_read_data returns false for a valid JPEG with no EXIF at all.
+            // If an EXIF signature exists but parsing fails, fail closed instead.
+            if (($exif === false && str_contains($bytes, "Exif\0\0")) || (is_array($exif) && isset($exif['IFD0']['Orientation']) && (int) $exif['IFD0']['Orientation'] !== 1)) {
                 throw ValidationException::withMessages(['image' => 'JPEG orientation cannot be safely preserved. Rotate and export it upright first.']);
             }
         }

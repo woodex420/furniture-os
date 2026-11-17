@@ -146,6 +146,9 @@ class PrivateMediaLibraryTest extends TestCase
         $app = "Exif\x00\x00".$tiff;
         $rotated = substr($jpeg, 0, 2)."\xff\xe1".pack('n', strlen($app) + 2).$app.substr($jpeg, 2);
         $this->post('/admin/website/media', ['title' => 'Rotated', 'image' => $this->file($rotated, 'image.jpg')])->assertSessionHasErrors('image');
-        $this->assertDatabaseCount('furniture_media', 1);
+        $uprightApp = "Exif\x00\x00".substr_replace($tiff, "\x01", 18, 1);
+        $upright = substr($jpeg, 0, 2)."\xff\xe1".pack('n', strlen($uprightApp) + 2).$uprightApp.substr($jpeg, 2);
+        $this->post('/admin/website/media', ['title' => 'Upright', 'image' => $this->file($upright, 'image.jpg')])->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('furniture_media', 2);
     }
 }
