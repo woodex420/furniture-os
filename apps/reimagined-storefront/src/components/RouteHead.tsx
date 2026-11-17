@@ -31,7 +31,9 @@ const RouteHead = () => {
     }
     // Staging-only CMS previews must not claim a production canonical URL.
     const stagingCms = config.cmsStorefrontPreview && /^\/p\/[^/]+\/?$/.test(pathname);
-    canon.setAttribute("href", stagingCms ? `${window.location.origin}${pathname}` : absUrl(pathname));
+    // Furniture service-area pages exist only in the preview, never claim a production canonical.
+    const cityPreview = /^\/locations(?:\/|$)/.test(pathname);
+    canon.setAttribute("href", stagingCms || cityPreview ? `${window.location.origin}${pathname}` : absUrl(pathname));
     trackPageview(pathname + search);
   }, [pathname, search]);
 

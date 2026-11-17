@@ -37,6 +37,7 @@
     $available = ['Dashboard' => ['admin', 'workspace.view'], 'Leads' => ['admin.leads', 'leads.view'], 'Contacts' => ['admin.contacts', 'contacts.view']];
     if (config('furniture.home_editor_enabled')) $available['Site Overview'] = ['admin.storefront.home', 'storefront.edit'];
     if (config('furniture.service_copy_enabled')) $available['Service pages'] = ['admin.website.services', 'storefront.edit'];
+    if (config('furniture.city_pages_enabled')) $available['City pages'] = ['admin.website.cities', 'storefront.edit'];
     if (config('furniture.media_library_enabled')) $available['Media Library'] = ['admin.website.media', 'storefront.edit'];
 @endphp
 <div class="app">
@@ -57,7 +58,7 @@
                         @if (isset($available[$item]))
                             @can($available[$item][1])
                                 @php($isActive = request()->routeIs($available[$item][0], $available[$item][0].'.show', $available[$item][0].'.create', $available[$item][0].'.edit'))
-                                <a href="{{ route($available[$item][0], absolute: false) }}" class="nav-item {{ $isActive ? 'active' : '' }}" @if($isActive) aria-current="{{ request()->routeIs($available[$item][0]) ? 'page' : 'location' }}" @endif>@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span>@if($item !== 'Dashboard')<small class="pending-badge">{{ ($item === 'Contacts' && config('furniture.contact_creation_enabled')) || ($item === 'Leads' && config('furniture.lead_creation_enabled')) || in_array($item, ['Site Overview', 'Service pages', 'Media Library'], true) ? 'Testing' : 'Read only' }}</small>@endif</a>
+                                <a href="{{ route($available[$item][0], absolute: false) }}" class="nav-item {{ $isActive ? 'active' : '' }}" @if($isActive) aria-current="{{ request()->routeIs($available[$item][0]) ? 'page' : 'location' }}" @endif>@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span>@if($item !== 'Dashboard')<small class="pending-badge">{{ ($item === 'Contacts' && config('furniture.contact_creation_enabled')) || ($item === 'Leads' && config('furniture.lead_creation_enabled')) || in_array($item, ['Site Overview', 'Service pages', 'City pages', 'Media Library'], true) ? 'Testing' : 'Read only' }}</small>@endif</a>
                             @endcan
                         @else
                             <span class="nav-item pending-item">@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span><small class="pending-badge">Pending</small></span>

@@ -1,0 +1,25 @@
+# Furniture city service-area pages — isolated preview
+
+**Status: narrow implementation for the synthetic Furniture preview, not a complete CMS or production deployment.** This is independent Furniture data, not an import from Woodex Interior or v2.1. No city records or business claims are seeded. A city service area is not a physical showroom; `/showrooms` remains a separate inherited demo workflow.
+
+## What works
+
+- When `FURNITURE_CITY_PAGES_ENABLED=true`, owner-only Website Studio → **City pages** creates and edits a city name, immutable lowercase URL slug, page title, summary and plain-text body (maximum 4,000 characters). Default visibility is **published on save**, with an optional private draft; saving an existing published page publishes its accepted changes to the connected preview without a separate publish action. Do not enter unverified real service claims.
+- Published pages appear in the actual React preview at `/locations` and `/locations/{slug}`. The services page links to the listing. Public list results are paginated by 20; no rows, pending network, not-found/unpublished and errors have distinct UI states. Existing pages poll while visible, so saving/unpublishing/restore normally updates an open preview without a reload. Inaccessible/malformed responses show an error or unavailable state, not stale private data; this is not a production freshness guarantee.
+- Owner authentication/permission checks, bounded validation, immutable unique slug, revision conflict detection and transactionally recorded snapshots are implemented. The last 20 revisions are shown; history is not pruned. Restoring creates a new version **including its previous visibility** and may republish a formerly published version. No delete or slug rename is provided.
+- Public `GET /storefront-api/cities?page=N` returns only published slug, city name, title and summary plus pagination counts. `GET /storefront-api/cities/{slug}` returns only published page fields, never draft/version/actor records. Requests are sessionless and successful responses and detail 404s are no-store. Data is rendered as text, not HTML. The disabled flag defaults to false.
+- The synthetic preview frontend is explicitly `noindex, nofollow`; city routes use the preview origin rather than a production canonical. This does **not** mean production SEO is implemented.
+
+## Limitations and safety
+
+- No visual canvas, rich content, template editor, media, per-page SEO fields, nested sections, scheduled publication, authenticated draft preview, physical address/showroom management or linked service catalogue. There is no actual server-rendered Astro page, sitemap or proper HTTP 404 for a React route; the API does return a 404 for missing/unpublished pages. Client polling is a temporary bridge, not crawler-visible immediate publication.
+- Laravel migrations and the unique per-city slug are temporary and do not form the final global route registry. Before integrating into the shared CMS, define collision/redirect policies and migrate city records and **all** revisions with rollback tests. Deleting tables on migration rollback loses content and history; back up and rehearse rollback first. MySQL locking/concurrent creates and hosting capabilities are not verified.
+- Public preview content may be visible to anyone with the preview link. Only publish synthetic/approved content. A private draft is returned only in the authenticated admin and is not a visual draft preview. Do not put confidential or production data in this disposable preview. Restoring a published version makes it visible again.
+- Tested HTTPS proxy simulation is not proof the founder's Arena browser, Hostinger, MySQL or production domain behaves the same. Other storefront modules still use demo data/adapters, and inherited TypeScript/security issues remain.
+
+## Verification
+
+- Local partial PHPUnit runner on PHP 8.4/SQLite: 109 tests and 1,132 assertions; the six city tests cover default-off, ownership, slug/field validation, duplicate prevention, private draft isolation, public field boundaries and pagination, save/stale conflicts, restore visibility, cross-page revision isolation, escaping and rollback on snapshot failure. Local PHP lacks `xmlwriter`/`pdo_mysql`, so this is not the standard production test environment.
+- Node parser tests reject invalid routes, incomplete/duplicate/oversized payloads and strip extra fields. Existing service parser and canvas tests pass. Reimagin Vite build passes; TypeScript still has unrelated inherited failures and no errors were reported in changed files.
+- Separate synthetic SQLite copy and nested HTTPS browser simulation with third-party-cookie phaseout tested owner login, draft isolation, save, list/detail polling, safe text, update, unpublish, restoring visibility, preview noindex and local canonical. Main synthetic preview was backed up and migrated, but the browser test did not add a city to its database. Actual Arena embedded browsing still needs user confirmation.
+- Check hosted validation for the exact commit. CI does not verify MySQL, hosting, production SEO or the full business system.

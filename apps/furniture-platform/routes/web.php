@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\SessionController;
+use App\Http\Controllers\Workspace\CityPageController;
 use App\Http\Controllers\Workspace\ContactCreationController;
 use App\Http\Controllers\Workspace\CustomerDetailController;
 use App\Http\Controllers\Workspace\LeadCreationController;
@@ -40,6 +41,14 @@ Route::get('/storefront-api/services/copy', [ServiceCopyController::class, 'publ
         EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class,
         ShareErrorsFromSession::class, PreventRequestForgery::class,
     ])->name('storefront.services.copy');
+
+// Published Furniture service areas only; draft data never appears in the public API.
+Route::get('/storefront-api/cities', [CityPageController::class, 'publicIndex'])
+    ->withoutMiddleware([EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class])
+    ->name('storefront.cities.index');
+Route::get('/storefront-api/cities/{slug}', [CityPageController::class, 'publicShow'])
+    ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->withoutMiddleware([EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class])
+    ->name('storefront.cities.show');
 
 // Only the currently selected public hero image is exposed, never the private library.
 Route::get('/storefront-api/home/image/{id}', [PublicHeroImageController::class, 'show'])
@@ -82,6 +91,19 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
         ->where('slug', '[a-z0-9-]+')->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.services.update');
     Route::post('/admin/website/services/{slug}/restore', [ServiceCopyController::class, 'restore'])
         ->where('slug', '[a-z0-9-]+')->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.services.restore');
+    // City service areas are separate from physical showrooms. No real locations are seeded.
+    Route::get('/admin/website/cities', [CityPageController::class, 'index'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.cities');
+    Route::get('/admin/website/cities/create', [CityPageController::class, 'create'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.cities.create');
+    Route::post('/admin/website/cities', [CityPageController::class, 'store'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.cities.store');
+    Route::get('/admin/website/cities/{slug}/edit', [CityPageController::class, 'edit'])
+        ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.cities.edit');
+    Route::post('/admin/website/cities/{slug}', [CityPageController::class, 'update'])
+        ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.cities.update');
+    Route::post('/admin/website/cities/{slug}/restore', [CityPageController::class, 'restore'])
+        ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.cities.restore');
     // Private media library; the separate public route serves only the selected hero image.
     Route::get('/admin/website/media', [MediaLibraryController::class, 'index'])
         ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.media');

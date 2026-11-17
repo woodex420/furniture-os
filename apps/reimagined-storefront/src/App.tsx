@@ -22,6 +22,8 @@ const Projects = lazy(() => import("./pages/Projects"));
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
 const Services = lazy(() => import("./pages/Services"));
 const ServiceDetail = lazy(() => import("./pages/ServiceDetail"));
+const CityIndex = lazy(() => import("./pages/CityPages").then((module) => ({ default: module.CityIndex })));
+const CityDetailPage = lazy(() => import("./pages/CityPages").then((module) => ({ default: module.CityDetailPage })));
 const B2B = lazy(() => import("./pages/B2B"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -54,7 +56,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <div className="preview-notice" role="note">
-            <span><strong>STOREFRONT PREVIEW</strong> · Sample data. Home hero, tagline and limited service text connect to Furniture admin; other features are still in progress.</span>
+            <span><strong>STOREFRONT PREVIEW</strong> · Sample data. Home hero, tagline, limited service text and city pages connect to Furniture admin; other features are still in progress.</span>
           </div>
           <RouteHead />
           <ChatBubble />
@@ -71,6 +73,8 @@ const App = () => (
               <Route path="/projects/:projectId" element={<ProjectDetail />} />
               <Route path="/services" element={<Services />} />
               <Route path="/services/:slug" element={<ServiceDetail />} />
+              <Route path="/locations" element={<CityIndex />} />
+              <Route path="/locations/:slug" element={<CityDetailPage />} />
               <Route path="/b2b" element={<B2B />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />

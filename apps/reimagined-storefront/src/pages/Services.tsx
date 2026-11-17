@@ -115,6 +115,7 @@ const Services = () => {
                 Choose the support you need—from shaping your floor plan to furnishing a complete office. Each service
                 connects to a dedicated page with more detail about the work.
               </p>
+              <Link to="/locations" className="inline-flex items-center gap-2 mt-4 font-bold text-accent">Explore service areas <ArrowRight className="h-4 w-4" /></Link>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
