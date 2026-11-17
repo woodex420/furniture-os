@@ -118,7 +118,7 @@ const HeroSlider = () => {
   };
 
   // Reads the Furniture admin's public, same-origin content endpoint. Only the first
-  // slide is connected; all other Reimagin v1 content stays in its real components.
+  // hero slide is connected; the separate tagline component uses the same endpoint.
   useEffect(() => {
     let active = true;
     let loading = false;

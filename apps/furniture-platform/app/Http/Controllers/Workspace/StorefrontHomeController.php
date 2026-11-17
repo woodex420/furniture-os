@@ -24,7 +24,7 @@ final class StorefrontHomeController
     public function publicContent(): JsonResponse
     {
         abort_unless(config('furniture.home_editor_enabled'), 404);
-        $content = DB::table('storefront_home_content')->where('id', 1)->first(['hero_title', 'hero_subtitle', 'hero_order', 'hero_cta_label', 'hero_cta_path', 'hero_image', 'hero_media_id', 'revision']);
+        $content = DB::table('storefront_home_content')->where('id', 1)->first(['hero_title', 'hero_subtitle', 'hero_order', 'hero_cta_label', 'hero_cta_path', 'hero_image', 'hero_media_id', 'home_tagline', 'revision']);
         abort_if($content === null, 503);
         $content->hero_order = HeroTextOrder::resolve($content->hero_order);
         $content->hero_image = HeroImage::resolve($content->hero_image);
@@ -77,7 +77,7 @@ final class StorefrontHomeController
             'hero_title' => is_string($request->input('hero_title')) ? trim($request->input('hero_title')) : $request->input('hero_title'),
             'hero_subtitle' => is_string($request->input('hero_subtitle')) ? trim($request->input('hero_subtitle')) : $request->input('hero_subtitle'),
         ]);
-        foreach (['hero_cta_label', 'hero_cta_path'] as $field) {
+        foreach (['hero_cta_label', 'hero_cta_path', 'home_tagline'] as $field) {
             if ($request->has($field) && is_string($request->input($field))) {
                 $request->merge([$field => trim($request->input($field))]);
             }
@@ -90,6 +90,7 @@ final class StorefrontHomeController
             'hero_subtitle' => ['required', 'string', 'max:240'],
             'hero_order' => ['sometimes', 'required', 'string', Rule::in(HeroTextOrder::values())],
             'hero_cta_label' => ['sometimes', 'required', 'string', 'max:80'],
+            'home_tagline' => ['sometimes', 'required', 'string', 'max:240'],
             'hero_image' => ['sometimes', 'required', 'string', Rule::in(array_keys(HeroImage::choices()))],
             'hero_media_id' => ['sometimes', 'nullable', 'uuid', Rule::exists('furniture_media', 'id')],
             // Root-relative ASCII paths only: no external URLs, backslashes, percent escapes or control characters.

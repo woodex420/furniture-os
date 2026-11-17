@@ -14,16 +14,16 @@ function setup(fetchOverride) {
         focus() { this.focused = true; }
         click() { this.dispatchEvent({ type: 'click' }); }
     }
-    const title = new Element(), subtitle = new Element(), order = new Element(), ctaLabel = new Element(), ctaPath = new Element(), image = new Element(), media = new Element(), frame = new Element(), status = new Element(), controls = new Element();
-    title.value = 'Draft'; subtitle.value = 'Sub'; order.value = 'title_first'; ctaLabel.value = 'Shop'; ctaPath.value = '/shop'; image.value = 'workspace';
+    const title = new Element(), subtitle = new Element(), order = new Element(), ctaLabel = new Element(), ctaPath = new Element(), image = new Element(), media = new Element(), tagline = new Element(), frame = new Element(), status = new Element(), controls = new Element();
+    title.value = 'Draft'; subtitle.value = 'Sub'; order.value = 'title_first'; ctaLabel.value = 'Shop'; ctaPath.value = '/shop'; image.value = 'workspace'; tagline.value = 'Original tagline';
     const messages = [];
     frame.contentWindow = { postMessage: (...args) => messages.push(args) };
     const buttons = ['fit', '375', '768', '1280', 'evil'].map(width => { const b = new Element(); b.dataset.canvasWidth = width; return b; });
     controls.querySelectorAll = () => buttons;
     const home = new Element(); home.dataset.storefrontOrigin = 'https://store.example';
     home.querySelector = selector => ({ '[data-canvas-frame]': frame, '[data-canvas-status]': status, '[data-canvas-controls]': controls })[selector];
-    const doc = { documentElement: { classList: { remove() {} } }, querySelector: selector => selector === '[data-home-canvas]' ? home : null, getElementById: id => ({ 'hero-title': title, 'hero-subtitle': subtitle, 'hero-order': order, 'hero-cta-label': ctaLabel, 'hero-cta-path': ctaPath, 'hero-image': image, 'hero-media': media })[id], addEventListener() {} };
-    const win = new Element(); win.location = { origin: 'https://admin.example' }; win.setTimeout = () => 1;
+    const doc = { documentElement: { classList: { remove() {} } }, querySelector: selector => selector === '[data-home-canvas]' ? home : null, getElementById: id => ({ 'hero-title': title, 'hero-subtitle': subtitle, 'hero-order': order, 'hero-cta-label': ctaLabel, 'hero-cta-path': ctaPath, 'hero-image': image, 'hero-media': media, 'home-tagline': tagline })[id], addEventListener() {} };
+    const win = new Element(); win.location = { origin: 'https://admin.example' }; win.timers = []; win.setTimeout = fn => { win.timers.push(fn); return win.timers.length; };
     const requests = [];
     const fetch = async (url, options) => {
         requests.push({ url, options });
@@ -31,7 +31,7 @@ function setup(fetchOverride) {
     };
     vm.runInNewContext(script, { document: doc, window: win, URL, AbortController, fetch, Event: class { constructor(type) { this.type = type; } } });
     const message = data => win.dispatchEvent({ type: 'message', source: frame.contentWindow, origin: 'https://store.example', data });
-    return { buttons, controls, frame, title, subtitle, order, ctaLabel, ctaPath, image, media, status, messages, requests, win, message };
+    return { buttons, controls, frame, title, subtitle, order, ctaLabel, ctaPath, image, media, tagline, status, messages, requests, win, message };
 }
 
 test('viewport presets change the real frame width without reloading or changing draft', () => {
@@ -140,4 +140,26 @@ test('private preview failures are reported and cleared when using a bundled ima
     media.dispatchEvent({ type: 'change' });
     assert.match(status.textContent, /Canvas connected/);
     assert.doesNotMatch(status.textContent, /could not be loaded/);
+});
+
+test('tagline updates and separate component readiness use only the approved frame', () => {
+    const { tagline, messages, message, win, frame, status } = setup();
+    message({ type: 'furniture-home-canvas-ready' });
+    win.timers[0]();
+    assert.match(status.textContent, /tagline preview is unavailable/);
+    message({ type: 'furniture-home-canvas-ready' });
+    assert.match(status.textContent, /tagline preview is unavailable/);
+    tagline.value = 'Fresh draft';
+    tagline.dispatchEvent({ type: 'input' });
+    assert.equal(messages.at(-1)[0].home_tagline, 'Fresh draft');
+    const count = messages.length;
+    win.dispatchEvent({ type: 'message', source: frame.contentWindow, origin: 'https://evil.example', data: { type: 'furniture-home-tagline-ready' } });
+    assert.equal(messages.length, count);
+    message({ type: 'furniture-home-tagline-ready' });
+    assert.match(status.textContent, /Canvas connected/);
+    assert.doesNotMatch(status.textContent, /unavailable/);
+    assert.equal(messages.at(-1)[0].home_tagline, 'Fresh draft');
+    assert.equal(messages.at(-1)[1], 'https://store.example');
+    message({ type: 'furniture-home-canvas-select', field: 'home_tagline', focus_input: true });
+    assert.equal(tagline.focused, true);
 });

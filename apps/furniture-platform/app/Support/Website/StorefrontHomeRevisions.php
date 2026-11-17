@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use LogicException;
 
-/** Transactional, append-only history for the limited connected home hero. */
+/** Transactional, append-only history for the limited connected homepage fields. */
 final class StorefrontHomeRevisions
 {
-    /** @param array{hero_title: string, hero_subtitle: string, revision: int|string, hero_order?: string, hero_cta_label?: string, hero_cta_path?: string, hero_image?: string, hero_media_id?: ?string} $data */
+    /** @param array{hero_title: string, hero_subtitle: string, revision: int|string, hero_order?: string, hero_cta_label?: string, hero_cta_path?: string, hero_image?: string, hero_media_id?: ?string, home_tagline?: string} $data */
     public function edit(int $actorId, array $data): void
     {
         $this->change($actorId, (int) $data['revision'], $data, null);
@@ -63,6 +63,7 @@ final class StorefrontHomeRevisions
                 $ctaPath = $version->hero_cta_path;
                 $image = HeroImage::resolve($version->hero_image);
                 $mediaId = $version->hero_media_id;
+                $tagline = $version->home_tagline;
                 $type = 'restore';
             } else {
                 $title = $data['hero_title'];
@@ -74,6 +75,7 @@ final class StorefrontHomeRevisions
                 $image = HeroImage::resolve($data['hero_image'] ?? $home->hero_image);
                 // A missing field means an older client; explicit null means use a bundled image.
                 $mediaId = array_key_exists('hero_media_id', $data) ? $data['hero_media_id'] : $home->hero_media_id;
+                $tagline = $data['home_tagline'] ?? $home->home_tagline;
                 $type = 'edit';
             }
             if ($mediaId !== null) {
@@ -85,13 +87,13 @@ final class StorefrontHomeRevisions
             $next = $expectedRevision + 1;
             DB::table('storefront_home_content')->where('id', 1)->update([
                 'hero_title' => $title, 'hero_subtitle' => $subtitle, 'hero_order' => $order,
-                'hero_cta_label' => $ctaLabel, 'hero_cta_path' => $ctaPath, 'hero_image' => $image, 'hero_media_id' => $mediaId,
+                'hero_cta_label' => $ctaLabel, 'hero_cta_path' => $ctaPath, 'hero_image' => $image, 'hero_media_id' => $mediaId, 'home_tagline' => $tagline,
                 'revision' => $next, 'updated_at' => now(),
             ]);
             DB::table('storefront_home_changes')->insert(['actor_id' => $actorId, 'revision' => $next, 'created_at' => now()]);
             DB::table('storefront_home_versions')->insert([
                 'revision' => $next, 'hero_title' => $title, 'hero_subtitle' => $subtitle, 'hero_order' => $order,
-                'hero_cta_label' => $ctaLabel, 'hero_cta_path' => $ctaPath, 'hero_image' => $image, 'hero_media_id' => $mediaId,
+                'hero_cta_label' => $ctaLabel, 'hero_cta_path' => $ctaPath, 'hero_image' => $image, 'hero_media_id' => $mediaId, 'home_tagline' => $tagline,
                 'actor_id' => $actorId, 'change_type' => $type, 'restored_from_revision' => $sourceRevision, 'created_at' => now(),
             ]);
         }, 3);

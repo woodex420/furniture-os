@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import HeroSlider from "@/components/home/HeroSlider";
+import HomeTagline from "@/components/home/HomeTagline";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ServicesStrip from "@/components/home/ServicesStrip";
@@ -52,11 +53,7 @@ const Index = () => {
         <HeroSlider />
 
         {/* === TAGLINE === */}
-        <section className="py-10 bg-background border-b">
-          <div className="container mx-auto px-4 text-center">
-            <p className="text-xl lg:text-2xl font-bold text-accent">Unmatched Capabilities. Fresh Products that Matter. Trusted Partnership.</p>
-          </div>
-        </section>
+        <HomeTagline />
 
         {/* === SERVICES STRIP (replaces Markets) === */}
         <ServicesStrip />
