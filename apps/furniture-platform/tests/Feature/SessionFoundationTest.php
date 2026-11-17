@@ -22,6 +22,19 @@ class SessionFoundationTest extends TestCase
             ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
     }
 
+    public function test_embedded_preview_help_is_opt_in_and_never_disables_authentication(): void
+    {
+        $this->withoutVite()->get('/login')->assertOk()->assertDontSee('Open sign-in in a new tab');
+        config(['furniture.admin_preview_landing' => true]);
+        $this->withoutVite()->get('/login')->assertOk()->assertSee('Open sign-in in a new tab')
+            ->assertSee('href="/login" target="_blank" rel="noopener noreferrer"', false)
+            ->assertSee('id="preview-cookie-warning"', false)->assertSee('name="_token"', false);
+        $this->get('/admin')->assertRedirect(route('login'));
+        $this->post('/login', ['email' => 'not-an-owner@example.test', 'password' => 'wrong'])
+            ->assertSessionHasErrors('email');
+        $this->assertGuest();
+    }
+
     public function test_sign_in_requires_valid_existing_credentials(): void
     {
         User::factory()->create(['email' => 'person@example.test', 'password' => Hash::make('synthetic-password'), 'is_owner' => true]);

@@ -27,6 +27,9 @@
                 <h2>Welcome back<span>.</span></h2>
                 <p class="auth-description">Sign in to your WOODEX OS workspace.</p>
                 <div class="auth-notice"><span aria-hidden="true"></span><div><strong>Workspace in progress</strong><p>This development foundation is not ready for business use.</p></div></div>
+                @if (config('furniture.admin_preview_landing'))
+                    <div class="auth-notice" aria-label="Preview sign-in help"><span aria-hidden="true"></span><div><strong>Synthetic preview sign-in</strong><p>Use the preview-only account. If sign-in does not continue inside Arena, open this page in a new tab and sign in there.</p><p><a href="{{ route('login', absolute: false) }}" target="_blank" rel="noopener noreferrer">Open sign-in in a new tab</a></p><p id="preview-cookie-warning" role="status" hidden>Cookies appear blocked in this frame. Open sign-in in a new tab and try again.</p></div></div>
+                @endif
                 <form method="POST" action="{{ route('login.store', absolute: false) }}">
                     @csrf
                     @if ($errors->any())
@@ -41,5 +44,24 @@
             <p class="auth-main-footer">WOODEX OS <span>·</span> THE OPERATING WORKSPACE</p>
         </main>
     </div>
+    @if (config('furniture.admin_preview_landing'))
+        <script>
+            // Diagnostic only: never bypass authentication, sessions or CSRF. Cookie
+            // policies can vary by browser and the containing site, so this is not proof
+            // that the session works. Direct-tab sign-in remains available regardless.
+            (() => {
+                if (!window.isSecureContext) return;
+                const name = '__Host-furniture_preview_probe';
+                try {
+                    document.cookie = name + '=1; Path=/; Secure; SameSite=None; Partitioned';
+                    const present = document.cookie.split(';').some((part) => part.trim() === name + '=1');
+                    document.cookie = name + '=; Path=/; Secure; SameSite=None; Partitioned; Max-Age=0';
+                    if (!present) document.getElementById('preview-cookie-warning').hidden = false;
+                } catch (_) {
+                    document.getElementById('preview-cookie-warning').hidden = false;
+                }
+            })();
+        </script>
+    @endif
 </body>
 </html>
