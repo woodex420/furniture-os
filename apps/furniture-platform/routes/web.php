@@ -53,6 +53,8 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
         ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.storefront.home');
     Route::post('/admin/website/home', [StorefrontHomeController::class, 'update'])
         ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.storefront.home.update');
+    Route::post('/admin/website/home/restore', [StorefrontHomeController::class, 'restore'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.storefront.home.restore');
     // Experimental owner-only creation remains disabled unless explicitly enabled.
     Route::get('/admin/leads/create', [LeadCreationController::class, 'create'])
         ->middleware(['can:workspace.view', 'can:leads.view', 'can:leads.create'])

@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Workspace;
 
-use App\Models\User;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Support\Website\StorefrontHomeRevisions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-use LogicException;
 
 /** First, limited connection between Furniture admin and the real homepage component. */
 final class StorefrontHomeController
@@ -34,7 +31,10 @@ final class StorefrontHomeController
         $content = DB::table('storefront_home_content')->where('id', 1)->first();
         abort_if($content === null, 503);
 
-        return view('workspace.storefront-home', ['content' => $content]);
+        return view('workspace.storefront-home', [
+            'content' => $content,
+            'versions' => DB::table('storefront_home_versions')->orderByDesc('revision')->limit(20)->get(),
+        ]);
     }
 
     public function update(Request $request): RedirectResponse
@@ -49,30 +49,21 @@ final class StorefrontHomeController
             'hero_subtitle' => ['required', 'string', 'max:240'],
             'revision' => ['required', 'integer', 'min:0', 'max:4294967294'],
         ]);
-        $actorId = Auth::id();
-        DB::transaction(function () use ($actorId, $data): void {
-            $actor = User::query()->lockForUpdate()->find($actorId);
-            if ($actor === null) {
-                throw new AuthorizationException;
-            }
-            Gate::forUser($actor)->authorize('workspace.view');
-            Gate::forUser($actor)->authorize('storefront.edit');
-            $row = DB::table('storefront_home_content')->where('id', 1)->lockForUpdate()->first();
-            if ($row === null) {
-                throw new LogicException('Storefront home row is missing.');
-            }
-            if ((int) $row->revision !== (int) $data['revision']) {
-                throw ValidationException::withMessages(['revision' => 'This page changed since you opened it. Reload before saving your changes.']);
-            }
-            $nextRevision = (int) $row->revision + 1;
-            DB::table('storefront_home_content')->where('id', 1)->update([
-                'hero_title' => $data['hero_title'], 'hero_subtitle' => $data['hero_subtitle'],
-                'revision' => $nextRevision, 'updated_at' => now(),
-            ]);
-            DB::table('storefront_home_changes')->insert(['actor_id' => $actorId, 'revision' => $nextRevision, 'created_at' => now()]);
-        }, 3);
+        app(StorefrontHomeRevisions::class)->edit((int) Auth::id(), $data);
 
         return redirect()->to(route('admin.storefront.home', absolute: false))->with('status', 'Home slide updated. The storefront preview will refresh.');
+    }
+
+    public function restore(Request $request, StorefrontHomeRevisions $revisions): RedirectResponse
+    {
+        $this->authorizeEditing();
+        $data = $request->validate([
+            'revision' => ['required', 'integer', 'min:0', 'max:4294967294'],
+            'source_revision' => ['required', 'integer', 'min:0', 'max:4294967294'],
+        ]);
+        $revisions->restore((int) Auth::id(), (int) $data['revision'], (int) $data['source_revision']);
+
+        return redirect()->to(route('admin.storefront.home', absolute: false))->with('status', 'Home slide restored. The storefront preview will refresh.');
     }
 
     private function authorizeEditing(): void
