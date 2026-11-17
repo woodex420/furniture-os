@@ -83,8 +83,10 @@ jobs:
         include:
           - engine: MySQL 8.4.7
             image: mysql:8.4.7
+            artifact: synthetic-mysql-8-4-7-schema
           - engine: MariaDB 10.5.29
             image: mariadb:10.5.29
+            artifact: synthetic-mariadb-10-5-29-schema
     services:
       mysql:
         image: ${{ matrix.image }}
@@ -160,6 +162,30 @@ jobs:
           test "$(mysql -h 127.0.0.1 -u root -N -s -e "$query")" = 1
           DB_DATABASE=furniture_imported_test php artisan migrate:rollback --path=tests/fixtures/mysql-roundtrip --step=1 --force
           test "$(mysql -h 127.0.0.1 -u root -N -s -e "$query")" = 0
+      # Preserve the exact SQL that passed import and migration tests as CI evidence.
+      # This is NOT a release package: it is generated only from an empty service
+      # and must not be imported into Hostinger until the application is ready.
+      - name: Describe verified synthetic database artifact
+        run: |
+          mkdir -p "$RUNNER_TEMP/furniture-sql-evidence"
+          cp "$RUNNER_TEMP/furniture-test.sql" "$RUNNER_TEMP/furniture-sql-evidence/furniture-synthetic-schema.sql"
+          cd "$RUNNER_TEMP/furniture-sql-evidence"
+          sha256sum furniture-synthetic-schema.sql > SHA256SUMS
+          printf '%s\n' \
+            'SYNTHETIC CI EVIDENCE ONLY — NOT AN INSTALLABLE RELEASE.' \
+            'Do not import into Hostinger or an existing database.' \
+            'Generated from an empty disposable CI database; includes migration defaults, not users or business records.' \
+            "GitHub commit: $GITHUB_SHA" \
+            "Database image: ${{ matrix.image }}" \
+            "GitHub run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            > README.txt
+      - name: Upload tested synthetic SQL evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ runner.temp }}/furniture-sql-evidence/
+          if-no-files-found: error
+          retention-days: 7
 
   frontend:
     name: Locked Furniture asset build and preview tests
