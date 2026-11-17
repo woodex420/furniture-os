@@ -21,6 +21,9 @@ class ProxyBrowserUrlsTest extends TestCase
         $this->assertSame('/login', $guest->headers->get('Location'));
 
         $owner = User::factory()->create(['is_owner' => true]);
+        // Feature tests make multiple HTTP requests in one PHP process; clear Livewire's
+        // per-render asset state as a fresh browser request would in the preview runtime.
+        app('livewire')->flushState();
         $page = $this->actingAs($owner)->get('http://internal.example/admin/leads')->assertOk();
         $page->assertSee('href="/admin/contacts"', false)
             ->assertSee('action="/logout"', false)

@@ -62,7 +62,8 @@ class CustomerReadFoundationTest extends TestCase
             Livewire::actingAs($user)->test($component)->assertForbidden();
         }
         $this->assertFalse(Gate::forUser($user)->allows('leads.view'));
-        $this->assertFalse(Gate::forUser($this->owner())->allows('leads.create'));
+        $this->assertFalse(Gate::forUser($user)->allows('leads.create'));
+        $this->assertTrue(Gate::forUser($this->owner())->allows('leads.create'));
     }
 
     public function test_separate_capability_is_enforced_on_navigation_route_and_component(): void
@@ -119,7 +120,7 @@ class CustomerReadFoundationTest extends TestCase
         $this->assertDatabaseCount('contacts', 0);
         $this->assertDatabaseCount('leads', 0);
         $this->actingAs($this->owner());
-        $this->post('/admin/leads', ['name' => 'Unexpected'])->assertStatus(405);
+        $this->post('/admin/leads', ['name' => 'Unexpected'])->assertNotFound();
         $this->post('/admin/contacts', ['name' => 'Unexpected'])->assertNotFound();
         foreach (['leads', 'contacts'] as $path) {
             $this->patch('/admin/'.$path, ['name' => 'Unexpected'])->assertStatus(405);

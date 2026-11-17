@@ -39,9 +39,9 @@
 .form-field { margin: 0 0 18px; }
 .form-field label { display: block; color: #46534a; font-size: 12px; font-weight: 600; margin-bottom: 7px; }
 .form-field label small { color: #84918a; font-weight: 400; margin-left: 4px; }
-.form-field input { width: 100%; border: 1px solid #d8e2d9; border-radius: 7px; padding: 11px 12px; font: inherit; font-size: 13px; color: #263b2c; background: #fff; }
-.form-field input:focus { outline: 2px solid #92be80; outline-offset: 1px; }
-.form-field input[aria-invalid="true"] { border-color: #b55442; }
+.form-field input, .form-field select { width: 100%; border: 1px solid #d8e2d9; border-radius: 7px; padding: 11px 12px; font: inherit; font-size: 13px; color: #263b2c; background: #fff; }
+.form-field input:focus, .form-field select:focus { outline: 2px solid #92be80; outline-offset: 1px; }
+.form-field input[aria-invalid="true"], .form-field select[aria-invalid="true"] { border-color: #b55442; }
 .form-error, .form-success { padding: 12px 14px; margin: 0 0 18px; border-radius: 7px; font-size: 12px; line-height: 1.5; }
 .form-error { background: #fff1ed; color: #a23e2f; }
 .form-error a { text-decoration: underline; }

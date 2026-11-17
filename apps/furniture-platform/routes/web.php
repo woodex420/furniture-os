@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\Workspace\ContactCreationController;
 use App\Http\Controllers\Workspace\CustomerDetailController;
+use App\Http\Controllers\Workspace\LeadCreationController;
 use App\Http\Middleware\PrivateWorkspaceResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +32,12 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
         ->middleware(['can:workspace.view', 'can:contacts.view'])
         ->name('admin.contacts');
     // Experimental owner-only creation remains disabled unless explicitly enabled.
+    Route::get('/admin/leads/create', [LeadCreationController::class, 'create'])
+        ->middleware(['can:workspace.view', 'can:leads.view', 'can:leads.create'])
+        ->name('admin.leads.create');
+    Route::post('/admin/leads', [LeadCreationController::class, 'store'])
+        ->middleware(['can:workspace.view', 'can:leads.view', 'can:leads.create', 'throttle:20,1'])
+        ->name('admin.leads.store');
     Route::get('/admin/contacts/create', [ContactCreationController::class, 'create'])
         ->middleware(['can:workspace.view', 'can:contacts.view', 'can:contacts.create'])
         ->name('admin.contacts.create');

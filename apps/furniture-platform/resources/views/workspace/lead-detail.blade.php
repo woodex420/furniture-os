@@ -4,6 +4,7 @@
 
 @section('workspace-content')
     <div class="content list-page">
+        @if(session('status'))<div class="form-success" role="status">{{ session('status') }}</div>@endif
         <div class="demo-banner"><span>READ-ONLY FOUNDATION</span> Editing, assignment, follow-ups and integrations are pending.</div>
         <div class="page-heading list-heading"><div><div class="eyebrow">WORKSPACE <span>/</span> CUSTOMERS <span>/</span> LEADS</div><h1>{{ $lead->title }}</h1><p>Lead details</p></div><span class="preview-label">READ ONLY · IN PROGRESS</span></div>
         <section class="card customer-detail" aria-labelledby="lead-details-title">
