@@ -13,6 +13,7 @@ use App\Http\Controllers\Workspace\LeadEditController;
 use App\Http\Controllers\Workspace\MediaLibraryController;
 use App\Http\Controllers\Workspace\PublicHeroImageController;
 use App\Http\Controllers\Workspace\ServiceCopyController;
+use App\Http\Controllers\Workspace\StorefrontBundleController;
 use App\Http\Controllers\Workspace\StorefrontHomeController;
 use App\Http\Middleware\PrivateWorkspaceResponse;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -34,8 +35,19 @@ Route::get('/', function () {
         ]);
     }
 
+    if (config('furniture.storefront_bundle_enabled')) {
+        return app(StorefrontBundleController::class)();
+    }
+
     return response('Reimagin v1 storefront is not available yet.', 503);
 })->name('home');
+
+// Only known React storefront paths can serve the shell. This does not swallow
+// unknown URLs, API routes, Livewire requests, authentication or admin routes.
+// Keep this list synchronized with storefront-route-inventory.json.
+Route::get('/{storefrontPath}', StorefrontBundleController::class)
+    ->where('storefrontPath', '(?:shop(?:/[^/]+)?|room-packages|virtual-showroom|series(?:/[^/]+)?|projects(?:/[^/]+)?|services(?:/[^/]+)?|locations(?:/[^/]+)?|b2b|about|contact|custom-design|quotation|showrooms|materials|warranty|blog(?:/[^/]+)?|checkout)')
+    ->name('storefront.bundle');
 
 // Read-only public homepage content; writes are restricted to the owner workspace.
 Route::get('/storefront-api/home', [StorefrontHomeController::class, 'publicContent'])

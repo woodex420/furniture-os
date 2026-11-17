@@ -16,6 +16,10 @@ return [
     'city_pages_enabled' => (bool) env('FURNITURE_CITY_PAGES_ENABLED', false),
     // Furniture-owned blog experiment; disabled until explicitly enabled.
     'blog_posts_enabled' => (bool) env('FURNITURE_BLOG_POSTS_ENABLED', false),
+    // Experimental same-origin storefront shell, off by default. The bundle must be
+    // built separately; this flag does not make demo commerce or login production-ready.
+    'storefront_bundle_enabled' => (bool) env('FURNITURE_STOREFRONT_BUNDLE_ENABLED', false),
+    'storefront_bundle_index' => storage_path('app/storefront-preview/index.html'),
     // Dedicated synthetic admin preview only: send its root to the authenticated workspace.
     'admin_preview_landing' => (bool) env('FURNITURE_ADMIN_PREVIEW_LANDING', false),
     // Higher but still bounded limits for disposable, shared-IP synthetic previews only.

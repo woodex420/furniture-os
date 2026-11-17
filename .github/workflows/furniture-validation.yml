@@ -229,7 +229,79 @@ jobs:
         run: |
           npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
           npx vite build
-          node --test tests/service-copy-parser.test.mjs tests/city-page-parser.test.mjs tests/blog-preview-parser.test.mjs tests/preview-proxy.test.mjs tests/storefront-route-inventory.test.mjs
+          node --test tests/service-copy-parser.test.mjs tests/city-page-parser.test.mjs tests/blog-preview-parser.test.mjs tests/preview-proxy.test.mjs tests/storefront-route-inventory.test.mjs ../../scripts/assemble-storefront-preview.test.mjs ../../scripts/storefront-route-sync.test.mjs
+          node ../../scripts/assemble-storefront-preview.mjs dist "$RUNNER_TEMP/furniture-storefront-preview-files"
+          test -s "$RUNNER_TEMP/furniture-storefront-preview-files/private/storefront-preview/index.html"
+          test -d "$RUNNER_TEMP/furniture-storefront-preview-files/public/assets"
+          test ! -e "$RUNNER_TEMP/furniture-storefront-preview-files/public/sitemap.xml"
+
+  same-origin-smoke:
+    name: Synthetic same-origin storefront and Laravel smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      APP_ENV: testing
+      APP_DEBUG: 'false'
+      APP_KEY: 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+      APP_URL: 'http://127.0.0.1:8099'
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /tmp/furniture-smoke.sqlite
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      MAIL_MAILER: array
+      QUEUE_CONNECTION: sync
+      FURNITURE_STOREFRONT_BUNDLE_ENABLED: 'true'
+      FURNITURE_HOME_EDITOR_ENABLED: 'true'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.2'
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          extensions: curl, dom, exif, fileinfo, gd, mbstring, pdo_sqlite, sqlite3, xml, xmlwriter, zip
+          tools: composer:v2
+          coverage: none
+      - name: Build and assemble the real storefront preview
+        run: |
+          cd apps/reimagined-storefront
+          npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+          npx vite build
+          node ../../scripts/assemble-storefront-preview.mjs dist "$RUNNER_TEMP/storefront-candidate"
+          cd ../furniture-platform
+          mkdir -p storage/app/storefront-preview
+          cp "$RUNNER_TEMP/storefront-candidate/private/storefront-preview/index.html" storage/app/storefront-preview/index.html
+          cp -a "$RUNNER_TEMP/storefront-candidate/public/assets" public/assets
+          cp -a "$RUNNER_TEMP/storefront-candidate/public/images" public/images
+          cp "$RUNNER_TEMP/storefront-candidate/public/og-cover.jpg" public/og-cover.jpg
+      - name: Install application and migrate synthetic SQLite
+        working-directory: apps/furniture-platform
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress --no-scripts --no-plugins
+          php artisan package:discover --ansi
+          touch "$DB_DATABASE"
+          php artisan migrate --force
+      - name: Exercise same-origin routes and built assets over HTTP
+        working-directory: apps/furniture-platform
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8099 --no-reload > "$RUNNER_TEMP/furniture-smoke.log" 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          curl --retry 10 --retry-connrefused --retry-delay 1 -fsS -D "$RUNNER_TEMP/home-headers" http://127.0.0.1:8099/ -o "$RUNNER_TEMP/home.html"
+          grep -qi '^X-Robots-Tag: noindex, nofollow' "$RUNNER_TEMP/home-headers"
+          grep -qi 'noindex, nofollow' "$RUNNER_TEMP/home.html"
+          curl -fsS http://127.0.0.1:8099/shop/example -o "$RUNNER_TEMP/nested.html"
+          cmp "$RUNNER_TEMP/home.html" "$RUNNER_TEMP/nested.html"
+          asset=$(grep -oE 'src="/assets/[^" ]+\.js"' "$RUNNER_TEMP/home.html" | head -1 | cut -d '"' -f 2)
+          test -n "$asset"
+          curl -fsS "http://127.0.0.1:8099$asset" -o "$RUNNER_TEMP/bundle.js"
+          test -s "$RUNNER_TEMP/bundle.js"
+          curl -fsS http://127.0.0.1:8099/storefront-api/home | grep -q 'hero_title'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/admin)" = 302
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/unknown-page)" = 404
 
   astro-spike:
     name: Astro shared-hero prototype
