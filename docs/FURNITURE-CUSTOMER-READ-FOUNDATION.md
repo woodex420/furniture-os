@@ -11,9 +11,9 @@
 
 ## Evidence
 
-- Temporary native PHP 8.4.21, synthetic SQLite and the locked dependency tree: **31 tests / 305 assertions passed**. Because local PHP lacks `xmlwriter`, this used the modified PHPUnit entry point documented in `FURNITURE-OWNER-AND-LOCK-PROGRESS.md`; it is not the standard complete runtime. Pint passed the nine changed PHP files. Route-cache test for the customer suite passed **8 tests / 105 assertions**. Hosted validation of this increment remains to be run.
+- Temporary native PHP 8.4.21, synthetic SQLite and the locked dependency tree: **31 tests / 305 assertions passed**. Because local PHP lacks `xmlwriter`, this used the modified PHPUnit entry point documented in `FURNITURE-OWNER-AND-LOCK-PROGRESS.md`; it is not the standard complete runtime. Pint passed the nine changed PHP files. Route-cache test for the customer suite passed **8 tests / 105 assertions**. GitHub [run 44027031526](https://github.com/woodex420/furniture-os/actions/runs/44027031526) passed the standard native locked install, PHPUnit, Composer audit, frontend build and preview/preflight tests for SHA `6b13da76af591e8500849702beb1ff125c911472`.
 - Tests cover guest/non-owner denial, separately revoked abilities, real Livewire HTTP refresh and no-store, search bounds and malformed values, literal wildcard/injection-looking input, escaping, nulls, pagination/reset, no default customer records and unavailable write routes. The tests do not establish a staff visibility or cross-owner policy.
-- A local browser with a disposable SQLite database and synthetic records exercised authenticated lead/contact navigation, pagination, search, logout/guest redirect and 320/375/768/1440 widths without persistent root overflow. The local test server was stopped. This is not hosted HTTPS, a full accessibility assessment or real data acceptance.
+- A local browser with a disposable SQLite database and synthetic records exercised authenticated lead/contact navigation, pagination, search, offline/reconnect indication, logout/guest redirect and 320/375/768/1440 widths without persistent root overflow. The local test server was stopped. This is not hosted HTTPS, a full accessibility assessment or real data acceptance.
 
 ## Required before expanding access or accepting data
 
