@@ -65,7 +65,7 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
         ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.storefront.home.update');
     Route::post('/admin/website/home/restore', [StorefrontHomeController::class, 'restore'])
         ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.storefront.home.restore');
-    // Private image experiment: files are not publicly served or connected to the storefront.
+    // Private media library; the separate public route serves only the selected hero image.
     Route::get('/admin/website/media', [MediaLibraryController::class, 'index'])
         ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.media');
     Route::post('/admin/website/media', [MediaLibraryController::class, 'store'])

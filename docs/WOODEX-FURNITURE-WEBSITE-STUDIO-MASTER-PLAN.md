@@ -2,6 +2,8 @@
 
 **Purpose:** Upgrade the Reimagin v1 storefront to **Astro + React + Tailwind CSS**, connect it to the separate Furniture Laravel admin, and build the complete visual Website Studio described by the founder. Woodex Interior is a functional and visual reference, not the Furniture database or deployment target.
 
+**Current project-wide status and prioritized pending work:** [Furniture production readiness and master to-do](FURNITURE-PRODUCTION-READINESS-TODO.md).
+
 **Status:** Architecture and phased implementation plan; not a claim that the site, builder, SEO system or integrations are complete. Phase 1 has started with an isolated Astro shared-hero experiment; see `MARKETINGWOODEX-RESOURCE-AND-ASTRO-SPIKE.md`. The initial home preview has been extended with revision history and restore; see `FURNITURE-HOME-REVISION-FOUNDATION.md`. A limited actual-storefront canvas, including versioned title/subtitle order, a first-slide button, five bundled background choices, a separately selected homepage tagline, and fixed-width viewport previews, is available when configured; see `FURNITURE-HOME-VISUAL-CANVAS.md`. The general page schema and full visual builder are still pending. This document supersedes older builder proposals that make the `woodex-2030` database authoritative for Furniture. Maintain the existing approved Furniture admin shell and the Reimagin v1 storefront appearance unless the founder changes the design direction.
 
 ## 1. Agreed product direction
