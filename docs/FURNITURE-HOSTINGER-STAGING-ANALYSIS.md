@@ -29,5 +29,5 @@
 
 ## Test evidence and open questions
 
-- A synthetic MySQL 8.4.7 CI test migrated an empty database, exported SQL with required internal rows, imported it into another, compared schema/keys, exercised lead writes and tested an additive migration/rollback. It is not a Hostinger deployment. A separate MariaDB 10.5.29 CI matrix is being run; check the exact run result before claiming it passed.
+- [CI run 44142660332](https://github.com/woodex420/furniture-os/actions/runs/44142660332) passed on commit `2eebf25`: synthetic MySQL 8.4.7 **and MariaDB 10.5.29** jobs migrated an empty database, exported SQL with required internal rows, imported it into another, compared schema/keys, exercised lead writes and tested an additive migration/rollback. This does not prove the actual Hostinger engine/version, concurrent writes, full workflows or deployment. The SQL was temporary CI data, not an upload package.
 - Need confirmation from the founder or a Hostinger-enabled operator: whether `staging.blackibex.net` may be overwritten, whether a verified backup exists, the *staging site's* web/CLI PHP and database engine/version, and the actual document-root constraints. No credentials or customer data should be shared in chat.
