@@ -16,6 +16,8 @@ return [
     'blog_posts_enabled' => (bool) env('FURNITURE_BLOG_POSTS_ENABLED', false),
     // Dedicated synthetic admin preview only: send its root to the authenticated workspace.
     'admin_preview_landing' => (bool) env('FURNITURE_ADMIN_PREVIEW_LANDING', false),
+    // Higher but still bounded limits for disposable, shared-IP synthetic previews only.
+    'synthetic_preview_login_limit' => (bool) env('FURNITURE_SYNTHETIC_PREVIEW_LOGIN_LIMIT', false),
     // Isolated, owner-only media experiment; disabled until explicitly enabled.
     'media_library_enabled' => (bool) env('FURNITURE_MEDIA_LIBRARY_ENABLED', false),
     // Optional, explicitly configured storefront origin for the visual preview.

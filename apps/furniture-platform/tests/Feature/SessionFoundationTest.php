@@ -6,7 +6,9 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
 class SessionFoundationTest extends TestCase
@@ -74,6 +76,41 @@ class SessionFoundationTest extends TestCase
         // Email case must not create a fresh account/IP bucket.
         $this->post('/login', ['email' => 'NOBODY@example.test', 'password' => 'wrong'])->assertStatus(429);
         $this->assertGuest();
+    }
+
+    public function test_synthetic_preview_limits_are_explicit_bounded_and_never_used_in_production(): void
+    {
+        $limitFor = fn () => (RateLimiter::limiter('workspace-login'))(Request::create('/login', 'POST', ['email' => 'preview@example.test']));
+        config(['furniture.admin_preview_landing' => false, 'furniture.synthetic_preview_login_limit' => true]);
+        $default = $limitFor();
+        $this->assertSame([5, 30], array_map(fn ($limit) => $limit->maxAttempts, $default));
+        config(['furniture.admin_preview_landing' => true, 'furniture.synthetic_preview_login_limit' => false]);
+        $this->assertSame([5, 30], array_map(fn ($limit) => $limit->maxAttempts, $limitFor()));
+        config(['furniture.synthetic_preview_login_limit' => true]);
+        $preview = $limitFor();
+        $this->assertSame([60, 300], array_map(fn ($limit) => $limit->maxAttempts, $preview));
+        $this->assertSame([60, 60], array_map(fn ($limit) => $limit->decaySeconds, $preview));
+        $this->assertNotSame($default[0]->key, $preview[0]->key);
+        $this->assertNotSame($default[1]->key, $preview[1]->key);
+        $this->assertStringNotContainsString('preview@example.test', $preview[0]->key);
+        $prior = $this->app['env'];
+        try {
+            $this->app['env'] = 'production';
+            $this->assertSame([5, 30], array_map(fn ($limit) => $limit->maxAttempts, $limitFor()));
+        } finally {
+            $this->app['env'] = $prior;
+        }
+    }
+
+    public function test_synthetic_preview_can_sign_in_after_the_default_five_attempts(): void
+    {
+        config(['furniture.admin_preview_landing' => true, 'furniture.synthetic_preview_login_limit' => true]);
+        User::factory()->create(['email' => 'sample-owner@example.test', 'password' => Hash::make('synthetic-password'), 'is_owner' => true]);
+        for ($i = 0; $i < 6; $i++) {
+            $this->post('/login', ['email' => 'sample-owner@example.test', 'password' => 'wrong'])->assertSessionHasErrors('email');
+        }
+        $this->post('/login', ['email' => 'sample-owner@example.test', 'password' => 'synthetic-password'])->assertRedirect('/admin');
+        $this->assertAuthenticated();
     }
 
     public function test_invalid_login_does_not_reveal_account_existence_or_flash_password(): void

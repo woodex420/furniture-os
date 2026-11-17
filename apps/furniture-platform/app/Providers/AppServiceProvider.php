@@ -55,11 +55,18 @@ class AppServiceProvider extends ServiceProvider
             $email = $request->input('email');
             $email = is_string($email) ? Str::lower(trim($email)) : '';
             $ip = (string) $request->ip();
+            // Preview visitors and local tests can share one reverse-proxy IP. An explicit
+            // double opt-in in local/testing environments separates those buckets and
+            // raises, but does not remove, limits. Never enable for real accounts/data.
+            $synthetic = config('furniture.admin_preview_landing')
+                && config('furniture.synthetic_preview_login_limit')
+                && $this->app->environment(['local', 'testing']);
+            $prefix = $synthetic ? 'synthetic-preview-v1:' : '';
 
             return [
                 // Do not put a raw email address in the cache key.
-                Limit::perMinute(5)->by('account-ip:'.hash('sha256', $email.'|'.$ip)),
-                Limit::perMinute(30)->by('login-ip:'.hash('sha256', $ip)),
+                Limit::perMinute($synthetic ? 60 : 5)->by($prefix.'account-ip:'.hash('sha256', $email.'|'.$ip)),
+                Limit::perMinute($synthetic ? 300 : 30)->by($prefix.'login-ip:'.hash('sha256', $ip)),
             ];
         });
     }
