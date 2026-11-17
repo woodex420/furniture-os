@@ -1,5 +1,5 @@
 <section class="card records-card" aria-labelledby="leads-list-title">
-    <div class="records-title"><div><h2 id="leads-list-title">All leads</h2><p>Owner access only · editing not available yet</p></div><span class="sample-chip">{{ config('furniture.lead_creation_enabled') ? 'Testing' : 'Read only' }}</span></div>
+    <div class="records-title"><div><h2 id="leads-list-title">All leads</h2><p>Owner access only · {{ config('furniture.lead_editing_enabled') && auth()->user()->can('leads.edit') ? 'limited title and source editing' : 'editing not available yet' }}</p></div><span class="sample-chip">{{ config('furniture.lead_creation_enabled') || config('furniture.lead_editing_enabled') ? 'Testing' : 'Read only' }}</span></div>
     <div class="records-tools"><label class="records-search">@include('workspace.icon', ['icon' => 'Search'])<span class="sr-only">{{ $canViewContacts ? 'Search leads by title or contact' : 'Search leads by title' }}</span><input type="search" wire:model.live.debounce.350ms="search" maxlength="100" placeholder="Search leads..."></label></div>
     @error('search') <p class="customer-validation" role="alert">{{ $message }}</p> @enderror
     <p class="customer-loading" wire:loading role="status">Updating results…</p>

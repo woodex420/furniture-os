@@ -5,8 +5,9 @@
 @section('workspace-content')
     <div class="content list-page">
         @if(session('status'))<div class="form-success" role="status">{{ session('status') }}</div>@endif
-        <div class="demo-banner"><span>READ-ONLY FOUNDATION</span> Editing, assignment, follow-ups and integrations are pending.</div>
-        <div class="page-heading list-heading"><div><div class="eyebrow">WORKSPACE <span>/</span> CUSTOMERS <span>/</span> LEADS</div><h1>{{ $lead->title }}</h1><p>Lead details</p></div><span class="preview-label">READ ONLY · IN PROGRESS</span></div>
+        @php($canEditLead = config('furniture.lead_editing_enabled') && auth()->user()->can('leads.edit'))
+        <div class="demo-banner"><span>{{ $canEditLead ? 'DEVELOPMENT WORKFLOW' : 'READ-ONLY FOUNDATION' }}</span> {{ $canEditLead ? 'Only title and source editing are available; assignment, follow-ups and integrations are pending.' : 'Editing, assignment, follow-ups and integrations are pending.' }}</div>
+        <div class="page-heading list-heading"><div><div class="eyebrow">WORKSPACE <span>/</span> CUSTOMERS <span>/</span> LEADS</div><h1>{{ $lead->title }}</h1><p>Lead details</p></div><span class="preview-label">{{ $canEditLead ? 'TESTING · IN PROGRESS' : 'READ ONLY · IN PROGRESS' }}</span></div>
         <section class="card customer-detail" aria-labelledby="lead-details-title">
             <a class="customer-back" href="{{ route('admin.leads', absolute: false) }}">← Back to leads</a>
             <h2 id="lead-details-title">Lead details</h2>
@@ -17,7 +18,8 @@
                 <div><dt>Status</dt><dd><span class="record-status">{{ $lead->status }}</span></dd></div>
                 <div><dt>Added</dt><dd>{{ $lead->created_at?->format('d M Y') ?? '—' }}</dd></div>
             </dl>
-            <p class="workspace-pending-note">This record is read-only. Actions and history are not connected yet.</p>
+            @if($canEditLead)<div class="form-actions"><a href="{{ route('admin.leads.edit', $lead->id, false) }}">Edit title and source</a></div>@endif
+            <p class="workspace-pending-note">{{ $canEditLead ? 'Status, contact assignment and history are not editable here.' : 'This record is read-only. Actions and history are not connected yet.' }}</p>
         </section>
         <footer>WOODEX OS <span>Customer workflows in progress</span><span>Built for better work</span></footer>
     </div>

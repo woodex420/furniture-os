@@ -7,7 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Provisional model; duplicate-lead policy and editing are not implemented. */
+/** Provisional model; duplicate policy and the full lead lifecycle remain pending. */
 class Lead extends Model
 {
     protected $guarded = ['*'];

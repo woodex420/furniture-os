@@ -7,6 +7,8 @@ return [
     // MySQL concurrency, deployment and business policy have not been verified.
     'contact_creation_enabled' => (bool) env('FURNITURE_CONTACT_CREATION_ENABLED', false),
     'lead_creation_enabled' => (bool) env('FURNITURE_LEAD_CREATION_ENABLED', false),
+    // Limited title/source editing, separately enabled only for testing.
+    'lead_editing_enabled' => (bool) env('FURNITURE_LEAD_EDITING_ENABLED', false),
     'home_editor_enabled' => (bool) env('FURNITURE_HOME_EDITOR_ENABLED', false),
     // Temporary service copy bridge for isolated storefront integration.
     'service_copy_enabled' => (bool) env('FURNITURE_SERVICE_COPY_ENABLED', false),

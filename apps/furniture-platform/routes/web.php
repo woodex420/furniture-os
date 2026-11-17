@@ -9,6 +9,7 @@ use App\Http\Controllers\Workspace\CityPageController;
 use App\Http\Controllers\Workspace\ContactCreationController;
 use App\Http\Controllers\Workspace\CustomerDetailController;
 use App\Http\Controllers\Workspace\LeadCreationController;
+use App\Http\Controllers\Workspace\LeadEditController;
 use App\Http\Controllers\Workspace\MediaLibraryController;
 use App\Http\Controllers\Workspace\PublicHeroImageController;
 use App\Http\Controllers\Workspace\ServiceCopyController;
@@ -170,6 +171,13 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
     Route::post('/admin/contacts', [ContactCreationController::class, 'store'])
         ->middleware(['can:workspace.view', 'can:contacts.view', 'can:contacts.create', 'throttle:20,1'])
         ->name('admin.contacts.store');
+    // Limited owner-only edit; authorize before looking up a record.
+    Route::get('/admin/leads/{id}/edit', [LeadEditController::class, 'edit'])
+        ->whereNumber('id')->middleware(['can:workspace.view', 'can:leads.view', 'can:leads.edit'])
+        ->name('admin.leads.edit');
+    Route::post('/admin/leads/{id}', [LeadEditController::class, 'update'])
+        ->whereNumber('id')->middleware(['can:workspace.view', 'can:leads.view', 'can:leads.edit', 'throttle:20,1'])
+        ->name('admin.leads.update');
     // Authorize before looking up a record, so denied users cannot distinguish IDs.
     Route::get('/admin/leads/{id}', [CustomerDetailController::class, 'lead'])
         ->whereNumber('id')->middleware(['can:workspace.view', 'can:leads.view'])
