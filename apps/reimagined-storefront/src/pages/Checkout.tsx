@@ -21,6 +21,7 @@ import { config } from "@/config/env";
 import { deliveryFeeFor } from "@/config/shipping";
 import { getTurnstileToken } from "@/lib/turnstile";
 import { unconfirmedOrderDetail } from "@/lib/order-submission";
+import { StagingSubmissionNotice } from "@/components/StagingSubmissionNotice";
 
 const cities = [
   "Lahore", "Karachi", "Islamabad", "Rawalpindi", "Faisalabad", "Multan",
@@ -63,7 +64,7 @@ const Checkout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submitLock.current || retryBlocked.current) return;
+    if (config.restrictedStaging || submitLock.current || retryBlocked.current) return;
     submitLock.current = true;
     const cartSnapshot = snapshotCart();
     setPlacing(true);
@@ -209,6 +210,7 @@ const Checkout = () => {
           <div className="text-center">
             <ShoppingCart className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
             <h1 className="text-2xl font-bold mb-2">Your cart is empty</h1>
+            <StagingSubmissionNotice />
             <p className="text-muted-foreground mb-6">Add products to your cart before checking out.</p>
             <Button className="bg-accent hover:bg-accent/90 text-accent-foreground" asChild>
               <Link to="/shop">Browse Products</Link>
@@ -240,6 +242,8 @@ const Checkout = () => {
         <section className="py-10">
           <div className="container mx-auto px-4">
             <form onSubmit={handleSubmit}>
+              <StagingSubmissionNotice />
+              <fieldset disabled={config.restrictedStaging}>
               <div className="grid lg:grid-cols-3 gap-8">
                 {/* Left: Form */}
                 <div className="lg:col-span-2 space-y-6">
@@ -406,6 +410,7 @@ const Checkout = () => {
                   </Card>
                 </div>
               </div>
+              </fieldset>
             </form>
           </div>
         </section>

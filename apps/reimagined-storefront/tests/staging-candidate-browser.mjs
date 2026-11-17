@@ -49,7 +49,37 @@ try {
   assert.equal(content.hero_title, 'Synthetic staging headline');
   await page.goto(`${origin}/`, { waitUntil: 'networkidle2' });
   await page.waitForFunction(() => document.body.textContent.includes('Synthetic staging headline'));
-  console.log('PASS: packaged storefront, owner login, Livewire search and home editor in synthetic CI browser.');
+  assert.match(await page.$eval('body', (el) => el.textContent), /Newsletter signup is not available yet/);
+  assert.equal(await page.$('button[aria-label="Open live chat"]'), null);
+
+  // Staging mode must not advertise fake successful submissions, even when
+  // an event is dispatched directly rather than clicking a disabled control.
+  await page.goto(`${origin}/contact`, { waitUntil: 'networkidle2' });
+  await page.waitForSelector('#name');
+  assert.equal(await page.$eval('#name', (el) => el.matches(':disabled')), true);
+  assert.match(await page.$eval('body', (el) => el.textContent), /orders and enquiries are disabled/);
+  await page.$eval('#name', (el) => el.closest('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
+  assert.doesNotMatch(await page.$eval('body', (el) => el.textContent), /Message Sent!/);
+
+  await page.evaluate(() => {
+    const item = { id: 'synthetic', name: 'Synthetic furniture', category: 'test', price: 100, quantity: 1 };
+    localStorage.setItem('woodex-cart', JSON.stringify([item]));
+    localStorage.setItem('woodex-quote', JSON.stringify([item]));
+  });
+  await page.goto(`${origin}/quotation`, { waitUntil: 'networkidle2' });
+  await page.waitForSelector('#project-type');
+  assert.equal(await page.$eval('#project-type', (el) => el.matches(':disabled')), true);
+  assert.equal(await page.evaluate(() => [...document.querySelectorAll('button')].some((el) => el.textContent.includes('Send WhatsApp') && el.disabled)), true);
+  await page.$eval('#project-type', (el) => el.closest('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
+  assert.doesNotMatch(await page.$eval('body', (el) => el.textContent), /Quote Request Submitted!/);
+
+  await page.goto(`${origin}/checkout`, { waitUntil: 'networkidle2' });
+  await page.waitForSelector('form');
+  assert.equal(await page.$eval('form button[type="submit"]', (el) => el.matches(':disabled')), true);
+  await page.$eval('form', (el) => el.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
+  assert.doesNotMatch(await page.$eval('body', (el) => el.textContent), /Order Placed Successfully!/);
+  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('woodex-cart')).length), 1);
+  console.log('PASS: packaged storefront, owner login, Livewire, home editor and restricted submissions in synthetic CI browser.');
 } finally {
   await browser.close();
 }

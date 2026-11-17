@@ -229,7 +229,7 @@ jobs:
         run: |
           npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
           npx vite build
-          node --test tests/service-copy-parser.test.mjs tests/city-page-parser.test.mjs tests/blog-preview-parser.test.mjs tests/preview-proxy.test.mjs tests/storefront-route-inventory.test.mjs ../../scripts/assemble-storefront-preview.test.mjs ../../scripts/storefront-route-sync.test.mjs
+          node --test tests/service-copy-parser.test.mjs tests/city-page-parser.test.mjs tests/blog-preview-parser.test.mjs tests/preview-proxy.test.mjs tests/storefront-route-inventory.test.mjs tests/restrict-staging.test.mjs ../../scripts/assemble-storefront-preview.test.mjs ../../scripts/storefront-route-sync.test.mjs
           node ../../scripts/assemble-storefront-preview.mjs dist "$RUNNER_TEMP/furniture-storefront-preview-files"
           test -s "$RUNNER_TEMP/furniture-storefront-preview-files/private/storefront-preview/index.html"
           test -d "$RUNNER_TEMP/furniture-storefront-preview-files/public/assets"
@@ -373,7 +373,8 @@ jobs:
           npm run build
           cd ../reimagined-storefront
           npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
-          npx vite build
+          VITE_SUPABASE_URL=https://must-not-ship.invalid VITE_BAGISTO_ADMIN_TOKEN=synthetic-must-not-ship npx vite build --mode furniture-staging
+          if grep -R -l -E 'must-not-ship\.invalid|synthetic-must-not-ship' dist; then echo 'Unexpected provider configuration in staging bundle'; exit 1; fi
           node ../../scripts/assemble-storefront-preview.mjs dist "$RUNNER_TEMP/storefront-fragment"
       - name: Build candidate ZIP and matching SQL
         run: |

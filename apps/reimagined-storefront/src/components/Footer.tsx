@@ -1,23 +1,8 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Clock, Facebook, Twitter, Linkedin, Instagram, Youtube, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Phone, Mail, MapPin, Clock, Facebook, Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
 import { site } from "@/config/site";
 
 const Footer = () => {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim()) {
-      setSubscribed(true);
-      setEmail("");
-      setTimeout(() => setSubscribed(false), 3000);
-    }
-  };
-
   return (
     <footer className="bg-primary text-primary-foreground mt-auto">
       {/* Main Footer */}
@@ -161,23 +146,7 @@ const Footer = () => {
             {/* Newsletter */}
             <div>
               <p className="text-xs font-semibold text-primary-foreground uppercase tracking-wider mb-3">Newsletter</p>
-              {subscribed ? (
-                <p className="text-sm text-hon-green-pale font-semibold">✓ Subscribed! Thank you.</p>
-              ) : (
-                <form onSubmit={handleSubscribe} className="flex gap-2">
-                  <Input
-                    type="email"
-                    placeholder="Your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 text-sm h-9"
-                  />
-                  <Button type="submit" size="sm" aria-label="Subscribe to newsletter" className="bg-accent hover:bg-accent/80 text-accent-foreground px-3 h-9 flex-shrink-0">
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </form>
-              )}
+              <p className="text-sm text-primary-foreground/70">Newsletter signup is not available yet.</p>
             </div>
           </div>
         </div>
@@ -193,7 +162,7 @@ const Footer = () => {
               <Link to="/contact" className="hover:text-accent transition-colors">Terms of Service</Link>
               <Link to="/contact" className="hover:text-accent transition-colors">Sitemap</Link>
               {/* Staff entry — added for preview testing, remove once sign-off is done */}
-              <Link to="/admin" aria-label="Staff login" className="hover:text-accent transition-colors">Staff</Link>
+              <a href="/admin" aria-label="Staff login" className="hover:text-accent transition-colors">Staff</a>
             </div>
           </div>
         </div>

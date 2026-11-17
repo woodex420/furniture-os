@@ -5,6 +5,7 @@ import { getAdminApi } from "@/api";
 import type { ChatMode } from "@/api/types";
 import ChatPanel from "@/components/chat/ChatPanel";
 import { cn } from "@/lib/utils";
+import { config } from "@/config/env";
 
 /**
  * Storefront live-chat bubble — the single public entry point to the WOODEX
@@ -22,6 +23,7 @@ export default function ChatBubble() {
   const hiddenForRoute = location.pathname.startsWith("/admin") || location.pathname.startsWith("/lab");
 
   useEffect(() => {
+    if (config.restrictedStaging) return;
     let alive = true;
     getAdminApi().getChatMode()
       .then((m) => { if (alive) setMode(m); })
@@ -34,7 +36,7 @@ export default function ChatBubble() {
 
   const handleUnseen = useCallback((n: number) => setUnseen(n), []);
 
-  if (hiddenForRoute || mode === "off" || mode === null) return null;
+  if (config.restrictedStaging || hiddenForRoute || mode === "off" || mode === null) return null;
 
   return (
     <div className="fixed bottom-5 right-4 z-40 sm:bottom-6 sm:right-6">

@@ -12,11 +12,11 @@ import { demoAdminApi } from "@/api/demo/db";
 import { bagistoAdminApi } from "@/api/bagisto/admin";
 import { supabaseAdminApi } from "@/api/supabase";
 import type { AdminApi } from "@/api/types";
+import { restrictStagingSubmissions } from "@/api/restrict-staging.mjs";
 
 export function getAdminApi(): AdminApi {
-  if (config.apiMode === "bagisto") return bagistoAdminApi;
-  if (config.apiMode === "supabase") return supabaseAdminApi;
-  return demoAdminApi; // demo + static both fall back to the offline demo DB
+  const api = config.apiMode === "bagisto" ? bagistoAdminApi : config.apiMode === "supabase" ? supabaseAdminApi : demoAdminApi;
+  return restrictStagingSubmissions(api, config.restrictedStaging) as AdminApi;
 }
 
 export * from "@/api/types";

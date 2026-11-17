@@ -20,7 +20,8 @@ function fixture(t) {
   file(join(app, '.env'), 'DO NOT PACKAGE');
   file(join(app, 'vendor/.env.example'), 'DO NOT PACKAGE');
   file(join(app, 'storage/logs/laravel.log'), 'DO NOT PACKAGE');
-  for (const name of ['public/assets/app.js', 'public/images/chair.webp', 'public/og-cover.jpg', 'public/robots.txt', 'private/storefront-preview/index.html']) file(join(fragment, name));
+  for (const name of ['public/assets/app.js', 'public/images/chair.webp', 'public/og-cover.jpg', 'public/robots.txt']) file(join(fragment, name));
+  file(join(fragment, 'private/storefront-preview/index.html'), '<meta name="furniture-staging" content="restricted">');
   for (const name of ['public/index.php', 'public/.htaccess', 'staging.env.example', 'INSTALL.txt']) file(join(root, 'deployment/staging', name));
   return { root, fragment, output, app };
 }
@@ -49,6 +50,13 @@ test('requires exact revision and refuses repository outputs or incomplete input
   assert.throws(() => buildStagingCandidate({ repoRoot: f.root, storefrontFragment: f.fragment, output: join(f.root, 'out'), revision: sha }), /outside/);
   rmSync(join(f.app, 'vendor/autoload.php'));
   assert.throws(() => buildStagingCandidate({ repoRoot: f.root, storefrontFragment: f.fragment, output: f.output, revision: sha }), /Missing built application/);
+  assert.equal(existsSync(f.output), false);
+});
+
+test('rejects a storefront that was not built in restricted staging mode', (t) => {
+  const f = fixture(t);
+  writeFileSync(join(f.fragment, 'private/storefront-preview/index.html'), '<html>not restricted</html>');
+  assert.throws(() => buildStagingCandidate({ repoRoot: f.root, storefrontFragment: f.fragment, output: f.output, revision: sha }), /furniture-staging mode/);
   assert.equal(existsSync(f.output), false);
 });
 

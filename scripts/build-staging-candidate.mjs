@@ -37,6 +37,10 @@ export function buildStagingCandidate({ repoRoot, storefrontFragment, output, re
   for (const item of ['public/assets', 'public/images', 'public/og-cover.jpg', 'public/robots.txt', 'private/storefront-preview/index.html']) {
     if (!existsSync(join(fragment, item))) throw new Error(`Missing storefront fragment: ${item}`);
   }
+  const storefrontIndex = readFileSync(join(fragment, 'private/storefront-preview/index.html'), 'utf8');
+  if (!/<meta\s+name="furniture-staging"\s+content="restricted"\s*\/?\s*>/i.test(storefrontIndex)) {
+    throw new Error('Storefront must be built in furniture-staging mode');
+  }
   mkdirSync(destination); // Existing outputs must never be overwritten.
   const privateApp = join(destination, 'furniture-app');
   const publicRoot = join(destination, 'public_html');

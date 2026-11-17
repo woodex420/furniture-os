@@ -66,9 +66,13 @@ INSTALL
    without the separate site password, and that /.env and /.git are denied.
    If a check fails, leave staging protected and do not use real data.
 
-This candidate has demo/partial catalog, forms and commerce. No real orders,
-contact details, production databases, payments or live integrations. The
-storefront is React preview, not the completed Astro migration or full platform.
+This candidate has demo/partial catalog, forms and commerce. Staging builds
+block the checkout, contact/quotation submissions and preview chat in the UI;
+the newsletter does not claim a subscription. These browser-side safeguards
+are NOT access control and do not cover every external link or inherited demo
+behavior. No real orders, contact details, production databases, payments or
+live integrations. The storefront is a React preview, not the completed Astro
+migration or full platform.
 The owner login and media/CRM workflows are early foundations, not a security
 certification. Actual Hostinger PHP, Apache/LiteSpeed rewrites, HTTPS, image
 uploads, backups and browser behavior still need separate validation.

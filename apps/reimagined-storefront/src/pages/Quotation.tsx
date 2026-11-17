@@ -21,6 +21,8 @@ import PrintableInvoice, { ClientInfo } from "@/components/quotation/PrintableIn
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { site } from "@/config/site";
+import { config } from "@/config/env";
+import { StagingSubmissionNotice } from "@/components/StagingSubmissionNotice";
 
 const benefits = [
   { icon: Clock, title: "24-Hour Response", description: "Receive detailed quotes within one business day" },
@@ -58,6 +60,7 @@ const Quotation = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (config.restrictedStaging) return;
     if (!consent) {
       toast.error("Please tick the consent box so we can process your enquiry.");
       return;
@@ -118,6 +121,10 @@ const Quotation = () => {
   const isClientInfoValid = clientInfo.name.trim() && clientInfo.location.trim() && clientInfo.contactNumber.trim() && clientInfo.whatsapp.trim();
 
   const requestAction = (action: "print" | "email" | "whatsapp") => {
+    if (config.restrictedStaging) {
+      toast.error("Quotation actions are unavailable in staging.");
+      return;
+    }
     if (items.length === 0) {
       toast.error("Please add at least one product to your quote basket first.");
       return;
@@ -131,6 +138,7 @@ const Quotation = () => {
   };
 
   const executeAction = (action: "print" | "email" | "whatsapp") => {
+    if (config.restrictedStaging) return;
     if (action === "print") {
       window.print();
     } else if (action === "email") {
@@ -267,15 +275,15 @@ const Quotation = () => {
                   <h2 className="text-xl font-bold">Your Quote Basket ({totalItems} items)</h2>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Button variant="outline" size="sm" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground gap-2" onClick={() => requestAction("print")}>
+                  <Button variant="outline" size="sm" className="border-accent text-accent hover:bg-accent hover:text-accent-foreground gap-2" disabled={config.restrictedStaging} onClick={() => requestAction("print")}>
                     <Download className="h-4 w-4" />
                     Download PDF
                   </Button>
-                  <Button variant="outline" size="sm" className="border-green-600 text-green-700 hover:bg-green-600 hover:text-white gap-2" onClick={() => requestAction("whatsapp")}>
+                  <Button variant="outline" size="sm" className="border-green-600 text-green-700 hover:bg-green-600 hover:text-white gap-2" disabled={config.restrictedStaging} onClick={() => requestAction("whatsapp")}>
                     <MessageCircle className="h-4 w-4" />
                     Send WhatsApp
                   </Button>
-                  <Button variant="outline" size="sm" className="border-blue-600 text-blue-700 hover:bg-blue-600 hover:text-white gap-2" onClick={() => requestAction("email")}>
+                  <Button variant="outline" size="sm" className="border-blue-600 text-blue-700 hover:bg-blue-600 hover:text-white gap-2" disabled={config.restrictedStaging} onClick={() => requestAction("email")}>
                     <Send className="h-4 w-4" />
                     Send Email
                   </Button>
@@ -425,7 +433,8 @@ const Quotation = () => {
                     </div>
                   ) : (
                     <form onSubmit={handleSubmit}>
-                      <fieldset disabled={submission.busy} className="space-y-5">
+                      <StagingSubmissionNotice />
+                      <fieldset disabled={submission.busy || config.restrictedStaging} className="space-y-5">
                       {items.length > 0 && (
                         <div className="p-4 bg-hon-green-pale rounded-sm border border-accent/30">
                           <p className="text-sm font-semibold text-accent">

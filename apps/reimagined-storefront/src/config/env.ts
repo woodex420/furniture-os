@@ -31,6 +31,9 @@ const apiMode = str(raw.VITE_API_MODE, "demo") as ApiMode;
 export const config = {
   appName: "WOODEX",
 
+  /** Build-time restriction for the protected test candidate, not server authorization. */
+  restrictedStaging: raw.MODE === "furniture-staging",
+
   /** Which backend adapter the app uses. */
   apiMode: (["demo", "static", "bagisto", "supabase"] as const).includes(apiMode) ? apiMode : "demo",
 

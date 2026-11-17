@@ -17,6 +17,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import contactHero from "@/assets/contact-hero.webp";
 import { site, waLink } from "@/config/site";
+import { config } from "@/config/env";
+import { StagingSubmissionNotice } from "@/components/StagingSubmissionNotice";
 
 const showrooms = [
   { city: "Lahore (HQ)", address: `${site.address.line1}, ${site.address.city}`, phone: site.phoneAlt, hours: site.hours },
@@ -43,6 +45,7 @@ const Contact = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (config.restrictedStaging) return;
     if (!consent) {
       toast.error("Please tick the consent box so we can process your enquiry.");
       return;
@@ -148,6 +151,7 @@ const Contact = () => {
                 <h2 className="text-xl font-bold mb-6">Send a Message</h2>
                 <Card className="border shadow-sm">
                   <CardContent className="pt-6">
+                    <StagingSubmissionNotice />
                     {submitted ? (
                       <div className="text-center py-12">
                         <div className="w-16 h-16 rounded-full bg-hon-green-pale flex items-center justify-center mx-auto mb-4">
@@ -158,7 +162,7 @@ const Contact = () => {
                       </div>
                     ) : (
                       <form onSubmit={handleSubmit}>
-                        <fieldset disabled={submission.busy} className="space-y-5">
+                        <fieldset disabled={submission.busy || config.restrictedStaging} className="space-y-5">
                         <div className="grid md:grid-cols-2 gap-5">
                           <div className="space-y-1.5">
                             <Label htmlFor="name">Full Name *</Label>

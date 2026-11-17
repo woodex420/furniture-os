@@ -8,6 +8,7 @@ import { QuoteProvider } from "@/contexts/QuoteContext";
 import { CartProvider } from "@/contexts/CartContext";
 import RouteHead from "@/components/RouteHead";
 import ChatBubble from "@/components/chat/ChatBubble";
+import { config } from "@/config/env";
 // Landing experience stays eager (LCP); every other storefront route is a separate chunk.
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -56,7 +57,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <div className="preview-notice" role="note">
-            <span><strong>STOREFRONT PREVIEW</strong> · Sample data. Home hero, tagline, limited service text, city pages and blog articles connect to Furniture admin; other features are still in progress.</span>
+            <span><strong>STOREFRONT PREVIEW</strong> · Sample data. Home hero, tagline, limited service text, city pages and blog articles connect to Furniture admin; other features are still in progress.{config.restrictedStaging && " Orders and enquiries are disabled; do not enter real customer data."}</span>
             {import.meta.env.DEV && <span className="preview-notice-links"><a href="/admin">Open Furniture admin</a></span>}
           </div>
           <RouteHead />
