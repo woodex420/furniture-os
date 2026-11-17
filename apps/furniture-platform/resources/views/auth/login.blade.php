@@ -26,9 +26,16 @@
                 <div class="auth-kicker"><span></span> THE OPERATING WORKSPACE</div>
                 <h2>Welcome back<span>.</span></h2>
                 <p class="auth-description">Sign in to your WOODEX OS workspace.</p>
-                <div class="auth-notice"><span aria-hidden="true"></span><div><strong>Workspace in progress</strong><p>This development foundation is not ready for business use.</p></div></div>
+                @unless (config('furniture.admin_preview_landing'))
+                    <div class="auth-notice"><span aria-hidden="true"></span><div><strong>Workspace in progress</strong><p>This development foundation is not ready for business use.</p></div></div>
+                @endunless
                 @if (config('furniture.admin_preview_landing'))
-                    <div class="auth-notice" aria-label="Preview sign-in help"><span aria-hidden="true"></span><div><strong>Synthetic preview sign-in</strong><p>Use the preview-only account. If sign-in does not continue inside Arena, open this page in a new tab and sign in there.</p><p><a href="{{ route('login', absolute: false) }}" target="_blank" rel="noopener noreferrer">Open sign-in in a new tab</a></p><p id="preview-cookie-warning" role="status" hidden>Cookies appear blocked in this frame. Open sign-in in a new tab and try again.</p><p id="preview-session-status" role="status">Checking preview session…</p><button id="preview-storage-access" type="button" hidden>Allow preview sign-in cookies</button></div></div>
+                    <div class="auth-error" id="preview-signin-help" hidden>
+                        <p id="preview-cookie-warning" role="status" hidden>Cookies may be blocked. Please allow sign-in cookies or open sign-in in a new tab.</p>
+                        <p id="preview-session-status" role="status" hidden></p>
+                        <button id="preview-storage-access" type="button" hidden>Allow sign-in cookies</button>
+                        <p><a href="{{ route('login', absolute: false) }}" target="_blank" rel="noopener noreferrer">Open sign-in in a new tab</a></p>
+                    </div>
                 @endif
                 <form method="POST" action="{{ route('login.store', absolute: false) }}">
                     @csrf
@@ -39,7 +46,7 @@
                     <div class="form-field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024" placeholder="Enter your password" @if($errors->any()) aria-describedby="sign-in-error" @endif></div>
                     <button class="sign-in-button" type="submit">Sign in <span aria-hidden="true">→</span></button>
                 </form>
-                <p class="auth-help">Account access and recovery are being developed.</p>
+                @unless (config('furniture.admin_preview_landing'))<p class="auth-help">Account access and recovery are being developed.</p>@endunless
             </div>
             <p class="auth-main-footer">WOODEX OS <span>·</span> THE OPERATING WORKSPACE</p>
         </main>
@@ -56,21 +63,27 @@
                     document.cookie = name + '=1; Path=/; Secure; SameSite=None; Partitioned';
                     const present = document.cookie.split(';').some((part) => part.trim() === name + '=1');
                     document.cookie = name + '=; Path=/; Secure; SameSite=None; Partitioned; Max-Age=0';
-                    if (!present) document.getElementById('preview-cookie-warning').hidden = false;
+                    if (!present) {
+                        document.getElementById('preview-signin-help').hidden = false;
+                        document.getElementById('preview-cookie-warning').hidden = false;
+                    }
                 } catch (_) {
+                    document.getElementById('preview-signin-help').hidden = false;
                     document.getElementById('preview-cookie-warning').hidden = false;
                 }
             })();
             // Check the actual Laravel session round-trip, not just JavaScript cookies.
             // The form token is sent only to the same-origin diagnostic and is never echoed.
             (() => {
+                const help = document.getElementById('preview-signin-help');
                 const status = document.getElementById('preview-session-status');
+                const showStatus = (message) => { help.hidden = false; status.hidden = false; status.textContent = message; };
                 const token = document.querySelector('input[name="_token"]')?.value;
                 const controller = new AbortController();
                 const storageButton = document.getElementById('preview-storage-access');
                 storageButton.addEventListener('click', async () => {
                     if (typeof document.requestStorageAccess !== 'function') {
-                        status.textContent = 'This browser cannot request embedded cookie access. Open sign-in in a new tab.';
+                        showStatus('This browser cannot request cookie access. Open sign-in in a new tab.');
                         return;
                     }
                     try {
@@ -79,24 +92,26 @@
                         await document.requestStorageAccess();
                         window.location.reload();
                     } catch (_) {
-                        status.textContent = 'Cookie access was denied or unavailable. Open sign-in in a new tab.';
+                        showStatus('Cookie access was denied or unavailable. Open sign-in in a new tab.');
                     }
                 });
                 const timeout = setTimeout(() => controller.abort(), 8000);
                 if (!token) {
-                    status.textContent = 'Preview session check unavailable. Open sign-in in a new tab.';
+                    showStatus('Could not check the session. Open sign-in in a new tab.');
                     clearTimeout(timeout);
                     return;
                 }
                 fetch('/login/preview-session', { credentials: 'same-origin', cache: 'no-store', signal: controller.signal, headers: { 'X-Preview-Session-Token': token } })
                     .then((response) => { if (!response.ok) throw new Error('Session check failed'); return response.json(); })
                     .then((result) => {
-                        status.textContent = result.available === true
-                            ? 'Preview session is available. Enter the preview account and select Sign in.'
-                            : 'Preview session was not retained. Allow preview sign-in cookies or open sign-in in a new tab.';
-                        storageButton.hidden = result.available === true;
+                        if (result.available === true) {
+                            help.hidden = true;
+                        } else {
+                            storageButton.hidden = false;
+                            showStatus('Session was not retained. Allow sign-in cookies or open sign-in in a new tab.');
+                        }
                     })
-                    .catch(() => { status.textContent = 'Could not check the preview session. Open sign-in in a new tab and try again.'; })
+                    .catch(() => { showStatus('Could not check the session. Open sign-in in a new tab and try again.'); })
                     .finally(() => clearTimeout(timeout));
             })();
         </script>
