@@ -17,7 +17,7 @@ class SessionFoundationTest extends TestCase
     {
         $this->get('/admin')->assertRedirect(route('login'));
         $this->post('/logout')->assertRedirect(route('login'));
-        $this->get('/login')->assertOk()->assertSee('Sign in')->assertSee('name="_token"', false)
+        $this->withoutVite()->get('/login')->assertOk()->assertSee('Sign in')->assertSee('name="_token"', false)
             ->assertHeader('Cache-Control', 'no-store, private')
             ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
     }
@@ -60,10 +60,17 @@ class SessionFoundationTest extends TestCase
             ->assertSessionMissing('_old_input.password');
     }
 
+    public function test_sign_in_form_handles_malformed_old_email_without_rendering_sensitive_input(): void
+    {
+        $this->withoutVite()->withSession(['_old_input' => ['email' => ['unexpected']]])
+            ->get('/login')->assertOk()->assertSee('Email address')->assertSee('name="_token"', false)
+            ->assertDontSee('value="Array"', false);
+    }
+
     public function test_login_rotates_the_session_identifier(): void
     {
         User::factory()->create(['email' => 'person@example.test', 'password' => Hash::make('synthetic-password')]);
-        $this->get('/login')->assertOk();
+        $this->withoutVite()->get('/login')->assertOk();
         $before = $this->app['session']->driver()->getId();
 
         $this->post('/login', ['email' => 'person@example.test', 'password' => 'synthetic-password'])
