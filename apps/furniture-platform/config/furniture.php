@@ -8,6 +8,8 @@ return [
     'contact_creation_enabled' => (bool) env('FURNITURE_CONTACT_CREATION_ENABLED', false),
     'lead_creation_enabled' => (bool) env('FURNITURE_LEAD_CREATION_ENABLED', false),
     'home_editor_enabled' => (bool) env('FURNITURE_HOME_EDITOR_ENABLED', false),
+    // Temporary service copy bridge for isolated storefront integration.
+    'service_copy_enabled' => (bool) env('FURNITURE_SERVICE_COPY_ENABLED', false),
     // Isolated, owner-only media experiment; disabled until explicitly enabled.
     'media_library_enabled' => (bool) env('FURNITURE_MEDIA_LIBRARY_ENABLED', false),
     // Optional, explicitly configured storefront origin for the visual preview.

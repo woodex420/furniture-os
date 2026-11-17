@@ -20,7 +20,7 @@
         'PROCUREMENT & PRODUCTION' => ['Suppliers', 'Purchase Orders', 'Goods Receipts', 'Supplier Invoices', 'Production', 'Stock Ledger', 'Warehouses', 'Stock Transfers', 'Reservations'],
         'ACCOUNTS' => ['Ledger & Reports', 'Payables', 'Income & Expenses'],
         'GROWTH' => ['Automations', 'Sequences', 'WhatsApp Templates', 'Marketing'],
-        'WEBSITE STUDIO' => ['Site Overview', 'All Pages', 'Visual Page Builder', 'Navigation', 'Reusable Sections & Templates', 'Storefront / Shop Design', 'Blog', 'Portfolio', 'Forms', 'Media Library', 'Theme & Design System', 'SEO', 'SEO Agent', 'Speed & Performance', 'Site Health', 'Website Settings', 'Redirects'],
+        'WEBSITE STUDIO' => ['Site Overview', 'All Pages', 'Visual Page Builder', 'Navigation', 'Reusable Sections & Templates', 'Storefront / Shop Design', 'Service pages', 'City pages', 'Blog', 'Portfolio', 'Forms', 'Media Library', 'Theme & Design System', 'SEO', 'SEO Agent', 'Speed & Performance', 'Site Health', 'Website Settings', 'Redirects'],
         'SYSTEM' => ['Settings', 'Access & Team', 'Connections', 'Platform', 'Audit & Activity', 'Workspace Preferences', 'Team Onboarding'],
     ];
     $icons = [
@@ -31,11 +31,12 @@
         'Operations Board' => 'KanbanSquare', 'Projects' => 'BriefcaseBusiness', 'Vendors & Costs' => 'Handshake', 'Client Portal' => 'Users', 'Handovers' => 'BadgeCheck',
         'Suppliers' => 'Handshake', 'Purchase Orders' => 'FileText', 'Goods Receipts' => 'Package', 'Supplier Invoices' => 'Receipt', 'Production' => 'Factory', 'Stock Ledger' => 'Layers3', 'Warehouses' => 'Warehouse', 'Stock Transfers' => 'Truck', 'Reservations' => 'CalendarDays',
         'Ledger & Reports' => 'Wallet', 'Payables' => 'Receipt', 'Income & Expenses' => 'ChartNoAxesCombined', 'Automations' => 'Zap', 'Sequences' => 'Layers3', 'WhatsApp Templates' => 'MessageSquare', 'Marketing' => 'Megaphone',
-        'Site Overview' => 'PanelTop', 'All Pages' => 'FileText', 'Visual Page Builder' => 'PanelTop', 'Navigation' => 'Layers3', 'Reusable Sections & Templates' => 'Layers3', 'Storefront / Shop Design' => 'Store', 'Blog' => 'FileText', 'Portfolio' => 'BriefcaseBusiness', 'Forms' => 'FileText', 'Media Library' => 'FolderOpen', 'Theme & Design System' => 'Sparkles', 'SEO' => 'Search', 'SEO Agent' => 'Sparkles', 'Speed & Performance' => 'ChartNoAxesCombined', 'Site Health' => 'BadgeCheck', 'Website Settings' => 'Settings', 'Redirects' => 'ArrowRight',
+        'Site Overview' => 'PanelTop', 'All Pages' => 'FileText', 'Visual Page Builder' => 'PanelTop', 'Navigation' => 'Layers3', 'Reusable Sections & Templates' => 'Layers3', 'Storefront / Shop Design' => 'Store', 'Service pages' => 'FileText', 'City pages' => 'FileText', 'Blog' => 'FileText', 'Portfolio' => 'BriefcaseBusiness', 'Forms' => 'FileText', 'Media Library' => 'FolderOpen', 'Theme & Design System' => 'Sparkles', 'SEO' => 'Search', 'SEO Agent' => 'Sparkles', 'Speed & Performance' => 'ChartNoAxesCombined', 'Site Health' => 'BadgeCheck', 'Website Settings' => 'Settings', 'Redirects' => 'ArrowRight',
         'Settings' => 'Settings', 'Access & Team' => 'Users', 'Connections' => 'Zap', 'Platform' => 'Layers3', 'Audit & Activity' => 'Clock3', 'Workspace Preferences' => 'SlidersHorizontal', 'Team Onboarding' => 'Users',
     ];
     $available = ['Dashboard' => ['admin', 'workspace.view'], 'Leads' => ['admin.leads', 'leads.view'], 'Contacts' => ['admin.contacts', 'contacts.view']];
     if (config('furniture.home_editor_enabled')) $available['Site Overview'] = ['admin.storefront.home', 'storefront.edit'];
+    if (config('furniture.service_copy_enabled')) $available['Service pages'] = ['admin.website.services', 'storefront.edit'];
     if (config('furniture.media_library_enabled')) $available['Media Library'] = ['admin.website.media', 'storefront.edit'];
 @endphp
 <div class="app">
@@ -55,8 +56,8 @@
                     @foreach ($items as $item)
                         @if (isset($available[$item]))
                             @can($available[$item][1])
-                                @php($isActive = request()->routeIs($available[$item][0], $available[$item][0].'.show', $available[$item][0].'.create'))
-                                <a href="{{ route($available[$item][0], absolute: false) }}" class="nav-item {{ $isActive ? 'active' : '' }}" @if($isActive) aria-current="{{ request()->routeIs($available[$item][0]) ? 'page' : 'location' }}" @endif>@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span>@if($item !== 'Dashboard')<small class="pending-badge">{{ ($item === 'Contacts' && config('furniture.contact_creation_enabled')) || ($item === 'Leads' && config('furniture.lead_creation_enabled')) || in_array($item, ['Site Overview', 'Media Library'], true) ? 'Testing' : 'Read only' }}</small>@endif</a>
+                                @php($isActive = request()->routeIs($available[$item][0], $available[$item][0].'.show', $available[$item][0].'.create', $available[$item][0].'.edit'))
+                                <a href="{{ route($available[$item][0], absolute: false) }}" class="nav-item {{ $isActive ? 'active' : '' }}" @if($isActive) aria-current="{{ request()->routeIs($available[$item][0]) ? 'page' : 'location' }}" @endif>@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span>@if($item !== 'Dashboard')<small class="pending-badge">{{ ($item === 'Contacts' && config('furniture.contact_creation_enabled')) || ($item === 'Leads' && config('furniture.lead_creation_enabled')) || in_array($item, ['Site Overview', 'Service pages', 'Media Library'], true) ? 'Testing' : 'Read only' }}</small>@endif</a>
                             @endcan
                         @else
                             <span class="nav-item pending-item">@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span><small class="pending-badge">Pending</small></span>

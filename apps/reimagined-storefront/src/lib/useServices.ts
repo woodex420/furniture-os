@@ -1,44 +1,20 @@
-import { useEffect, useState } from "react";
-import { getAdminApi } from "@/api";
+import { useMemo } from "react";
 import type { AdminService } from "@/api/types";
 import { services } from "@/data/services";
+import { useServiceCopy, type ServiceCopy } from "@/lib/useServiceCopy";
 
-/**
- * Service catalogue: admin-managed demo DB when seeded, otherwise the bundled
- * static catalogue. `ready` flips once the live query settles — deep links to
- * admin-created services depend on it (absent from the fallback pre-fetch).
- */
-const staticFallback = (): AdminService[] =>
-  services.map((s, i) => ({
-    ...s,
-    active: true,
-    sortOrder: (i + 1) * 10,
-    createdAt: "",
-    updatedAt: "",
-  }));
+// This preview uses the original bundled service definitions plus the narrow
+// Furniture copy bridge. It does not read or modify the legacy demo database.
+const staticServices: AdminService[] = services.map((s, i) => ({
+  ...s,
+  active: true,
+  sortOrder: (i + 1) * 10,
+  createdAt: "",
+  updatedAt: "",
+}));
 
-export function useServices(): { services: AdminService[]; ready: boolean } {
-  const [list, setList] = useState<AdminService[]>(staticFallback);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    let on = true;
-    getAdminApi()
-      .listServices()
-      .then((rows) => {
-        if (!on) return;
-        if (rows.length > 0) setList([...rows].sort((a, b) => a.sortOrder - b.sortOrder));
-      })
-      .catch(() => {
-        /* demo API unavailable — bundled catalogue stays */
-      })
-      .finally(() => {
-        if (on) setReady(true);
-      });
-    return () => {
-      on = false;
-    };
-  }, []);
-
-  return { services: list, ready };
+export function useServices(): { services: AdminService[]; ready: boolean; copy: ServiceCopy } {
+  const copy = useServiceCopy();
+  const withCopy = useMemo(() => staticServices.map((service) => copy[service.slug] ? { ...service, ...copy[service.slug] } : service), [copy]);
+  return { services: withCopy, ready: true, copy };
 }

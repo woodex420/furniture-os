@@ -56,9 +56,8 @@ const serviceReasons = [
 ];
 
 const Services = () => {
-  // Catalogue is admin-managed (/admin/services since P1.5); static bundle is the offline fallback.
-  // Inactive services vanish from the hero and the highlight cards; detail pages redirect to /services.
-  const { services } = useServices();
+  // Only title/tagline overrides come from Furniture; the remaining catalogue is still a preview.
+  const { services, copy } = useServices();
   const activeServices = services.filter((s) => s.active);
 
   useEffect(() => {
@@ -122,14 +121,16 @@ const Services = () => {
               {serviceHighlights.map((item, index) => {
                 const service = activeServices.find((entry) => entry.slug === item.slug);
                 if (!service) return null;
+                const title = copy[item.slug]?.title ?? item.title;
+                const summary = copy[item.slug]?.tagline ?? item.summary;
 
                 return (
                   <article key={item.slug} className="group flex h-full flex-col overflow-hidden border border-border bg-background transition-colors hover:border-accent">
-                    <Link to={`/services/${item.slug}`} className="block overflow-hidden" aria-label={`Learn more about ${item.title}`}>
+                    <Link to={`/services/${item.slug}`} className="block overflow-hidden" aria-label={`Learn more about ${title}`}>
                       <div className="aspect-[16/10] overflow-hidden">
                         <img
                           src={service.hero}
-                          alt={`${item.title} by WOODEX`}
+                          alt={`${title} by WOODEX`}
                           loading="lazy"
                           width={1536}
                           height={1024}
@@ -139,8 +140,8 @@ const Services = () => {
                     </Link>
                     <div className="flex flex-1 flex-col p-6">
                       <p className="mb-2 text-xs font-bold text-accent">0{index + 1}</p>
-                      <h3 className="mb-2 text-xl font-bold">{item.title}</h3>
-                      <p className="mb-5 text-sm leading-relaxed text-muted-foreground">{item.summary}</p>
+                      <h3 className="mb-2 text-xl font-bold">{title}</h3>
+                      <p className="mb-5 text-sm leading-relaxed text-muted-foreground">{summary}</p>
                       <ul className="mb-6 space-y-2">
                         {item.features.map((feature) => (
                           <li key={feature} className="flex items-start gap-2 text-sm">

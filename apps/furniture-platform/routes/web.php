@@ -8,6 +8,7 @@ use App\Http\Controllers\Workspace\CustomerDetailController;
 use App\Http\Controllers\Workspace\LeadCreationController;
 use App\Http\Controllers\Workspace\MediaLibraryController;
 use App\Http\Controllers\Workspace\PublicHeroImageController;
+use App\Http\Controllers\Workspace\ServiceCopyController;
 use App\Http\Controllers\Workspace\StorefrontHomeController;
 use App\Http\Middleware\PrivateWorkspaceResponse;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -32,6 +33,13 @@ Route::get('/storefront-api/home', [StorefrontHomeController::class, 'publicCont
         PreventRequestForgery::class,
     ])
     ->name('storefront.home.content');
+
+// Narrow read-only service-copy bridge, independent of the homepage preview flag.
+Route::get('/storefront-api/services/copy', [ServiceCopyController::class, 'publicContent'])
+    ->withoutMiddleware([
+        EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class,
+        ShareErrorsFromSession::class, PreventRequestForgery::class,
+    ])->name('storefront.services.copy');
 
 // Only the currently selected public hero image is exposed, never the private library.
 Route::get('/storefront-api/home/image/{id}', [PublicHeroImageController::class, 'show'])
@@ -65,6 +73,15 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
         ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.storefront.home.update');
     Route::post('/admin/website/home/restore', [StorefrontHomeController::class, 'restore'])
         ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.storefront.home.restore');
+    // Temporary owner-only copy editor for existing Reimagin service pages.
+    Route::get('/admin/website/services', [ServiceCopyController::class, 'index'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.services');
+    Route::get('/admin/website/services/{slug}', [ServiceCopyController::class, 'edit'])
+        ->where('slug', '[a-z0-9-]+')->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.services.edit');
+    Route::post('/admin/website/services/{slug}', [ServiceCopyController::class, 'update'])
+        ->where('slug', '[a-z0-9-]+')->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.services.update');
+    Route::post('/admin/website/services/{slug}/restore', [ServiceCopyController::class, 'restore'])
+        ->where('slug', '[a-z0-9-]+')->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.services.restore');
     // Private media library; the separate public route serves only the selected hero image.
     Route::get('/admin/website/media', [MediaLibraryController::class, 'index'])
         ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.media');

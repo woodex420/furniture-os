@@ -10,7 +10,7 @@ import { site } from "@/config/site";
 
 const ServiceDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  // Catalogue is admin-managed (/admin/services since P1.5); seeded fallback offline.
+  // Furniture supplies only title/tagline overrides; other details are preview data.
   const { services: allServices, ready } = useServices();
   const service = slug ? allServices.find((s) => s.slug === slug && s.active) : undefined;
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -41,8 +41,10 @@ const ServiceDetail = () => {
       serviceType: service.shortTitle,
     });
     document.head.appendChild(ld);
-    window.scrollTo(0, 0);
+    return () => { ld.remove(); };
   }, [service]);
+
+  useEffect(() => { window.scrollTo(0, 0); }, [slug]);
 
   if (!ready) {
     // Live query still settling — admin-created services are absent from the bundled fallback.
