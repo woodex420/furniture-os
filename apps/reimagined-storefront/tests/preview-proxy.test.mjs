@@ -10,7 +10,7 @@ test('preview proxy is opt-in and keeps browser-facing routes same-origin', () =
   const proxy = buildPreviewProxy('http://internal.example:5176');
   assert.equal(Object.keys(proxy).length, previewProxyPatterns.length);
   for (const config of Object.values(proxy)) assert.deepEqual(config, { target: 'http://internal.example:5176', changeOrigin: true });
-  for (const route of ['/admin', '/admin?x=1', '/admin/website/blog', '/login', '/login?next=1', '/logout', '/build/assets/auth.css', '/workspace/livewire/update', '/livewire/livewire.js?id=1', '/livewire-53ac0bbe/livewire.min.js?id=1', '/storefront-api/blog']) assert.equal(matches(route), true, route);
+  for (const route of ['/admin', '/admin?x=1', '/admin/website/blog', '/login', '/login?next=1', '/login/preview-session', '/logout', '/build/assets/auth.css', '/workspace/livewire/update', '/livewire/livewire.js?id=1', '/livewire-53ac0bbe/livewire.min.js?id=1', '/storefront-api/blog']) assert.equal(matches(route), true, route);
 });
 
 test('does not intercept storefront or similarly named routes', () => {

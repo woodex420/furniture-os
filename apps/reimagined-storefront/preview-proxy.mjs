@@ -2,7 +2,7 @@
 export const previewProxyPatterns = [
   '^/storefront-api(?:/|\\?|$)',
   '^/admin(?:/|\\?|$)',
-  '^/login(?:\\?|$)',
+  '^/login(?:/|\\?|$)',
   '^/logout(?:\\?|$)',
   '^/build(?:/|\\?|$)',
   '^/workspace/livewire(?:/|\\?|$)',

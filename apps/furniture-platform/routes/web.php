@@ -16,6 +16,7 @@ use App\Http\Middleware\PrivateWorkspaceResponse;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -78,6 +79,14 @@ Route::get('/storefront-api/home/image/{id}', [PublicHeroImageController::class,
 
 Route::middleware([PrivateWorkspaceResponse::class, 'guest'])->group(function (): void {
     Route::get('/login', [SessionController::class, 'create'])->name('login');
+    // Synthetic preview diagnostic only: check that the browser returned this session,
+    // never return the token or grant access. Default installations do not expose it.
+    Route::get('/login/preview-session', function (Request $request) {
+        abort_unless(config('furniture.admin_preview_landing'), 404);
+        $candidate = $request->header('X-Preview-Session-Token');
+
+        return response()->json(['available' => is_string($candidate) && hash_equals($request->session()->token(), $candidate)]);
+    })->name('login.preview-session');
     Route::post('/login', [SessionController::class, 'store'])->middleware('throttle:workspace-login')->name('login.store');
 });
 

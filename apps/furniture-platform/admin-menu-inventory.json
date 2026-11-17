@@ -1,0 +1,530 @@
+[
+  {
+    "group": "WORKSPACE",
+    "name": "Dashboard",
+    "status": "partial",
+    "path": "/admin",
+    "flag": null,
+    "scope": "Owner dashboard shell; reporting and workflow panels pending."
+  },
+  {
+    "group": "WORKSPACE",
+    "name": "Approvals",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WORKSPACE",
+    "name": "Reports",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "CUSTOMERS",
+    "name": "Leads",
+    "status": "partial",
+    "path": "/admin/leads",
+    "flag": null,
+    "scope": "Owner read/search/details; experimental creation may be enabled."
+  },
+  {
+    "group": "CUSTOMERS",
+    "name": "Contacts",
+    "status": "partial",
+    "path": "/admin/contacts",
+    "flag": null,
+    "scope": "Owner read/search/details; experimental creation may be enabled."
+  },
+  {
+    "group": "CUSTOMERS",
+    "name": "Tasks & Visits",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "CUSTOMERS",
+    "name": "Inbox",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SALES",
+    "name": "Estimations",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SALES",
+    "name": "Quotations",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SALES",
+    "name": "Invoices",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SALES",
+    "name": "Payments",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SALES",
+    "name": "Documents",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "COMMERCE",
+    "name": "Store Overview",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "COMMERCE",
+    "name": "Products",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "COMMERCE",
+    "name": "Categories",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "COMMERCE",
+    "name": "Series",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "COMMERCE",
+    "name": "Orders",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "COMMERCE",
+    "name": "Delivery & Installation",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "COMMERCE",
+    "name": "Support & Warranty",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "OPERATIONS",
+    "name": "Operations Board",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "OPERATIONS",
+    "name": "Projects",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "OPERATIONS",
+    "name": "Vendors & Costs",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "OPERATIONS",
+    "name": "Client Portal",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "OPERATIONS",
+    "name": "Handovers",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "PROCUREMENT & PRODUCTION",
+    "name": "Suppliers",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "PROCUREMENT & PRODUCTION",
+    "name": "Purchase Orders",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "PROCUREMENT & PRODUCTION",
+    "name": "Goods Receipts",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "PROCUREMENT & PRODUCTION",
+    "name": "Supplier Invoices",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "PROCUREMENT & PRODUCTION",
+    "name": "Production",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "PROCUREMENT & PRODUCTION",
+    "name": "Stock Ledger",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "PROCUREMENT & PRODUCTION",
+    "name": "Warehouses",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "PROCUREMENT & PRODUCTION",
+    "name": "Stock Transfers",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "PROCUREMENT & PRODUCTION",
+    "name": "Reservations",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "ACCOUNTS",
+    "name": "Ledger & Reports",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "ACCOUNTS",
+    "name": "Payables",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "ACCOUNTS",
+    "name": "Income & Expenses",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "GROWTH",
+    "name": "Automations",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "GROWTH",
+    "name": "Sequences",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "GROWTH",
+    "name": "WhatsApp Templates",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "GROWTH",
+    "name": "Marketing",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Site Overview",
+    "status": "partial",
+    "path": "/admin/website/home",
+    "flag": "home_editor_enabled",
+    "scope": "Limited first-hero and tagline editor; not full page builder."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "All Pages",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Visual Page Builder",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Navigation",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Reusable Sections & Templates",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Storefront / Shop Design",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Service pages",
+    "status": "partial",
+    "path": "/admin/website/services",
+    "flag": "service_copy_enabled",
+    "scope": "Title and tagline bridge for existing service slugs only."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "City pages",
+    "status": "partial",
+    "path": "/admin/website/cities",
+    "flag": "city_pages_enabled",
+    "scope": "Plain-text city service-area preview, not showrooms."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Blog",
+    "status": "partial",
+    "path": "/admin/website/blog",
+    "flag": "blog_posts_enabled",
+    "scope": "Plain-text preview articles, drafts and revisions."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Portfolio",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Forms",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Media Library",
+    "status": "partial",
+    "path": "/admin/website/media",
+    "flag": "media_library_enabled",
+    "scope": "Limited private media and selected hero publication."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Theme & Design System",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "SEO",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "SEO Agent",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Speed & Performance",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Site Health",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Website Settings",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "WEBSITE STUDIO",
+    "name": "Redirects",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SYSTEM",
+    "name": "Settings",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SYSTEM",
+    "name": "Access & Team",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SYSTEM",
+    "name": "Connections",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SYSTEM",
+    "name": "Platform",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SYSTEM",
+    "name": "Audit & Activity",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SYSTEM",
+    "name": "Workspace Preferences",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  },
+  {
+    "group": "SYSTEM",
+    "name": "Team Onboarding",
+    "status": "pending",
+    "path": null,
+    "flag": null,
+    "scope": "No connected Furniture workspace workflow in this navigation."
+  }
+]

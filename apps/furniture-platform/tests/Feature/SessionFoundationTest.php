@@ -35,6 +35,20 @@ class SessionFoundationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_preview_session_diagnostic_is_opt_in_and_does_not_authenticate(): void
+    {
+        $this->get('/login/preview-session')->assertNotFound();
+        config(['furniture.admin_preview_landing' => true]);
+        $this->withoutVite()->get('/login')->assertOk()->assertSee('Checking preview session');
+        $token = $this->app['session']->driver()->token();
+        $this->getJson('/login/preview-session')->assertOk()->assertExactJson(['available' => false])
+            ->assertHeader('Cache-Control', 'no-store, private')->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+        $this->withHeader('X-Preview-Session-Token', $token)->getJson('/login/preview-session')
+            ->assertOk()->assertExactJson(['available' => true]);
+        $this->assertGuest();
+        $this->get('/admin')->assertRedirect(route('login'));
+    }
+
     public function test_sign_in_requires_valid_existing_credentials(): void
     {
         User::factory()->create(['email' => 'person@example.test', 'password' => Hash::make('synthetic-password'), 'is_owner' => true]);
