@@ -41,8 +41,8 @@ class CustomerReadFoundationTest extends TestCase
             $this->assertTrue($response->headers->hasCacheControlDirective('no-store'));
             $this->assertTrue($response->headers->hasCacheControlDirective('private'));
         }
-        $this->get('/admin')->assertSee('href="'.route('admin.leads').'"', false)
-            ->assertSee('href="'.route('admin.contacts').'"', false);
+        $this->get('/admin')->assertSee('href="'.route('admin.leads', absolute: false).'"', false)
+            ->assertSee('href="'.route('admin.contacts', absolute: false).'"', false);
     }
 
     public function test_guest_and_non_owner_are_denied_both_pages_and_components(): void
@@ -69,7 +69,7 @@ class CustomerReadFoundationTest extends TestCase
     {
         $owner = $this->owner();
         Gate::define('leads.view', fn (): bool => false);
-        $this->withoutVite()->actingAs($owner)->get('/admin')->assertOk()->assertDontSee('href="'.route('admin.leads').'"', false);
+        $this->withoutVite()->actingAs($owner)->get('/admin')->assertOk()->assertDontSee('href="'.route('admin.leads', absolute: false).'"', false);
         $this->get('/admin/leads')->assertForbidden();
         Livewire::actingAs($owner)->test(LeadsIndex::class)->assertForbidden();
         $this->get('/admin/contacts')->assertOk();

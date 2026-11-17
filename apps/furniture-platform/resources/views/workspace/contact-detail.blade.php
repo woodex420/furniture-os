@@ -7,7 +7,7 @@
         <div class="demo-banner"><span>READ-ONLY FOUNDATION</span> Editing, activity and integrations are pending.</div>
         <div class="page-heading list-heading"><div><div class="eyebrow">WORKSPACE <span>/</span> CUSTOMERS <span>/</span> CONTACTS</div><h1>{{ $contact->name }}</h1><p>Contact details</p></div><span class="preview-label">READ ONLY · IN PROGRESS</span></div>
         <section class="card customer-detail" aria-labelledby="contact-details-title">
-            <a class="customer-back" href="{{ route('admin.contacts') }}">← Back to contacts</a>
+            <a class="customer-back" href="{{ route('admin.contacts', absolute: false) }}">← Back to contacts</a>
             <h2 id="contact-details-title">Contact details</h2>
             <dl>
                 <div><dt>Name</dt><dd>{{ $contact->name }}</dd></div>

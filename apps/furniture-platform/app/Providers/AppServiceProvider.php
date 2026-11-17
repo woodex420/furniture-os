@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -28,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Browser assets stay same-origin when a reverse proxy supplies an internal Host.
+        // A separately configured CDN or subdirectory deployment needs its own review.
+        Vite::createAssetPathsUsing(fn (string $path): string => '/'.ltrim($path, '/'));
+
         // Provisional first-owner-only access. No blanket owner bypass for other abilities.
         Gate::define('workspace.view', fn (User $user): bool => $user->is_owner === true);
         // Until staff policy and record visibility are designed, only the owner can read CRM records.

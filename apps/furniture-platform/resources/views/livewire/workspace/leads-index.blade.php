@@ -8,7 +8,7 @@
         <table><thead><tr><th scope="col">Lead</th><th scope="col">Contact</th><th scope="col">Source</th><th scope="col">Status</th><th scope="col">Added</th></tr></thead>
             <tbody>
                 @forelse ($leads as $lead)
-                    <tr wire:key="lead-{{ $lead->id }}"><td><a class="record-name customer-record-link" href="{{ route('admin.leads.show', $lead->id) }}">{{ $lead->title }}</a></td><td>{{ $canViewContacts ? ($lead->contact?->name ?? '—') : 'Restricted' }}</td><td>{{ $lead->source ?: '—' }}</td><td><span class="record-status">{{ $lead->status }}</span></td><td>{{ $lead->created_at?->format('d M Y') ?? '—' }}</td></tr>
+                    <tr wire:key="lead-{{ $lead->id }}"><td><a class="record-name customer-record-link" href="{{ route('admin.leads.show', $lead->id, false) }}">{{ $lead->title }}</a></td><td>{{ $canViewContacts ? ($lead->contact?->name ?? '—') : 'Restricted' }}</td><td>{{ $lead->source ?: '—' }}</td><td><span class="record-status">{{ $lead->status }}</span></td><td>{{ $lead->created_at?->format('d M Y') ?? '—' }}</td></tr>
                 @empty
                     <tr><td colspan="5"><div class="list-empty"><strong>No leads found</strong><p>{{ is_string($search) && trim($search) !== '' ? 'Try another search.' : 'No leads are available to view yet.' }}</p></div></td></tr>
                 @endforelse

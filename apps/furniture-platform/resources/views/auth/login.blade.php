@@ -27,7 +27,7 @@
                 <h2>Welcome back<span>.</span></h2>
                 <p class="auth-description">Sign in to your WOODEX OS workspace.</p>
                 <div class="auth-notice"><span aria-hidden="true"></span><div><strong>Workspace in progress</strong><p>This development foundation is not ready for business use.</p></div></div>
-                <form method="POST" action="{{ route('login.store') }}">
+                <form method="POST" action="{{ route('login.store', absolute: false) }}">
                     @csrf
                     @if ($errors->any())
                         <div class="auth-error" id="sign-in-error" role="alert">Sign-in failed. Check your details and try again.</div>

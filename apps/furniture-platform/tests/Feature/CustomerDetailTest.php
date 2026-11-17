@@ -31,7 +31,7 @@ class CustomerDetailTest extends TestCase
         $this->withoutVite()->actingAs($owner);
         $leadPage = $this->get('/admin/leads/'.$lead)->assertOk()->assertSee('READ-ONLY FOUNDATION')
             ->assertSee('&lt;b&gt;Example lead&lt;/b&gt;', false)->assertDontSee('<b>Example lead</b>', false)
-            ->assertSee('&lt;script&gt;Private Contact&lt;/script&gt;', false)->assertSee(route('admin.contacts.show', $contact), false);
+            ->assertSee('&lt;script&gt;Private Contact&lt;/script&gt;', false)->assertSee(route('admin.contacts.show', $contact, false), false);
         $this->assertTrue($leadPage->headers->hasCacheControlDirective('no-store'));
         $this->assertTrue($leadPage->headers->hasCacheControlDirective('private'));
         $this->get('/admin/contacts/'.$contact)->assertOk()->assertSee('private@example.test')
@@ -62,7 +62,7 @@ class CustomerDetailTest extends TestCase
         $owner = User::factory()->create(['is_owner' => true]);
         Gate::define('contacts.view', fn (): bool => false);
         $this->withoutVite()->actingAs($owner)->get('/admin/leads/'.$lead)->assertOk()->assertSee('Restricted')
-            ->assertDontSee('Private Contact')->assertDontSee(route('admin.contacts.show', $contact), false);
+            ->assertDontSee('Private Contact')->assertDontSee(route('admin.contacts.show', $contact, false), false);
         $this->get('/admin/contacts/'.$contact)->assertForbidden();
         Livewire::actingAs($owner)->test(LeadsIndex::class)->assertSee('Restricted')->assertDontSee('Private Contact')
             ->set('search', 'Private Contact')->assertSee('No leads found')->assertDontSee('Example lead');

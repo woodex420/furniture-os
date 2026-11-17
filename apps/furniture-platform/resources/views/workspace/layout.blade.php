@@ -54,7 +54,7 @@
                         @if (isset($available[$item]))
                             @can($available[$item][1])
                                 @php($isActive = request()->routeIs($available[$item][0], $available[$item][0].'.show'))
-                                <a href="{{ route($available[$item][0]) }}" class="nav-item {{ $isActive ? 'active' : '' }}" @if($isActive) aria-current="{{ request()->routeIs($available[$item][0]) ? 'page' : 'location' }}" @endif>@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span>@if($item !== 'Dashboard')<small class="pending-badge">Read only</small>@endif</a>
+                                <a href="{{ route($available[$item][0], absolute: false) }}" class="nav-item {{ $isActive ? 'active' : '' }}" @if($isActive) aria-current="{{ request()->routeIs($available[$item][0]) ? 'page' : 'location' }}" @endif>@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span>@if($item !== 'Dashboard')<small class="pending-badge">Read only</small>@endif</a>
                             @endcan
                         @else
                             <span class="nav-item pending-item">@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span><small class="pending-badge">Pending</small></span>
@@ -68,11 +68,14 @@
     <main class="main" id="main-content">
         <header class="topbar">
             <div class="top-left"><button type="button" class="mobile-menu icon-button" data-workspace-menu hidden aria-controls="workspace-navigation" aria-expanded="false" aria-label="Open navigation">☰</button><span>Workspace</span><span aria-hidden="true">›</span><strong>@yield('workspace-title', 'Dashboard')</strong></div>
-            <div class="top-actions"><div class="avatar" aria-hidden="true">W</div><span class="top-user">{{ auth()->user()->name }}</span><form method="POST" action="{{ route('logout') }}">@csrf <button type="submit" class="workspace-signout">Sign out</button></form></div>
+            <div class="top-actions"><div class="avatar" aria-hidden="true">W</div><span class="top-user">{{ auth()->user()->name }}</span><form method="POST" action="{{ route('logout', absolute: false) }}">@csrf <button type="submit" class="workspace-signout">Sign out</button></form></div>
         </header>
         @yield('workspace-content')
     </main>
 </div>
-@livewireScripts
+{{-- Livewire renders same-origin URLs using the request host; strip that origin so
+     browser requests never target an internal reverse-proxy host. External configured assets remain unchanged. --}}
+@php($workspaceLivewireScripts = \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts())
+{!! str_replace(rtrim(url('/'), '/').'/', '/', $workspaceLivewireScripts) !!}
 </body>
 </html>
