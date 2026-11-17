@@ -49,7 +49,15 @@ jobs:
       - name: Discover packages in synthetic environment
         run: php artisan package:discover --ansi
       - name: Complete current PHPUnit suite
-        run: php vendor/bin/phpunit
+        run: |
+          set +e
+          php vendor/bin/phpunit --colors=never 2>&1 | tee "$RUNNER_TEMP/phpunit-output.txt"
+          result=${PIPESTATUS[0]}
+          set -e
+          if [ "$result" -ne 0 ]; then
+            while IFS= read -r line; do echo "::error::$line"; done < <(tail -45 "$RUNNER_TEMP/phpunit-output.txt")
+          fi
+          exit "$result"
       - name: Dependency advisory check
         run: |
           set +e
