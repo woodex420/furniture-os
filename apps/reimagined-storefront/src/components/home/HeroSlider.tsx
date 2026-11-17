@@ -16,13 +16,17 @@ const slides = [
 ];
 
 
+const heroImages = { workspace: slide1, meeting: slide2, executive: slide3, reception: slide4, manager: slide5 } as const;
+type HeroImage = keyof typeof heroImages;
+const isHeroImage = (value: unknown): value is HeroImage => typeof value === "string" && Object.prototype.hasOwnProperty.call(heroImages, value);
+
 type HeroOrder = "title_first" | "subtitle_first";
 const isHeroOrder = (value: unknown): value is HeroOrder => value === "title_first" || value === "subtitle_first";
 // Mirrors the server's restricted root-relative path contract; never render unsafe hrefs.
 const isInternalPath = (value: unknown): value is string => typeof value === "string" && value.length <= 240 && /^\/(?!\/)[A-Za-z0-9._~/?=&-]*(?![\s\S])/.test(value);
-type HomeContent = { hero_title: string | null; hero_subtitle: string | null; hero_order: HeroOrder; hero_cta_label: string | null; hero_cta_path: string | null };
-type CanvasContent = { hero_title: string; hero_subtitle: string; hero_order: HeroOrder | null; hero_cta_label: string | null; hero_cta_path: string | null };
-type CanvasField = "hero_title" | "hero_subtitle" | "hero_cta_label";
+type HomeContent = { hero_title: string | null; hero_subtitle: string | null; hero_order: HeroOrder; hero_cta_label: string | null; hero_cta_path: string | null; hero_image: HeroImage };
+type CanvasContent = { hero_title: string; hero_subtitle: string; hero_order: HeroOrder | null; hero_cta_label: string | null; hero_cta_path: string | null; hero_image: HeroImage | null };
+type CanvasField = "hero_title" | "hero_subtitle" | "hero_cta_label" | "hero_image";
 
 /** Shared by the current Reimagin homepage and the isolated Astro parity spike. */
 const HeroSlider = () => {
@@ -64,9 +68,11 @@ const HeroSlider = () => {
       if ("hero_order" in data && !isHeroOrder(data.hero_order)) return;
       if ("hero_cta_label" in data && (typeof data.hero_cta_label !== "string" || data.hero_cta_label.length > 1024)) return;
       if ("hero_cta_path" in data && (typeof data.hero_cta_path !== "string" || data.hero_cta_path.length > 1024)) return;
+      if ("hero_image" in data && !isHeroImage(data.hero_image)) return;
       setCanvasContent({ hero_title: data.hero_title, hero_subtitle: data.hero_subtitle, hero_order: "hero_order" in data && isHeroOrder(data.hero_order) ? data.hero_order : null,
         hero_cta_label: "hero_cta_label" in data && typeof data.hero_cta_label === "string" ? data.hero_cta_label : null,
-        hero_cta_path: "hero_cta_path" in data && typeof data.hero_cta_path === "string" ? data.hero_cta_path : null });
+        hero_cta_path: "hero_cta_path" in data && typeof data.hero_cta_path === "string" ? data.hero_cta_path : null,
+        hero_image: "hero_image" in data && isHeroImage(data.hero_image) ? data.hero_image : null });
     };
     // Keep this limited canvas on the homepage; it is not a navigation preview.
     const blockNavigation = (event: MouseEvent) => {
@@ -110,6 +116,7 @@ const HeroSlider = () => {
             hero_order: 'hero_order' in data && isHeroOrder(data.hero_order) ? data.hero_order : 'title_first',
             hero_cta_label: 'hero_cta_label' in data && typeof data.hero_cta_label === 'string' && data.hero_cta_label.length <= 80 ? data.hero_cta_label : null,
             hero_cta_path: 'hero_cta_path' in data && isInternalPath(data.hero_cta_path) ? data.hero_cta_path : null,
+            hero_image: 'hero_image' in data && isHeroImage(data.hero_image) ? data.hero_image : 'workspace',
           });
         }
       } catch {
@@ -149,10 +156,11 @@ const HeroSlider = () => {
           {canvasParent && (
             <div className="absolute top-3 left-3 z-20 flex flex-wrap items-center gap-2 rounded bg-primary px-3 py-2 text-xs text-primary-foreground shadow-lg" role="toolbar" aria-label="Homepage preview selection">
               <span>UNSAVED CANVAS</span>
+              <button type="button" aria-pressed={selectedField === "hero_image"} onClick={() => selectCanvasField("hero_image")} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_image" ? "bg-accent text-accent-foreground" : ""}`}>Background</button>
               <button type="button" aria-pressed={selectedField === "hero_cta_label"} onClick={() => selectCanvasField("hero_cta_label", false)} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_cta_label" ? "bg-accent text-accent-foreground" : ""}`}>Button</button>
               <button type="button" aria-pressed={selectedField === "hero_title"} onClick={() => selectCanvasField("hero_title", false)} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_title" ? "bg-accent text-accent-foreground" : ""}`}>Title</button>
               <button type="button" aria-pressed={selectedField === "hero_subtitle"} onClick={() => selectCanvasField("hero_subtitle", false)} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_subtitle" ? "bg-accent text-accent-foreground" : ""}`}>Subtitle</button>
-              {selectedField !== "hero_cta_label" && <>
+              {(selectedField === "hero_title" || selectedField === "hero_subtitle") && <>
                 <button type="button" aria-label={`Move ${selectedField === "hero_title" ? "title" : "subtitle"} up`} onClick={() => moveCanvasField("up")} disabled={selectedField === firstField} className="rounded border border-primary-foreground/50 px-2 py-1 disabled:opacity-40">↑</button>
                 <button type="button" aria-label={`Move ${selectedField === "hero_title" ? "title" : "subtitle"} down`} onClick={() => moveCanvasField("down")} disabled={selectedField !== firstField} className="rounded border border-primary-foreground/50 px-2 py-1 disabled:opacity-40">↓</button>
               </>}
@@ -160,7 +168,7 @@ const HeroSlider = () => {
           )}
           {slides.map((slide, i) => (
             <div key={i} className={`absolute inset-0 transition-opacity duration-1000 ${i === current ? "opacity-100" : "opacity-0"}`}>
-              <img src={slide.image} alt="" className="w-full h-full object-cover" />
+              <img src={i === 0 ? heroImages[canvasContent?.hero_image ?? homeContent?.hero_image ?? 'workspace'] : slide.image} alt="" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-primary/75 via-primary/40 to-transparent" />
             </div>
           ))}

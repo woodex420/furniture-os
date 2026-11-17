@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Workspace;
 
+use App\Support\Website\HeroImage;
 use App\Support\Website\HeroTextOrder;
 use App\Support\Website\StorefrontCanvasUrl;
 use App\Support\Website\StorefrontHomeRevisions;
@@ -22,9 +23,10 @@ final class StorefrontHomeController
     public function publicContent(): JsonResponse
     {
         abort_unless(config('furniture.home_editor_enabled'), 404);
-        $content = DB::table('storefront_home_content')->where('id', 1)->first(['hero_title', 'hero_subtitle', 'hero_order', 'hero_cta_label', 'hero_cta_path', 'revision']);
+        $content = DB::table('storefront_home_content')->where('id', 1)->first(['hero_title', 'hero_subtitle', 'hero_order', 'hero_cta_label', 'hero_cta_path', 'hero_image', 'revision']);
         abort_if($content === null, 503);
         $content->hero_order = HeroTextOrder::resolve($content->hero_order);
+        $content->hero_image = HeroImage::resolve($content->hero_image);
 
         return response()->json($content)->header('Cache-Control', 'no-store');
     }
@@ -35,14 +37,17 @@ final class StorefrontHomeController
         $content = DB::table('storefront_home_content')->where('id', 1)->first();
         abort_if($content === null, 503);
         $content->hero_order = HeroTextOrder::resolve($content->hero_order);
+        $content->hero_image = HeroImage::resolve($content->hero_image);
         $versions = DB::table('storefront_home_versions')->orderByDesc('revision')->limit(20)->get();
         foreach ($versions as $version) {
             $version->hero_order = HeroTextOrder::resolve($version->hero_order);
+            $version->hero_image = HeroImage::resolve($version->hero_image);
         }
 
         return view('workspace.storefront-home', [
             'content' => $content,
             'canvasUrl' => StorefrontCanvasUrl::configured(),
+            'imageChoices' => HeroImage::choices(),
             'versions' => $versions,
         ]);
     }
@@ -64,6 +69,7 @@ final class StorefrontHomeController
             'hero_subtitle' => ['required', 'string', 'max:240'],
             'hero_order' => ['sometimes', 'required', 'string', Rule::in(HeroTextOrder::values())],
             'hero_cta_label' => ['sometimes', 'required', 'string', 'max:80'],
+            'hero_image' => ['sometimes', 'required', 'string', Rule::in(array_keys(HeroImage::choices()))],
             // Root-relative ASCII paths only: no external URLs, backslashes, percent escapes or control characters.
             'hero_cta_path' => ['sometimes', 'required', 'string', 'max:240', 'regex:#\A/(?!/)[A-Za-z0-9._~/?=&-]*\z#D'],
             'revision' => ['required', 'integer', 'min:0', 'max:4294967294'],

@@ -14,7 +14,7 @@ use LogicException;
 /** Transactional, append-only history for the limited connected home hero. */
 final class StorefrontHomeRevisions
 {
-    /** @param array{hero_title: string, hero_subtitle: string, revision: int|string, hero_order?: string, hero_cta_label?: string, hero_cta_path?: string} $data */
+    /** @param array{hero_title: string, hero_subtitle: string, revision: int|string, hero_order?: string, hero_cta_label?: string, hero_cta_path?: string, hero_image?: string} $data */
     public function edit(int $actorId, array $data): void
     {
         $this->change($actorId, (int) $data['revision'], $data, null);
@@ -40,6 +40,7 @@ final class StorefrontHomeRevisions
                 throw new LogicException('Storefront home row is missing.');
             }
             HeroTextOrder::resolve($home->hero_order);
+            HeroImage::resolve($home->hero_image);
             if ((int) $home->revision !== $expectedRevision) {
                 throw ValidationException::withMessages(['revision' => 'This page changed since you opened it. Reload before saving your changes.']);
             }
@@ -59,6 +60,7 @@ final class StorefrontHomeRevisions
                 $order = HeroTextOrder::resolve($version->hero_order);
                 $ctaLabel = $version->hero_cta_label;
                 $ctaPath = $version->hero_cta_path;
+                $image = HeroImage::resolve($version->hero_image);
                 $type = 'restore';
             } else {
                 $title = $data['hero_title'];
@@ -67,18 +69,19 @@ final class StorefrontHomeRevisions
                 $order = HeroTextOrder::resolve($data['hero_order'] ?? $home->hero_order);
                 $ctaLabel = $data['hero_cta_label'] ?? $home->hero_cta_label;
                 $ctaPath = $data['hero_cta_path'] ?? $home->hero_cta_path;
+                $image = HeroImage::resolve($data['hero_image'] ?? $home->hero_image);
                 $type = 'edit';
             }
             $next = $expectedRevision + 1;
             DB::table('storefront_home_content')->where('id', 1)->update([
                 'hero_title' => $title, 'hero_subtitle' => $subtitle, 'hero_order' => $order,
-                'hero_cta_label' => $ctaLabel, 'hero_cta_path' => $ctaPath,
+                'hero_cta_label' => $ctaLabel, 'hero_cta_path' => $ctaPath, 'hero_image' => $image,
                 'revision' => $next, 'updated_at' => now(),
             ]);
             DB::table('storefront_home_changes')->insert(['actor_id' => $actorId, 'revision' => $next, 'created_at' => now()]);
             DB::table('storefront_home_versions')->insert([
                 'revision' => $next, 'hero_title' => $title, 'hero_subtitle' => $subtitle, 'hero_order' => $order,
-                'hero_cta_label' => $ctaLabel, 'hero_cta_path' => $ctaPath,
+                'hero_cta_label' => $ctaLabel, 'hero_cta_path' => $ctaPath, 'hero_image' => $image,
                 'actor_id' => $actorId, 'change_type' => $type, 'restored_from_revision' => $sourceRevision, 'created_at' => now(),
             ]);
         }, 3);

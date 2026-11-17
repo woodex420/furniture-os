@@ -14,19 +14,19 @@ function setup() {
         focus() { this.focused = true; }
         click() { this.dispatchEvent({ type: 'click' }); }
     }
-    const title = new Element(), subtitle = new Element(), order = new Element(), ctaLabel = new Element(), ctaPath = new Element(), frame = new Element(), status = new Element(), controls = new Element();
-    title.value = 'Draft'; subtitle.value = 'Sub'; order.value = 'title_first'; ctaLabel.value = 'Shop'; ctaPath.value = '/shop';
+    const title = new Element(), subtitle = new Element(), order = new Element(), ctaLabel = new Element(), ctaPath = new Element(), image = new Element(), frame = new Element(), status = new Element(), controls = new Element();
+    title.value = 'Draft'; subtitle.value = 'Sub'; order.value = 'title_first'; ctaLabel.value = 'Shop'; ctaPath.value = '/shop'; image.value = 'workspace';
     const messages = [];
     frame.contentWindow = { postMessage: (...args) => messages.push(args) };
     const buttons = ['fit', '375', '768', '1280', 'evil'].map(width => { const b = new Element(); b.dataset.canvasWidth = width; return b; });
     controls.querySelectorAll = () => buttons;
     const home = new Element(); home.dataset.storefrontOrigin = 'https://store.example';
     home.querySelector = selector => ({ '[data-canvas-frame]': frame, '[data-canvas-status]': status, '[data-canvas-controls]': controls })[selector];
-    const doc = { documentElement: { classList: { remove() {} } }, querySelector: selector => selector === '[data-home-canvas]' ? home : null, getElementById: id => ({ 'hero-title': title, 'hero-subtitle': subtitle, 'hero-order': order, 'hero-cta-label': ctaLabel, 'hero-cta-path': ctaPath })[id], addEventListener() {} };
+    const doc = { documentElement: { classList: { remove() {} } }, querySelector: selector => selector === '[data-home-canvas]' ? home : null, getElementById: id => ({ 'hero-title': title, 'hero-subtitle': subtitle, 'hero-order': order, 'hero-cta-label': ctaLabel, 'hero-cta-path': ctaPath, 'hero-image': image })[id], addEventListener() {} };
     const win = new Element(); win.location = { origin: 'https://admin.example' }; win.setTimeout = () => 1;
     vm.runInNewContext(script, { document: doc, window: win, URL, Event: class { constructor(type) { this.type = type; } } });
     const message = data => win.dispatchEvent({ type: 'message', source: frame.contentWindow, origin: 'https://store.example', data });
-    return { buttons, controls, frame, title, subtitle, order, ctaLabel, ctaPath, status, messages, win, message };
+    return { buttons, controls, frame, title, subtitle, order, ctaLabel, ctaPath, image, status, messages, win, message };
 }
 
 test('viewport presets change the real frame width without reloading or changing draft', () => {
@@ -70,4 +70,14 @@ test('button draft is sent only to the configured frame and click selection focu
     assert.equal(payload.hero_cta_path, '/services');
     message({ type: 'furniture-home-canvas-select', field: 'hero_cta_label', focus_input: true });
     assert.equal(ctaLabel.focused, true);
+});
+
+test('background selection sends the draft and focuses the image selector', () => {
+    const { image, messages, message } = setup();
+    image.value = 'meeting';
+    image.dispatchEvent({ type: 'change' });
+    assert.equal(messages.at(-1)[0].hero_image, 'meeting');
+    assert.equal(messages.at(-1)[1], 'https://store.example');
+    message({ type: 'furniture-home-canvas-select', field: 'hero_image', focus_input: true });
+    assert.equal(image.focused, true);
 });

@@ -37,9 +37,10 @@ if (homeCanvas) {
     const order = document.getElementById('hero-order');
     const ctaLabel = document.getElementById('hero-cta-label');
     const ctaPath = document.getElementById('hero-cta-path');
+    const image = document.getElementById('hero-image');
     try {
         const storefront = new URL(homeCanvas.dataset.storefrontOrigin);
-        if (!frame || !status || !title || !subtitle || !order || !ctaLabel || !ctaPath || !['http:', 'https:'].includes(storefront.protocol) || storefront.origin === window.location.origin) throw new Error('Canvas must use a separate origin');
+        if (!frame || !status || !title || !subtitle || !order || !ctaLabel || !ctaPath || !image || !['http:', 'https:'].includes(storefront.protocol) || storefront.origin === window.location.origin) throw new Error('Canvas must use a separate origin');
         const targetOrigin = storefront.origin;
         const controls = homeCanvas.querySelector('[data-canvas-controls]');
         if (controls) {
@@ -67,7 +68,7 @@ if (homeCanvas) {
             }, 12000);
         };
         const sendValues = () => {
-            frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-values', hero_title: title.value, hero_subtitle: subtitle.value, hero_order: order.value, hero_cta_label: ctaLabel.value, hero_cta_path: ctaPath.value }, targetOrigin);
+            frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-values', hero_title: title.value, hero_subtitle: subtitle.value, hero_order: order.value, hero_cta_label: ctaLabel.value, hero_cta_path: ctaPath.value, hero_image: image.value }, targetOrigin);
         };
         window.addEventListener('message', (event) => {
             if (event.source !== frame.contentWindow || event.origin !== targetOrigin || !event.data || typeof event.data !== 'object') return;
@@ -81,6 +82,7 @@ if (homeCanvas) {
                 if (event.data.focus_input !== false && event.data.field === 'hero_title') title.focus();
                 if (event.data.focus_input !== false && event.data.field === 'hero_subtitle') subtitle.focus();
                 if (event.data.focus_input !== false && event.data.field === 'hero_cta_label') ctaLabel.focus();
+                if (event.data.focus_input !== false && event.data.field === 'hero_image') image.focus();
             } else if (event.data.type === 'furniture-home-canvas-move') {
                 const fields = order.value === 'title_first' ? ['hero_title', 'hero_subtitle'] : order.value === 'subtitle_first' ? ['hero_subtitle', 'hero_title'] : [];
                 const index = fields.indexOf(event.data.field);
@@ -93,6 +95,7 @@ if (homeCanvas) {
         });
         for (const input of [title, subtitle, ctaLabel, ctaPath]) input.addEventListener('input', sendValues);
         order.addEventListener('change', sendValues);
+        image.addEventListener('change', sendValues);
         frame.addEventListener('load', () => {
             waitForCanvas();
             frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-ping' }, targetOrigin);
