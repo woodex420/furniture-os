@@ -14,6 +14,8 @@ return [
     'city_pages_enabled' => (bool) env('FURNITURE_CITY_PAGES_ENABLED', false),
     // Furniture-owned blog experiment; disabled until explicitly enabled.
     'blog_posts_enabled' => (bool) env('FURNITURE_BLOG_POSTS_ENABLED', false),
+    // Dedicated synthetic admin preview only: send its root to the authenticated workspace.
+    'admin_preview_landing' => (bool) env('FURNITURE_ADMIN_PREVIEW_LANDING', false),
     // Isolated, owner-only media experiment; disabled until explicitly enabled.
     'media_library_enabled' => (bool) env('FURNITURE_MEDIA_LIBRARY_ENABLED', false),
     // Optional, explicitly configured storefront origin for the visual preview.

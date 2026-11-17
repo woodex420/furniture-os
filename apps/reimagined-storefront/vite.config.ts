@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'node:path';
+import { buildPreviewProxy } from './preview-proxy.mjs';
 
-// Isolated, local-only demo. No reference-repository env files or live API proxy.
+// Preview-only development proxy. Never use a reference-repository env or production credentials.
 export default defineConfig({
   server: {
     host: '0.0.0.0',
@@ -10,10 +11,10 @@ export default defineConfig({
     strictPort: true,
     allowedHosts: true,
     hmr: process.env.ARENA_PREVIEW === '1' ? { clientPort: 443 } : undefined,
-    // Dev-server only: browsers use a same-origin URL; never ship this internal address.
-    proxy: process.env.FURNITURE_PREVIEW_API ? {
-      '/storefront-api': { target: process.env.FURNITURE_PREVIEW_API, changeOrigin: true },
-    } : undefined,
+    // Dev-server only: same-origin storefront and Furniture admin in the synthetic preview.
+    // No backend address or credentials are exposed to browser bundles. Do not deploy this
+    // as a production proxy; Laravel's auth/CSRF/permissions remain authoritative.
+    proxy: buildPreviewProxy(process.env.FURNITURE_PREVIEW_API),
   },
   plugins: [react()],
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },

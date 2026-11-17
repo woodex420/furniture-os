@@ -20,10 +20,19 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-// The public Furniture storefront is not implemented yet. Never present a framework welcome
-// page or example products as a finished shop.
-Route::get('/', fn () => response('Reimagin v1 storefront is not available yet.', 503))
-    ->name('home');
+// The Laravel public storefront is not implemented. Only a separately enabled synthetic
+// admin preview may direct its root to the workspace; normal installations remain 503.
+Route::get('/', function () {
+    if (config('furniture.admin_preview_landing')) {
+        return response('', 302, [
+            'Location' => '/admin',
+            'Cache-Control' => 'private, no-store',
+            'X-Robots-Tag' => 'noindex, nofollow',
+        ]);
+    }
+
+    return response('Reimagin v1 storefront is not available yet.', 503);
+})->name('home');
 
 // Read-only public homepage content; writes are restricted to the owner workspace.
 Route::get('/storefront-api/home', [StorefrontHomeController::class, 'publicContent'])

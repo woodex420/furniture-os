@@ -115,7 +115,7 @@ jobs:
         run: |
           npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
           npx vite build
-          node --test tests/service-copy-parser.test.mjs tests/city-page-parser.test.mjs tests/blog-preview-parser.test.mjs
+          node --test tests/service-copy-parser.test.mjs tests/city-page-parser.test.mjs tests/blog-preview-parser.test.mjs tests/preview-proxy.test.mjs
 
   astro-spike:
     name: Astro shared-hero prototype

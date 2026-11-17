@@ -57,6 +57,7 @@ const App = () => (
         <BrowserRouter>
           <div className="preview-notice" role="note">
             <span><strong>STOREFRONT PREVIEW</strong> · Sample data. Home hero, tagline, limited service text, city pages and blog articles connect to Furniture admin; other features are still in progress.</span>
+            {import.meta.env.DEV && <span className="preview-notice-links"><a href="/admin">Open Furniture admin</a></span>}
           </div>
           <RouteHead />
           <ChatBubble />
