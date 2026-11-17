@@ -17,3 +17,6 @@ auth.json
 *.sqlite3
 *.sqlite-*
 *.db
+
+# Isolated Astro spike output/cache (never a release artifact).
+/apps/astro-hero-spike/.astro/
