@@ -1,0 +1,20 @@
+/* Dedicated editor chrome, scoped so the storefront retains its original tokens. */
+.builder-workspace { min-height: calc(100dvh - 36px); height: calc(100dvh - 36px); padding: 10px 14px 14px; background: #edf0e9; }
+.builder-intro { display: flex; align-items: center; gap: 18px; min-height: 34px; color: #50604d; font-size: 12px; font-weight: 600; }
+.builder-brand { color: #1f301b; font-size: 16px; font-weight: 900; letter-spacing: -.04em; }
+.builder-brand small { color: #5a812e; font-size: 10px; letter-spacing: .18em; }
+.builder-demo { padding: 4px 8px; border: 1px solid #d5e2c8; border-radius: 20px; background: #f7fbed; color: #56762f; }
+.builder-hint { margin-left: auto; color: #7b8977; font-weight: 400; }
+.builder-workspace [data-puck-entry] { --puck-color-interactive: #527d20; --puck-color-interactive-hover: #3e6417; --puck-color-interactive-active: #2f4e10; --puck-color-interactive-subtle: #e7f0d9; --puck-color-focus-ring: #799d4f; --puck-color-selection-border: #a4bf83; }
+.builder-inspector-nav { display:flex; gap: 4px; padding: 12px; border-bottom: 1px solid #e5e9e1; }
+.builder-inspector-nav button { flex: 1; padding: 8px 4px; border-radius: 6px; color: #697368; font-size: 12px; font-weight: 600; }
+.builder-inspector-nav button[aria-selected="true"] { color:#42691b; background: #ecf4e3; }
+.builder-field-row { padding: 12px 16px; border-bottom: 1px solid #edf0eb; }
+@media (max-width: 767px) {
+  .builder-workspace { height: calc(100dvh - 60px); min-height: 620px; padding: 8px; }
+  .builder-intro { flex-wrap: wrap; gap: 8px; }
+  .builder-actions { width: 100%; margin-left: 0; }
+  .builder-workspace { height: auto; min-height: calc(100dvh - 60px); }
+  .builder-workspace > .min-h-0 { min-height: 520px; }
+  .builder-hint { display:none; }
+}

@@ -35,6 +35,7 @@
         'Settings' => 'Settings', 'Access & Team' => 'Users', 'Connections' => 'Zap', 'Platform' => 'Layers3', 'Audit & Activity' => 'Clock3', 'Workspace Preferences' => 'SlidersHorizontal', 'Team Onboarding' => 'Users',
     ];
     $available = ['Dashboard' => ['admin', 'workspace.view'], 'Leads' => ['admin.leads', 'leads.view'], 'Contacts' => ['admin.contacts', 'contacts.view']];
+    if (config('furniture.home_editor_enabled')) $available['Site Overview'] = ['admin.storefront.home', 'storefront.edit'];
 @endphp
 <div class="app">
     <div class="workspace-backdrop" data-workspace-backdrop hidden aria-hidden="true"></div>
@@ -54,7 +55,7 @@
                         @if (isset($available[$item]))
                             @can($available[$item][1])
                                 @php($isActive = request()->routeIs($available[$item][0], $available[$item][0].'.show', $available[$item][0].'.create'))
-                                <a href="{{ route($available[$item][0], absolute: false) }}" class="nav-item {{ $isActive ? 'active' : '' }}" @if($isActive) aria-current="{{ request()->routeIs($available[$item][0]) ? 'page' : 'location' }}" @endif>@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span>@if($item !== 'Dashboard')<small class="pending-badge">{{ ($item === 'Contacts' && config('furniture.contact_creation_enabled')) || ($item === 'Leads' && config('furniture.lead_creation_enabled')) ? 'Testing' : 'Read only' }}</small>@endif</a>
+                                <a href="{{ route($available[$item][0], absolute: false) }}" class="nav-item {{ $isActive ? 'active' : '' }}" @if($isActive) aria-current="{{ request()->routeIs($available[$item][0]) ? 'page' : 'location' }}" @endif>@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span>@if($item !== 'Dashboard')<small class="pending-badge">{{ ($item === 'Contacts' && config('furniture.contact_creation_enabled')) || ($item === 'Leads' && config('furniture.lead_creation_enabled')) || $item === 'Site Overview' ? 'Testing' : 'Read only' }}</small>@endif</a>
                             @endcan
                         @else
                             <span class="nav-item pending-item">@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span><small class="pending-badge">Pending</small></span>

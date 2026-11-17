@@ -1,0 +1,287 @@
+import { useState, useEffect } from "react";
+import { Mail, Phone, MapPin, Clock, Send, MessageCircle, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
+import { getAdminApi } from "@/api";
+import { LeadConsent } from "@/components/LeadConsent";
+import { LeadSubmissionWarning } from "@/components/LeadSubmissionWarning";
+import { unconfirmedLeadDetail, useLeadSubmissionGuard } from "@/lib/lead-submission";
+import { CONTACT_MESSAGE_LIMIT, CONTACT_SUBJECT_LIMIT, LEAD_INTEREST_LIMIT } from "@/lib/lead-content";
+import { buildConsent, collectAttributionBrowser } from "@/lib/consent";
+import { getTurnstileToken } from "@/lib/turnstile";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import contactHero from "@/assets/contact-hero.webp";
+import { site, waLink } from "@/config/site";
+
+const showrooms = [
+  { city: "Lahore (HQ)", address: `${site.address.line1}, ${site.address.city}`, phone: site.phoneAlt, hours: site.hours },
+  { city: "Karachi", address: "456 Clifton Block 5, Karachi", phone: "+92 21 111 WOODEX", hours: "Mon–Sat: 9am–7pm" },
+  { city: "Islamabad", address: "789 Blue Area, F-7, Islamabad", phone: "+92 51 111 WOODEX", hours: "Mon–Sat: 10am–6pm" },
+];
+
+const faqs = [
+  { q: "How quickly can you deliver?", a: "Standard delivery takes 7-14 business days within major cities. Custom orders may take 3-4 weeks depending on complexity." },
+  { q: "Do you offer installation services?", a: "Yes, free professional assembly and installation is included for all orders within Lahore, Karachi, and Islamabad. Other cities available at nominal charges." },
+  { q: "Can I visit the factory?", a: "Absolutely! We welcome factory visits by appointment. Contact us to schedule a tour of our manufacturing facility in Lahore." },
+  { q: "What payment methods do you accept?", a: "We accept bank transfers, cheques, and cash on delivery for orders within major cities. Corporate clients can set up credit accounts." },
+];
+
+const Contact = () => {
+  const [submitted, setSubmitted] = useState(false);
+  const submission = useLeadSubmissionGuard();
+  const [consent, setConsent] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    document.title = "Contact Us — WOODEX Pakistan | Showrooms in Lahore, Karachi, Islamabad";
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!consent) {
+      toast.error("Please tick the consent box so we can process your enquiry.");
+      return;
+    }
+    const form = e.currentTarget;
+    const val = (id: string) => ((form.elements.namedItem(id) as HTMLInputElement | HTMLTextAreaElement | null)?.value ?? "").trim();
+    const name = val("name");
+    const email = val("email");
+    const phone = val("phone");
+    const subject = val("subject");
+    const message = val("message");
+    const summary = `Website enquiry — ${subject || "General"}: ${message}`;
+    if (summary.length > LEAD_INTEREST_LIMIT) {
+      toast.error("Your enquiry is too long to submit. Please shorten the subject or message.");
+      return;
+    }
+    if (!submission.begin()) return;
+    let cfTurnstileToken: string | undefined;
+    try {
+      cfTurnstileToken = (await getTurnstileToken("lead")) ?? undefined;
+    } catch (err) {
+      console.error("Turnstile challenge failed:", err);
+      toast.error("Verification didn't load — check your connection and try again.");
+      submission.verificationFailed();
+      return;
+    }
+    try {
+      const lead = await getAdminApi().createLead({
+        type: "quote",
+        name,
+        email: email || undefined,
+        phone: phone || "—",
+        summary,
+        ...buildConsent(),
+        ...collectAttributionBrowser(),
+        cfTurnstileToken,
+      });
+      const detail = unconfirmedLeadDetail(lead.submissionOutcome);
+      if (detail) {
+        submission.unconfirmed(detail);
+        toast.error("We couldn't confirm your enquiry. Please check with us before sending it again.");
+        return;
+      }
+      submission.success();
+      setSubmitted(true);
+      form.reset();
+      setTimeout(() => { submission.reset(); setSubmitted(false); }, 4000);
+    } catch (err) {
+      console.error("Contact lead outcome could not be confirmed:", err);
+      submission.unconfirmed(null);
+      toast.error("We couldn't confirm your enquiry. Please check with us before sending it again.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+
+      <main className="flex-1">
+        {/* Page Header with Hero Image */}
+        <section className="relative h-72 overflow-hidden bg-primary">
+          <img src={contactHero} alt="WOODEX Office Showroom" className="w-full h-full object-cover opacity-30" />
+          <div className="absolute inset-0 flex items-center">
+            <div className="container mx-auto px-4">
+              <p className="text-hon-green-light text-xs font-bold uppercase tracking-widest mb-2">Contact Us</p>
+              <h1 className="text-4xl lg:text-5xl font-black text-primary-foreground mb-3">Get in Touch</h1>
+              <p className="text-primary-foreground/75 max-w-xl">
+                Have questions about our products or services? We'd love to hear from you.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Contact Info + Form */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="grid lg:grid-cols-3 gap-10">
+              {/* Info Cards */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-bold mb-6">Contact Information</h2>
+                {[
+                  { icon: Phone, title: "Call Us", lines: [site.phone, site.phoneAlt] },
+                  { icon: Mail, title: "Email Us", lines: [site.email, site.salesEmail] },
+                  { icon: MapPin, title: "Head Office", lines: [site.address.line1, `${site.address.city}, ${site.address.country}`] },
+                  { icon: Clock, title: "Business Hours", lines: [site.hours, "Sun: Closed"] },
+                ].map((item) => (
+                  <div key={item.title} className="flex gap-4 p-4 border border-border rounded-sm hover:border-accent transition-colors">
+                    <div className="w-10 h-10 rounded-sm bg-hon-green-pale flex items-center justify-center flex-shrink-0">
+                      <item.icon className="h-5 w-5 text-accent" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm mb-1">{item.title}</p>
+                      {item.lines.map((line) => (
+                        <p key={line} className="text-sm text-muted-foreground">{line}</p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Form */}
+              <div className="lg:col-span-2">
+                <h2 className="text-xl font-bold mb-6">Send a Message</h2>
+                <Card className="border shadow-sm">
+                  <CardContent className="pt-6">
+                    {submitted ? (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 rounded-full bg-hon-green-pale flex items-center justify-center mx-auto mb-4">
+                          <Send className="h-8 w-8 text-accent" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-2">Message Sent!</h3>
+                        <p className="text-muted-foreground">We'll get back to you within 24 hours.</p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleSubmit}>
+                        <fieldset disabled={submission.busy} className="space-y-5">
+                        <div className="grid md:grid-cols-2 gap-5">
+                          <div className="space-y-1.5">
+                            <Label htmlFor="name">Full Name *</Label>
+                            <Input id="name" placeholder="Muhammad Ali" maxLength={160} required />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label htmlFor="email">Email *</Label>
+                            <Input id="email" type="email" placeholder="your@email.com" maxLength={254} required />
+                          </div>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-5">
+                          <div className="space-y-1.5">
+                            <Label htmlFor="phone">Phone</Label>
+                            <Input id="phone" type="tel" placeholder={site.phone} maxLength={40} />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label htmlFor="subject">Subject</Label>
+                            <Input id="subject" placeholder="Product inquiry" maxLength={CONTACT_SUBJECT_LIMIT} />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="message">Message *</Label>
+                          <Textarea id="message" placeholder="Tell us about your project..." className="min-h-[140px]" maxLength={CONTACT_MESSAGE_LIMIT} required />
+                          <p className="text-xs text-muted-foreground">Up to {CONTACT_MESSAGE_LIMIT} characters. Please do not include sensitive information.</p>
+                        </div>
+                        <LeadConsent checked={consent} onChange={setConsent} />
+                        {submission.unknown && <LeadSubmissionWarning detail={submission.detail} acknowledged={submission.acknowledged} onAcknowledge={submission.acknowledge} />}
+                        <Button type="submit" disabled={submission.busy || submission.blocked || !consent} className="w-full bg-accent hover:bg-hon-green-dark text-accent-foreground font-semibold">
+                          {submission.busy ? "Sending…" : "Send Message"}
+                        </Button>
+                        </fieldset>
+                      </form>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Google Maps */}
+        <section className="border-t">
+          <div className="w-full h-80 bg-section-mid">
+            <iframe
+              title={`WOODEX Head Office Location — ${site.address.city}`}
+              src={site.address.mapsEmbed}
+              className="w-full h-full border-0"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </section>
+
+        {/* Showrooms */}
+        <section className="py-14 bg-section-light border-t">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-10">
+              <div className="w-12 h-1 bg-accent mx-auto mb-4" />
+              <h2 className="text-3xl font-bold mb-3">Visit Our Showrooms</h2>
+              <p className="text-muted-foreground">Experience our furniture in person</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {showrooms.map((s) => (
+                <div key={s.city} className="p-6 bg-background border rounded-sm hover:border-accent transition-colors">
+                  <div className="w-8 h-1 bg-accent mb-4" />
+                  <h3 className="font-bold text-lg mb-3">{s.city}</h3>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-start gap-2"><MapPin className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" /><span>{s.address}</span></div>
+                    <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-accent flex-shrink-0" /><span>{s.phone}</span></div>
+                    <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-accent flex-shrink-0" /><span>{s.hours}</span></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-14 bg-background border-t">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <div className="text-center mb-10">
+              <div className="w-12 h-1 bg-accent mx-auto mb-5" />
+              <h2 className="text-2xl font-bold mb-2">Frequently Asked Questions</h2>
+            </div>
+            <div className="space-y-3">
+              {faqs.map((faq, i) => (
+                <div key={i} className="border border-border rounded-sm overflow-hidden">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-section-light transition-colors"
+                  >
+                    <span className="font-semibold text-sm">{faq.q}</span>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform flex-shrink-0 ml-4 ${openFaq === i ? "rotate-180" : ""}`} />
+                  </button>
+                  {openFaq === i && (
+                    <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed border-t border-border bg-section-light">
+                      <div className="pt-3">{faq.a}</div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* WhatsApp Floating Button */}
+      <div role="region" aria-label="Chat with WOODEX" className="fixed bottom-6 right-6 z-50">
+        <a
+          href={waLink("Hi WOODEX, I'm interested in your furniture")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-14 h-14 bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,38%)] text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+          aria-label="Chat on WhatsApp"
+        >
+          <MessageCircle className="h-7 w-7" />
+        </a>
+      </div>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Contact;

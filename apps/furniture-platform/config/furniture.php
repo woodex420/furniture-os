@@ -7,4 +7,5 @@ return [
     // MySQL concurrency, deployment and business policy have not been verified.
     'contact_creation_enabled' => (bool) env('FURNITURE_CONTACT_CREATION_ENABLED', false),
     'lead_creation_enabled' => (bool) env('FURNITURE_LEAD_CREATION_ENABLED', false),
+    'home_editor_enabled' => (bool) env('FURNITURE_HOME_EDITOR_ENABLED', false),
 ];

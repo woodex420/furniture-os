@@ -41,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('contacts.view', fn (User $user): bool => $user->is_owner === true);
         // Experimental owner-only contact creation; the UI is feature-flagged off by default.
         Gate::define('contacts.create', fn (User $user): bool => $user->is_owner === true);
+        Gate::define('storefront.edit', fn (User $user): bool => $user->is_owner === true);
 
         // All current Livewire components are private workspace components. Future public
         // components need a separately reviewed endpoint, not a relaxation of this one.
