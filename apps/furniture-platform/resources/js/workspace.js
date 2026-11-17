@@ -38,6 +38,7 @@ if (homeCanvas) {
     const ctaLabel = document.getElementById('hero-cta-label');
     const ctaPath = document.getElementById('hero-cta-path');
     const image = document.getElementById('hero-image');
+    const media = document.getElementById('hero-media');
     try {
         const storefront = new URL(homeCanvas.dataset.storefrontOrigin);
         if (!frame || !status || !title || !subtitle || !order || !ctaLabel || !ctaPath || !image || !['http:', 'https:'].includes(storefront.protocol) || storefront.origin === window.location.origin) throw new Error('Canvas must use a separate origin');
@@ -67,8 +68,37 @@ if (homeCanvas) {
                 if (!connected && thisAttempt === attempt) status.textContent = 'Canvas unavailable or blocked. You can still save using the fields below.';
             }, 12000);
         };
+        const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        let imageRequest = 0;
+        let imageAbort = null;
         const sendValues = () => {
-            frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-values', hero_title: title.value, hero_subtitle: subtitle.value, hero_order: order.value, hero_cta_label: ctaLabel.value, hero_cta_path: ctaPath.value, hero_image: image.value }, targetOrigin);
+            const values = { type: 'furniture-home-canvas-values', hero_title: title.value, hero_subtitle: subtitle.value, hero_order: order.value, hero_cta_label: ctaLabel.value, hero_cta_path: ctaPath.value, hero_image: image.value };
+            if (media) values.hero_media_id = uuid.test(media.value) ? media.value : null;
+            frame.contentWindow?.postMessage(values, targetOrigin);
+        };
+        const sendPrivateImage = async () => {
+            const sequence = ++imageRequest;
+            imageAbort?.abort();
+            if (!media || !uuid.test(media.value)) {
+                if (connected) status.textContent = 'Canvas connected · Changes here are not saved until you update the storefront.';
+                return;
+            }
+            const id = media.value;
+            imageAbort = new AbortController();
+            try {
+                // The admin fetches with its own session. Only the approved frame receives
+                // the bytes; no private URL, cookie or token is sent to the storefront.
+                const response = await fetch(`/admin/website/media/${id}/file`, { credentials: 'same-origin', cache: 'no-store', signal: imageAbort.signal });
+                const mime = response.headers.get('content-type')?.split(';')[0];
+                if (!response.ok || !['image/png', 'image/jpeg'].includes(mime)) throw new Error('Image unavailable');
+                const bytes = await response.arrayBuffer();
+                if (bytes.byteLength === 0 || bytes.byteLength > 12 * 1024 * 1024) throw new Error('Image too large');
+                if (sequence !== imageRequest || media.value !== id || !connected) return;
+                frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-image', id, mime, bytes }, targetOrigin, [bytes]);
+                status.textContent = 'Canvas connected · Changes here are not saved until you update the storefront.';
+            } catch (error) {
+                if (sequence === imageRequest && error?.name !== 'AbortError') status.textContent = 'Canvas connected, but the selected image could not be loaded. Check your session or choose another image.';
+            }
         };
         window.addEventListener('message', (event) => {
             if (event.source !== frame.contentWindow || event.origin !== targetOrigin || !event.data || typeof event.data !== 'object') return;
@@ -76,6 +106,7 @@ if (homeCanvas) {
                 connected = true;
                 status.textContent = 'Canvas connected · Changes here are not saved until you update the storefront.';
                 sendValues();
+                void sendPrivateImage();
             } else if (event.data.type === 'furniture-home-canvas-select') {
                 // Toolbar selection stays in the frame so keyboard users can reach move controls.
                 if (event.data.focus_input !== undefined && typeof event.data.focus_input !== 'boolean') return;
@@ -96,6 +127,7 @@ if (homeCanvas) {
         for (const input of [title, subtitle, ctaLabel, ctaPath]) input.addEventListener('input', sendValues);
         order.addEventListener('change', sendValues);
         image.addEventListener('change', sendValues);
+        if (media) media.addEventListener('change', () => { sendValues(); void sendPrivateImage(); });
         frame.addEventListener('load', () => {
             waitForCanvas();
             frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-ping' }, targetOrigin);

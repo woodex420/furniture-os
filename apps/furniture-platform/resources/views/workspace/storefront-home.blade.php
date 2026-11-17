@@ -11,6 +11,7 @@
         $ctaLabelValue = old('hero_cta_label', $content->hero_cta_label ?? 'Shop Now');
         $ctaPathValue = old('hero_cta_path', $content->hero_cta_path ?? '/shop?category=workstations');
         $imageValue = old('hero_image', $content->hero_image);
+        $mediaValue = old('hero_media_id', $content->hero_media_id);
     @endphp
     <div class="content list-page">
         <div class="demo-banner"><span>STOREFRONT INTEGRATION</span> First homepage slide only. Full visual editing and other pages are still in progress.</div>
@@ -42,7 +43,7 @@
         <section class="card customer-detail contact-create" aria-labelledby="home-editor-heading">
             <h2 id="home-editor-heading">Homepage hero</h2>
             <p class="form-help">Save the first slide’s text, text order, button and background to the connected storefront preview. Other slides and page sections are unchanged.</p>
-            @if ($errors->any())<div class="form-error" role="alert">Please check the fields below. @error('revision'){{ $message }} <a href="{{ route('admin.storefront.home', absolute: false) }}">Reload editor</a>.@enderror @error('source_revision'){{ $message }}@enderror</div>@endif
+            @if ($errors->any())<div class="form-error" role="alert">Please check the fields below. @error('revision'){{ $message }} <a href="{{ route('admin.storefront.home', absolute: false) }}">Reload editor</a>.@enderror @error('source_revision'){{ $message }}@enderror @error('hero_media_id'){{ $message }}@enderror</div>@endif
             <form method="POST" action="{{ route('admin.storefront.home.update', absolute: false) }}">
                 @csrf
                 <input type="hidden" name="revision" value="{{ is_scalar($revisionValue) ? $revisionValue : '' }}">
@@ -51,7 +52,12 @@
                 <div class="form-field"><label for="hero-order">First slide text order</label><select id="hero-order" name="hero_order" @error('hero_order') aria-invalid="true" aria-describedby="order-error" @enderror><option value="title_first" @selected($orderValue === 'title_first')>Title, then subtitle</option><option value="subtitle_first" @selected($orderValue === 'subtitle_first')>Subtitle, then title</option></select>@error('hero_order')<p class="field-error" id="order-error">{{ $message }}</p>@enderror</div>
                 <div class="form-field"><label for="hero-cta-label">First slide button text</label><input id="hero-cta-label" name="hero_cta_label" type="text" maxlength="80" required value="{{ is_string($ctaLabelValue) ? $ctaLabelValue : '' }}" @error('hero_cta_label') aria-invalid="true" aria-describedby="cta-label-error" @enderror>@error('hero_cta_label')<p class="field-error" id="cta-label-error">{{ $message }}</p>@enderror</div>
                 <div class="form-field"><label for="hero-cta-path">First slide button destination</label><input id="hero-cta-path" name="hero_cta_path" type="text" maxlength="240" required value="{{ is_string($ctaPathValue) ? $ctaPathValue : '' }}" aria-describedby="cta-path-help @error('hero_cta_path') cta-path-error @enderror" @error('hero_cta_path') aria-invalid="true" @enderror><p id="cta-path-help" class="form-help">Internal paths only, for example /contact or /shop?category=workstations. No spaces, encoded characters or external links.</p>@error('hero_cta_path')<p class="field-error" id="cta-path-error">{{ $message }}</p>@enderror</div>
-                <div class="form-field"><label for="hero-image">First slide background</label><select id="hero-image" name="hero_image" @error('hero_image') aria-invalid="true" aria-describedby="image-error" @enderror>@foreach ($imageChoices as $key => $label)<option value="{{ $key }}" @selected($imageValue === $key)>{{ $label }}</option>@endforeach</select><p class="form-help">Choose one of the five images already in the storefront. New uploads are not available yet.</p>@error('hero_image')<p class="field-error" id="image-error">{{ $message }}</p>@enderror</div>
+                <div class="form-field"><label for="hero-image">First slide background</label><select id="hero-image" name="hero_image" @error('hero_image') aria-invalid="true" aria-describedby="image-error" @enderror>@foreach ($imageChoices as $key => $label)<option value="{{ $key }}" @selected($imageValue === $key)>{{ $label }}</option>@endforeach</select><p class="form-help">Used when no uploaded image is selected below.</p>@error('hero_image')<p class="field-error" id="image-error">{{ $message }}</p>@enderror</div>
+                @if (config('furniture.media_library_enabled'))
+                    <div class="form-field"><label for="hero-media">Uploaded background</label><select id="hero-media" name="hero_media_id" @error('hero_media_id') aria-invalid="true" aria-describedby="hero-media-error" @enderror><option value="" @selected($mediaValue === null || $mediaValue === '')>Use bundled background</option>@foreach ($mediaChoices as $item)<option value="{{ $item->id }}" @selected($mediaValue === $item->id)>{{ $item->title }} · {{ $item->id }}</option>@endforeach</select><p class="form-help">The latest 100 uploads are listed, plus the current selection. <a href="{{ route('admin.website.media', absolute: false) }}">Upload an image</a>. Selecting an image here is a draft; saving or restoring a version that uses it makes that image publicly accessible on the connected storefront preview.</p>@error('hero_media_id')<p class="field-error" id="hero-media-error">{{ $message }}</p>@enderror</div>
+                @elseif ($content->hero_media_id)
+                    <p class="form-help">An uploaded background is selected. Media selection is disabled; saving other fields preserves it.</p>
+                @endif
                 <div class="form-actions"><button type="submit">Update storefront preview</button></div>
             </form>
         </section>
@@ -71,7 +77,7 @@
                             <p>{{ $version->hero_title ?? 'Default title' }} — {{ $version->hero_subtitle ?? 'Default subtitle' }}</p>
                             <p>Order: {{ $version->hero_order === 'subtitle_first' ? 'Subtitle, then title' : 'Title, then subtitle' }}</p>
                             <p>Button: {{ $version->hero_cta_label ?? 'Shop Now' }} → {{ $version->hero_cta_path ?? '/shop?category=workstations' }}</p>
-                            <p>Background: {{ $imageChoices[$version->hero_image] }}</p>
+                            <p>Background: {{ $version->hero_media_id ? ($version->media_title ?? 'Unavailable upload') . ' · uploaded image' : $imageChoices[$version->hero_image] . ' · bundled image' }}</p>
                             @if ((int) $version->revision !== (int) $content->revision)
                                 <form method="POST" action="{{ route('admin.storefront.home.restore', absolute: false) }}">
                                     @csrf

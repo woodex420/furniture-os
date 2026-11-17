@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import slide1 from "@/assets/hero-slide-1.webp?url";
@@ -19,13 +19,14 @@ const slides = [
 const heroImages = { workspace: slide1, meeting: slide2, executive: slide3, reception: slide4, manager: slide5 } as const;
 type HeroImage = keyof typeof heroImages;
 const isHeroImage = (value: unknown): value is HeroImage => typeof value === "string" && Object.prototype.hasOwnProperty.call(heroImages, value);
+const isMediaId = (value: unknown): value is string => typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 
 type HeroOrder = "title_first" | "subtitle_first";
 const isHeroOrder = (value: unknown): value is HeroOrder => value === "title_first" || value === "subtitle_first";
 // Mirrors the server's restricted root-relative path contract; never render unsafe hrefs.
 const isInternalPath = (value: unknown): value is string => typeof value === "string" && value.length <= 240 && /^\/(?!\/)[A-Za-z0-9._~/?=&-]*(?![\s\S])/.test(value);
-type HomeContent = { hero_title: string | null; hero_subtitle: string | null; hero_order: HeroOrder; hero_cta_label: string | null; hero_cta_path: string | null; hero_image: HeroImage };
-type CanvasContent = { hero_title: string; hero_subtitle: string; hero_order: HeroOrder | null; hero_cta_label: string | null; hero_cta_path: string | null; hero_image: HeroImage | null };
+type HomeContent = { hero_title: string | null; hero_subtitle: string | null; hero_order: HeroOrder; hero_cta_label: string | null; hero_cta_path: string | null; hero_image: HeroImage; hero_media_id: string | null };
+type CanvasContent = { hero_title: string; hero_subtitle: string; hero_order: HeroOrder | null; hero_cta_label: string | null; hero_cta_path: string | null; hero_image: HeroImage | null; hero_media_id: string | null | undefined };
 type CanvasField = "hero_title" | "hero_subtitle" | "hero_cta_label" | "hero_image";
 
 /** Shared by the current Reimagin homepage and the isolated Astro parity spike. */
@@ -37,6 +38,9 @@ const HeroSlider = () => {
   const [canvasParent, setCanvasParent] = useState<string | null>(null);
   const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null);
   const [selectedField, setSelectedField] = useState<CanvasField>("hero_title");
+  const [canvasImage, setCanvasImage] = useState<{ id: string; url: string } | null>(null);
+  const imageRef = useRef<{ id: string; url: string } | null>(null);
+  const selectedMediaRef = useRef<string | null | undefined>(undefined);
 
   // This mode only changes pixels inside an embedded preview. It has no write access.
   // A parent must send from the origin in the URL and from the actual iframe parent.
@@ -62,6 +66,14 @@ const HeroSlider = () => {
         window.parent.postMessage({ type: "furniture-home-canvas-ready" }, origin);
         return;
       }
+      if (data.type === "furniture-home-canvas-image") {
+        if (!("id" in data) || !isMediaId(data.id) || data.id !== selectedMediaRef.current || !("mime" in data) || typeof data.mime !== "string" || !["image/png", "image/jpeg"].includes(data.mime) || !("bytes" in data) || !(data.bytes instanceof ArrayBuffer) || data.bytes.byteLength === 0 || data.bytes.byteLength > 12 * 1024 * 1024) return;
+        const url = URL.createObjectURL(new Blob([data.bytes], { type: String(data.mime) }));
+        if (imageRef.current) URL.revokeObjectURL(imageRef.current.url);
+        imageRef.current = { id: data.id, url };
+        setCanvasImage(imageRef.current);
+        return;
+      }
       if (data.type !== "furniture-home-canvas-values") return;
       if (!("hero_title" in data) || !("hero_subtitle" in data) || typeof data.hero_title !== "string" || typeof data.hero_subtitle !== "string") return;
       if (data.hero_title.length > 1024 || data.hero_subtitle.length > 1024) return;
@@ -69,10 +81,19 @@ const HeroSlider = () => {
       if ("hero_cta_label" in data && (typeof data.hero_cta_label !== "string" || data.hero_cta_label.length > 1024)) return;
       if ("hero_cta_path" in data && (typeof data.hero_cta_path !== "string" || data.hero_cta_path.length > 1024)) return;
       if ("hero_image" in data && !isHeroImage(data.hero_image)) return;
+      if ("hero_media_id" in data && data.hero_media_id !== null && !isMediaId(data.hero_media_id)) return;
+      const mediaId = "hero_media_id" in data ? (isMediaId(data.hero_media_id) ? data.hero_media_id : null) : undefined;
+      selectedMediaRef.current = mediaId;
+      if (imageRef.current && imageRef.current.id !== mediaId) {
+        URL.revokeObjectURL(imageRef.current.url);
+        imageRef.current = null;
+        setCanvasImage(null);
+      }
       setCanvasContent({ hero_title: data.hero_title, hero_subtitle: data.hero_subtitle, hero_order: "hero_order" in data && isHeroOrder(data.hero_order) ? data.hero_order : null,
         hero_cta_label: "hero_cta_label" in data && typeof data.hero_cta_label === "string" ? data.hero_cta_label : null,
         hero_cta_path: "hero_cta_path" in data && typeof data.hero_cta_path === "string" ? data.hero_cta_path : null,
-        hero_image: "hero_image" in data && isHeroImage(data.hero_image) ? data.hero_image : null });
+        hero_image: "hero_image" in data && isHeroImage(data.hero_image) ? data.hero_image : null,
+        hero_media_id: mediaId });
     };
     // Keep this limited canvas on the homepage; it is not a navigation preview.
     const blockNavigation = (event: MouseEvent) => {
@@ -84,6 +105,9 @@ const HeroSlider = () => {
     return () => {
       window.removeEventListener("message", onMessage);
       document.removeEventListener("click", blockNavigation, true);
+      if (imageRef.current) URL.revokeObjectURL(imageRef.current.url);
+      imageRef.current = null;
+      selectedMediaRef.current = undefined;
     };
   }, []);
 
@@ -117,6 +141,7 @@ const HeroSlider = () => {
             hero_cta_label: 'hero_cta_label' in data && typeof data.hero_cta_label === 'string' && data.hero_cta_label.length <= 80 ? data.hero_cta_label : null,
             hero_cta_path: 'hero_cta_path' in data && isInternalPath(data.hero_cta_path) ? data.hero_cta_path : null,
             hero_image: 'hero_image' in data && isHeroImage(data.hero_image) ? data.hero_image : 'workspace',
+            hero_media_id: 'hero_media_id' in data && isMediaId(data.hero_media_id) ? data.hero_media_id : null,
           });
         }
       } catch {
@@ -142,6 +167,11 @@ const HeroSlider = () => {
   const next = () => setCurrent((c) => (c + 1) % slides.length);
   const heroOrder = current === 0 ? (canvasContent?.hero_order ?? homeContent?.hero_order ?? "title_first") : "title_first";
   const firstField = heroOrder === "title_first" ? "hero_title" : "hero_subtitle";
+  const draftMediaId = canvasContent?.hero_media_id;
+  const bundledImage = heroImages[canvasContent?.hero_image ?? homeContent?.hero_image ?? 'workspace'];
+  const firstImage = draftMediaId !== undefined
+    ? (draftMediaId === null ? bundledImage : (canvasImage?.id === draftMediaId ? canvasImage.url : undefined))
+    : (homeContent?.hero_media_id ? `/storefront-api/home/image/${homeContent.hero_media_id}` : bundledImage);
   const draftPath = canvasContent?.hero_cta_path;
   const firstCtaPath = draftPath !== null && draftPath !== undefined ? (isInternalPath(draftPath) ? draftPath : slides[0].ctaHref) : (homeContent?.hero_cta_path ?? slides[0].ctaHref);
   const moveCanvasField = (direction: "up" | "down") => {
@@ -168,7 +198,7 @@ const HeroSlider = () => {
           )}
           {slides.map((slide, i) => (
             <div key={i} className={`absolute inset-0 transition-opacity duration-1000 ${i === current ? "opacity-100" : "opacity-0"}`}>
-              <img src={i === 0 ? heroImages[canvasContent?.hero_image ?? homeContent?.hero_image ?? 'workspace'] : slide.image} alt="" className="w-full h-full object-cover" />
+              <img src={i === 0 ? firstImage : slide.image} alt="" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-primary/75 via-primary/40 to-transparent" />
             </div>
           ))}

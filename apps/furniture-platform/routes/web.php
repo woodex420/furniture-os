@@ -7,6 +7,7 @@ use App\Http\Controllers\Workspace\ContactCreationController;
 use App\Http\Controllers\Workspace\CustomerDetailController;
 use App\Http\Controllers\Workspace\LeadCreationController;
 use App\Http\Controllers\Workspace\MediaLibraryController;
+use App\Http\Controllers\Workspace\PublicHeroImageController;
 use App\Http\Controllers\Workspace\StorefrontHomeController;
 use App\Http\Middleware\PrivateWorkspaceResponse;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -31,6 +32,14 @@ Route::get('/storefront-api/home', [StorefrontHomeController::class, 'publicCont
         PreventRequestForgery::class,
     ])
     ->name('storefront.home.content');
+
+// Only the currently selected public hero image is exposed, never the private library.
+Route::get('/storefront-api/home/image/{id}', [PublicHeroImageController::class, 'show'])
+    ->whereUuid('id')
+    ->withoutMiddleware([
+        EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class,
+        ShareErrorsFromSession::class, PreventRequestForgery::class,
+    ])->name('storefront.home.image');
 
 Route::middleware([PrivateWorkspaceResponse::class, 'guest'])->group(function (): void {
     Route::get('/login', [SessionController::class, 'create'])->name('login');

@@ -4,8 +4,8 @@
 
 @section('workspace-content')
 <div class="content list-page">
-    <div class="demo-banner"><span>EXPERIMENTAL PRIVATE MEDIA</span> Images here are private and are not yet connected to the storefront.</div>
-    <div class="page-heading list-heading"><div><div class="eyebrow">WEBSITE STUDIO <span>/</span> MEDIA</div><h1>Media library</h1><p>Upload a Furniture image for private review.</p></div></div>
+    <div class="demo-banner"><span>EXPERIMENTAL MEDIA</span> Uploads are private until selected and saved as the homepage background.</div>
+    <div class="page-heading list-heading"><div><div class="eyebrow">WEBSITE STUDIO <span>/</span> MEDIA</div><h1>Media library</h1><p>Upload a Furniture image for review and optional use on the first homepage slide.</p></div></div>
     @if(session('status'))<div class="form-success" role="status">{{ session('status') }}</div>@endif
     <section class="card customer-detail contact-create" aria-labelledby="upload-heading">
         <h2 id="upload-heading">Add image</h2>
@@ -20,13 +20,13 @@
     </section>
     <section class="card customer-detail contact-create media-library" aria-labelledby="media-list-heading">
         <h2 id="media-list-heading">Private images</h2>
-        <p class="form-help">Only the owner can view these files. Editing, deletion, publishing and selecting an upload in the canvas are not available yet.</p>
+        <p class="form-help">Only the owner can browse this library. An image becomes publicly accessible if you select and save it in Site Overview. Editing, deletion and use on other pages are not available yet.</p>
         @if ($media->isEmpty())
             <p>No images uploaded.</p>
         @else
             <ul class="media-grid">
                 @foreach ($media as $item)
-                    <li class="media-card"><img src="{{ route('admin.website.media.file', ['id' => $item->id], absolute: false) }}" alt=""><strong>{{ $item->title }}</strong><span>{{ $item->width }} × {{ $item->height }} · {{ strtoupper($item->mime === 'image/png' ? 'PNG' : 'JPEG') }} · {{ number_format($item->bytes / 1024, 1) }} KB</span></li>
+                    <li class="media-card"><img src="{{ route('admin.website.media.file', ['id' => $item->id], absolute: false) }}" alt=""><strong>{{ $item->title }}</strong>@if ($item->id === $publicHeroId)<span>Public · current homepage background</span>@else<span>Not currently served publicly</span>@endif<span>{{ $item->width }} × {{ $item->height }} · {{ strtoupper($item->mime === 'image/png' ? 'PNG' : 'JPEG') }} · {{ number_format($item->bytes / 1024, 1) }} KB</span></li>
                 @endforeach
             </ul>
             {{ $media->links() }}

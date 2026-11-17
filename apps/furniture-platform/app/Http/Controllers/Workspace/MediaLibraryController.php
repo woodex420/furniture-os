@@ -22,6 +22,7 @@ final class MediaLibraryController
 
         return view('workspace.media-library', [
             'media' => DB::table('furniture_media')->orderByDesc('created_at')->orderByDesc('id')->paginate(20),
+            'publicHeroId' => config('furniture.home_editor_enabled') ? DB::table('storefront_home_content')->where('id', 1)->value('hero_media_id') : null,
         ]);
     }
 
@@ -37,7 +38,7 @@ final class MediaLibraryController
         ]);
         $uploads->store((int) Auth::id(), $data['title'], $data['image']);
 
-        return redirect()->to(route('admin.website.media', absolute: false))->with('status', 'Image added to the private library. It is not published or connected to the storefront.');
+        return redirect()->to(route('admin.website.media', absolute: false))->with('status', 'Image added to the library. It stays private until you select and save it in Site Overview.');
     }
 
     public function show(string $id): BinaryFileResponse
