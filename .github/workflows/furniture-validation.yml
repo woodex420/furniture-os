@@ -73,6 +73,85 @@ jobs:
             exit "$result"
           fi
 
+  mysql-roundtrip:
+    name: Disposable MySQL manual SQL round trip
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.4.7
+        env:
+          MYSQL_ROOT_PASSWORD: synthetic-ci-only
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_DATABASE: furniture_source_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -psynthetic-ci-only"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    defaults:
+      run:
+        working-directory: apps/furniture-platform
+    env:
+      APP_ENV: testing
+      APP_KEY: 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+      APP_URL: 'http://localhost'
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: furniture_source_test
+      DB_USERNAME: root
+      DB_PASSWORD: synthetic-ci-only
+      DB_URL: ''
+      MYSQL_PWD: synthetic-ci-only
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      MAIL_MAILER: array
+      QUEUE_CONNECTION: sync
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          extensions: curl, dom, exif, fileinfo, gd, mbstring, pdo_mysql, xml, xmlwriter, zip
+          tools: composer:v2
+          coverage: none
+      - name: Install locked application dependencies and MySQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y mysql-client
+          composer install --no-interaction --prefer-dist --no-progress --no-scripts --no-plugins
+          composer check-platform-reqs
+          php artisan package:discover --ansi
+      - name: Migrate disposable MySQL and produce test-only SQL
+        run: |
+          php artisan migrate --force
+          mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE furniture_imported_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'
+          # Never dump arbitrary databases or user data: this service is new and disposable.
+          mysqldump -h 127.0.0.1 -u root --no-data --skip-add-drop-table --skip-triggers --skip-comments --skip-dump-date --no-tablespaces --set-gtid-purged=OFF furniture_source_test > "$RUNNER_TEMP/furniture-test.sql"
+          # Schema-only is insufficient: these tables contain migration bookkeeping and
+          # essential empty-install defaults inserted by the migrations, not customer data.
+          mysqldump -h 127.0.0.1 -u root --no-create-info --skip-add-locks --skip-triggers --skip-comments --skip-dump-date --no-tablespaces --set-gtid-purged=OFF furniture_source_test migrations customer_write_guards storefront_home_content storefront_home_versions storefront_service_copy storefront_service_copy_versions >> "$RUNNER_TEMP/furniture-test.sql"
+          if grep -iE '^[[:space:]]*(DROP[[:space:]]+(TABLE|DATABASE)|CREATE[[:space:]]+DATABASE|USE[[:space:]])' "$RUNNER_TEMP/furniture-test.sql"; then
+            echo 'Unexpected destructive or database-selecting SQL'; exit 1
+          fi
+          mysql -h 127.0.0.1 -u root furniture_imported_test < "$RUNNER_TEMP/furniture-test.sql"
+      - name: Compare imported schema and test the imported application
+        run: |
+          DB_DATABASE=furniture_imported_test php artisan migrate --force | tee "$RUNNER_TEMP/migration-after-import.txt"
+          grep -q 'Nothing to migrate' "$RUNNER_TEMP/migration-after-import.txt"
+          DB_DATABASE=furniture_imported_test php tests/mysql-roundtrip.php
+      - name: Test an additive migration after manual SQL import
+        run: |
+          DB_DATABASE=furniture_imported_test php artisan migrate --path=tests/fixtures/mysql-roundtrip --force
+          test "$(mysql -h 127.0.0.1 -u root -N -s -e \"SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='furniture_imported_test' AND TABLE_NAME='leads' AND COLUMN_NAME='mysql_roundtrip_probe'\")" = 1
+          DB_DATABASE=furniture_imported_test php artisan migrate:rollback --path=tests/fixtures/mysql-roundtrip --step=1 --force
+          test "$(mysql -h 127.0.0.1 -u root -N -s -e \"SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='furniture_imported_test' AND TABLE_NAME='leads' AND COLUMN_NAME='mysql_roundtrip_probe'\")" = 0
+
   frontend:
     name: Locked Furniture asset build and preview tests
     runs-on: ubuntu-24.04
