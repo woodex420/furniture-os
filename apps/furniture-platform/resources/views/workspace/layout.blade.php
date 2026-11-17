@@ -73,7 +73,7 @@
     <main class="main" id="main-content">
         <header class="topbar">
             <div class="top-left"><button type="button" class="mobile-menu icon-button" data-workspace-menu hidden aria-controls="workspace-navigation" aria-expanded="false" aria-label="Open navigation">☰</button><span>Workspace</span><span aria-hidden="true">›</span><strong>@yield('workspace-title', 'Dashboard')</strong></div>
-            <div class="top-actions"><div class="avatar" aria-hidden="true">W</div><span class="top-user">{{ auth()->user()->name }}</span><form method="POST" action="{{ route('logout', absolute: false) }}">@csrf <button type="submit" class="workspace-signout">Sign out</button></form></div>
+            <div class="top-actions"><div class="avatar" aria-hidden="true">W</div><span class="top-user">{{ auth()->user()->name }}</span><a class="workspace-signout" href="{{ route('admin.owner.password.edit', absolute: false) }}">Account security</a><form method="POST" action="{{ route('logout', absolute: false) }}">@csrf <button type="submit" class="workspace-signout">Sign out</button></form></div>
         </header>
         @yield('workspace-content')
     </main>

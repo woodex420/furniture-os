@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\OwnerPasswordController;
 use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\Workspace\BlogPostController;
 use App\Http\Controllers\Workspace\CityPageController;
@@ -92,6 +93,11 @@ Route::middleware([PrivateWorkspaceResponse::class, 'guest'])->group(function ()
 
 Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function (): void {
     Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
+    // Owner-only account security; not an account recovery or staff-management flow.
+    Route::get('/admin/account/password', [OwnerPasswordController::class, 'edit'])
+        ->middleware('can:workspace.view')->name('admin.owner.password.edit');
+    Route::post('/admin/account/password', [OwnerPasswordController::class, 'update'])
+        ->middleware(['can:workspace.view', 'throttle:5,1'])->name('admin.owner.password.update');
     // The shell is available to the initial owner; business modules remain pending.
     Route::get('/admin', fn () => view('workspace.dashboard'))
         ->middleware('can:workspace.view')
