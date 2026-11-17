@@ -28,7 +28,8 @@ class SessionFoundationTest extends TestCase
         config(['furniture.admin_preview_landing' => true]);
         $this->withoutVite()->get('/login')->assertOk()->assertSee('Open sign-in in a new tab')
             ->assertSee('href="/login" target="_blank" rel="noopener noreferrer"', false)
-            ->assertSee('id="preview-cookie-warning"', false)->assertSee('name="_token"', false);
+            ->assertSee('id="preview-cookie-warning"', false)->assertSee('id="preview-storage-access"', false)
+            ->assertSee('requestStorageAccess', false)->assertSee('name="_token"', false);
         $this->get('/admin')->assertRedirect(route('login'));
         $this->post('/login', ['email' => 'not-an-owner@example.test', 'password' => 'wrong'])
             ->assertSessionHasErrors('email');
