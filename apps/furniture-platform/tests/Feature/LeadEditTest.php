@@ -121,7 +121,7 @@ class LeadEditTest extends TestCase
     {
         config(['furniture.lead_editing_enabled' => true]);
         $id = $this->lead();
-        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->withoutVite()->actingAs(User::factory()->create(['is_owner' => true]));
         for ($i = 0; $i < 20; $i++) {
             $this->post("/admin/leads/$id", $this->payload(['title' => '']))->assertUnprocessable();
         }
