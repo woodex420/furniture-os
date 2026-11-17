@@ -20,7 +20,16 @@
             @if ($canvasUrl)
                 <div class="home-canvas-frame" data-home-canvas data-storefront-origin="{{ $canvasUrl }}">
                     <div class="home-canvas-status" role="status" data-canvas-status>Loading storefront canvas…</div>
-                    <iframe title="Reimagin homepage visual preview" data-canvas-frame sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer" loading="lazy"></iframe>
+                    <div class="home-canvas-controls" role="group" aria-label="Canvas viewport width" data-canvas-controls hidden>
+                        <span>Viewport:</span>
+                        <button type="button" data-canvas-width="fit" aria-pressed="true">Fit</button>
+                        <button type="button" data-canvas-width="375" aria-pressed="false">Mobile · 375px</button>
+                        <button type="button" data-canvas-width="768" aria-pressed="false">Tablet · 768px</button>
+                        <button type="button" data-canvas-width="1280" aria-pressed="false">Desktop · 1280px</button>
+                    </div>
+                    <div class="home-canvas-scroll" tabindex="0" role="region" aria-label="Scrollable storefront canvas">
+                        <iframe title="Reimagin homepage visual preview" data-canvas-frame sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer" loading="lazy"></iframe>
+                    </div>
                 </div>
                 <noscript><p>Enable JavaScript to use the canvas. You can still save the fields below.</p></noscript>
             @else

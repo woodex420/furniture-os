@@ -77,6 +77,7 @@ jobs:
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npm run build
+          node --test tests/canvas-controls.test.mjs
       - name: Preview and preflight regression tests
         run: |
           npm ci --ignore-scripts --no-audit --no-fund

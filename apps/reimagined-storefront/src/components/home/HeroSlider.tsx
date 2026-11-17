@@ -72,10 +72,10 @@ const HeroSlider = () => {
     };
   }, []);
 
-  const selectCanvasField = (field: "hero_title" | "hero_subtitle") => {
+  const selectCanvasField = (field: "hero_title" | "hero_subtitle", focusInput = true) => {
     if (!canvasParent) return;
     setSelectedField(field);
-    window.parent.postMessage({ type: "furniture-home-canvas-select", field }, canvasParent);
+    window.parent.postMessage({ type: "furniture-home-canvas-select", field, focus_input: focusInput }, canvasParent);
   };
 
   // Reads the Furniture admin's public, same-origin content endpoint. Only the first
@@ -136,8 +136,8 @@ const HeroSlider = () => {
           {canvasParent && (
             <div className="absolute top-3 left-3 z-20 flex flex-wrap items-center gap-2 rounded bg-primary px-3 py-2 text-xs text-primary-foreground shadow-lg" role="toolbar" aria-label="Homepage preview selection">
               <span>UNSAVED CANVAS</span>
-              <button type="button" aria-pressed={selectedField === "hero_title"} onClick={() => selectCanvasField("hero_title")} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_title" ? "bg-accent text-accent-foreground" : ""}`}>Title</button>
-              <button type="button" aria-pressed={selectedField === "hero_subtitle"} onClick={() => selectCanvasField("hero_subtitle")} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_subtitle" ? "bg-accent text-accent-foreground" : ""}`}>Subtitle</button>
+              <button type="button" aria-pressed={selectedField === "hero_title"} onClick={() => selectCanvasField("hero_title", false)} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_title" ? "bg-accent text-accent-foreground" : ""}`}>Title</button>
+              <button type="button" aria-pressed={selectedField === "hero_subtitle"} onClick={() => selectCanvasField("hero_subtitle", false)} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_subtitle" ? "bg-accent text-accent-foreground" : ""}`}>Subtitle</button>
               <button type="button" aria-label={`Move ${selectedField === "hero_title" ? "title" : "subtitle"} up`} onClick={() => moveCanvasField("up")} disabled={selectedField === firstField} className="rounded border border-primary-foreground/50 px-2 py-1 disabled:opacity-40">↑</button>
               <button type="button" aria-label={`Move ${selectedField === "hero_title" ? "title" : "subtitle"} down`} onClick={() => moveCanvasField("down")} disabled={selectedField !== firstField} className="rounded border border-primary-foreground/50 px-2 py-1 disabled:opacity-40">↓</button>
             </div>

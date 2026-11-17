@@ -39,6 +39,19 @@ if (homeCanvas) {
         const storefront = new URL(homeCanvas.dataset.storefrontOrigin);
         if (!frame || !status || !title || !subtitle || !order || !['http:', 'https:'].includes(storefront.protocol) || storefront.origin === window.location.origin) throw new Error('Canvas must use a separate origin');
         const targetOrigin = storefront.origin;
+        const controls = homeCanvas.querySelector('[data-canvas-controls]');
+        if (controls) {
+            const buttons = [...controls.querySelectorAll('button[data-canvas-width]')];
+            for (const button of buttons) {
+                button.addEventListener('click', () => {
+                    const width = button.dataset.canvasWidth;
+                    if (!['fit', '375', '768', '1280'].includes(width)) return;
+                    frame.style.width = width === 'fit' ? '100%' : `${width}px`;
+                    for (const item of buttons) item.setAttribute('aria-pressed', String(item === button));
+                });
+            }
+            controls.hidden = false;
+        }
         storefront.searchParams.set('furniture-canvas', 'home');
         storefront.searchParams.set('parent-origin', window.location.origin);
         let connected = false;
@@ -61,8 +74,10 @@ if (homeCanvas) {
                 status.textContent = 'Canvas connected · Changes here are not saved until you update the storefront.';
                 sendValues();
             } else if (event.data.type === 'furniture-home-canvas-select') {
-                if (event.data.field === 'hero_title') title.focus();
-                if (event.data.field === 'hero_subtitle') subtitle.focus();
+                // Toolbar selection stays in the frame so keyboard users can reach move controls.
+                if (event.data.focus_input !== undefined && typeof event.data.focus_input !== 'boolean') return;
+                if (event.data.focus_input !== false && event.data.field === 'hero_title') title.focus();
+                if (event.data.focus_input !== false && event.data.field === 'hero_subtitle') subtitle.focus();
             } else if (event.data.type === 'furniture-home-canvas-move') {
                 const fields = order.value === 'title_first' ? ['hero_title', 'hero_subtitle'] : order.value === 'subtitle_first' ? ['hero_subtitle', 'hero_title'] : [];
                 const index = fields.indexOf(event.data.field);

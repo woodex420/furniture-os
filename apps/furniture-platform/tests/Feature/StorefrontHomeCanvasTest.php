@@ -21,7 +21,8 @@ class StorefrontHomeCanvasTest extends TestCase
             ->assertSee('Canvas not configured')->assertDontSee('data-canvas-frame', false);
         config(['furniture.storefront_canvas_url' => 'https://storefront.example.test']);
         $this->get('/admin/website/home')->assertOk()->assertSee('data-canvas-frame', false)
-            ->assertSee('data-storefront-origin="https://storefront.example.test"', false);
+            ->assertSee('data-storefront-origin="https://storefront.example.test"', false)
+            ->assertSee('Canvas viewport width')->assertSee('Mobile · 375px')->assertSee('Desktop · 1280px');
         $this->actingAs(User::factory()->create(['is_owner' => false]))->get('/admin/website/home')->assertForbidden();
         config(['furniture.home_editor_enabled' => false]);
         $this->actingAs($owner)->get('/admin/website/home')->assertNotFound();
