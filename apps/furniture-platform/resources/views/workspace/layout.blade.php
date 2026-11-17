@@ -53,7 +53,8 @@
                     @foreach ($items as $item)
                         @if (isset($available[$item]))
                             @can($available[$item][1])
-                                <a href="{{ route($available[$item][0]) }}" class="nav-item {{ request()->routeIs($available[$item][0]) ? 'active' : '' }}" @if(request()->routeIs($available[$item][0])) aria-current="page" @endif>@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span>@if($item !== 'Dashboard')<small class="pending-badge">Read only</small>@endif</a>
+                                @php($isActive = request()->routeIs($available[$item][0], $available[$item][0].'.show'))
+                                <a href="{{ route($available[$item][0]) }}" class="nav-item {{ $isActive ? 'active' : '' }}" @if($isActive) aria-current="{{ request()->routeIs($available[$item][0]) ? 'page' : 'location' }}" @endif>@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span>@if($item !== 'Dashboard')<small class="pending-badge">Read only</small>@endif</a>
                             @endcan
                         @else
                             <span class="nav-item pending-item">@include('workspace.icon', ['icon' => $icons[$item]])<span>{{ $item }}</span><small class="pending-badge">Pending</small></span>

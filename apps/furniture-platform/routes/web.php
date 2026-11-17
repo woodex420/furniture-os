@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\SessionController;
+use App\Http\Controllers\Workspace\CustomerDetailController;
 use App\Http\Middleware\PrivateWorkspaceResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -28,4 +29,11 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
     Route::get('/admin/contacts', fn () => view('workspace.contacts'))
         ->middleware(['can:workspace.view', 'can:contacts.view'])
         ->name('admin.contacts');
+    // Authorize before looking up a record, so denied users cannot distinguish IDs.
+    Route::get('/admin/leads/{id}', [CustomerDetailController::class, 'lead'])
+        ->whereNumber('id')->middleware(['can:workspace.view', 'can:leads.view'])
+        ->name('admin.leads.show');
+    Route::get('/admin/contacts/{id}', [CustomerDetailController::class, 'contact'])
+        ->whereNumber('id')->middleware(['can:workspace.view', 'can:contacts.view'])
+        ->name('admin.contacts.show');
 });

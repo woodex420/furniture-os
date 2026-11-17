@@ -24,6 +24,15 @@
 .customer-pagination button:disabled { cursor: default; color: #aab5ad; }
 .customer-loading, .customer-validation { margin: 0 22px 12px; font-size: 11px; color: #6e7d70; }
 .customer-validation { color: #b55442; }
+.customer-record-link, .customer-back { color: #4f8d37; font-weight: 600; }
+.customer-record-link:hover, .customer-back:hover { text-decoration: underline; }
+.customer-detail { max-width: 860px; padding: 22px; }
+.customer-detail h2 { font-size: 15px; margin: 22px 0 14px; }
+.customer-detail dl { border-top: 1px solid #eef1ee; margin: 0; }
+.customer-detail dl div { display: flex; justify-content: space-between; gap: 20px; border-bottom: 1px solid #eef1ee; padding: 15px 0; font-size: 12px; }
+.customer-detail dt { color: #84918a; }
+.customer-detail dd { margin: 0; color: #46534a; text-align: right; overflow-wrap: anywhere; min-width: 0; }
+.list-heading h1 { overflow-wrap: anywhere; }
 .mobile-menu[hidden], .close-mobile[hidden], .workspace-backdrop[hidden] { display: none !important; }
 .workspace-backdrop { display: none; }
 @media(max-width:900px) {

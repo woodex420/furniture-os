@@ -8,7 +8,7 @@
         <table><thead><tr><th scope="col">Contact</th><th scope="col">Email</th><th scope="col">Phone</th><th scope="col">Added</th></tr></thead>
             <tbody>
                 @forelse ($contacts as $contact)
-                    <tr wire:key="contact-{{ $contact->id }}"><td><span class="record-name">{{ $contact->name }}</span></td><td>{{ $contact->email ?: '—' }}</td><td>{{ $contact->phone ?: '—' }}</td><td>{{ $contact->created_at?->format('d M Y') ?? '—' }}</td></tr>
+                    <tr wire:key="contact-{{ $contact->id }}"><td><a class="record-name customer-record-link" href="{{ route('admin.contacts.show', $contact->id) }}">{{ $contact->name }}</a></td><td>{{ $contact->email ?: '—' }}</td><td>{{ $contact->phone ?: '—' }}</td><td>{{ $contact->created_at?->format('d M Y') ?? '—' }}</td></tr>
                 @empty
                     <tr><td colspan="4"><div class="list-empty"><strong>No contacts found</strong><p>{{ is_string($search) && trim($search) !== '' ? 'Try another search.' : 'No contacts are available to view yet.' }}</p></div></td></tr>
                 @endforelse
