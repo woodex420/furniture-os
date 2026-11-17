@@ -36,7 +36,7 @@ class CustomerReadFoundationTest extends TestCase
     {
         $this->withoutVite()->actingAs($this->owner());
         foreach (['leads' => 'No leads found', 'contacts' => 'No contacts found'] as $path => $empty) {
-            $response = $this->get('/admin/'.$path)->assertOk()->assertSee('READ-ONLY FOUNDATION')->assertSee($empty)
+            $response = $this->get('/admin/'.$path)->assertOk()->assertSee($empty)
                 ->assertHeader('X-Robots-Tag', 'noindex, nofollow')->assertDontSee('Amina Malik');
             $this->assertTrue($response->headers->hasCacheControlDirective('no-store'));
             $this->assertTrue($response->headers->hasCacheControlDirective('private'));
@@ -113,14 +113,15 @@ class CustomerReadFoundationTest extends TestCase
             ->set('search', 'Enquiry 12')->assertSee('Enquiry 12');
     }
 
-    public function test_no_customer_write_routes_and_no_default_business_records(): void
+    public function test_no_default_business_records_and_unimplemented_writes_are_unavailable(): void
     {
         $this->seed();
         $this->assertDatabaseCount('contacts', 0);
         $this->assertDatabaseCount('leads', 0);
         $this->actingAs($this->owner());
+        $this->post('/admin/leads', ['name' => 'Unexpected'])->assertStatus(405);
+        $this->post('/admin/contacts', ['name' => 'Unexpected'])->assertNotFound();
         foreach (['leads', 'contacts'] as $path) {
-            $this->post('/admin/'.$path, ['name' => 'Unexpected'])->assertStatus(405);
             $this->patch('/admin/'.$path, ['name' => 'Unexpected'])->assertStatus(405);
             $this->delete('/admin/'.$path)->assertStatus(405);
         }

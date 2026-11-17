@@ -15,7 +15,8 @@ use Illuminate\Validation\ValidationException;
 use LogicException;
 
 /**
- * Unrouted development candidate; do not expose until policy and MySQL locking are reviewed.
+ * Experimental creation service. The optional owner-only UI is for isolated testing;
+ * policy and MySQL locking still require review before a real deployment.
  * Only callers authenticated through the application may invoke this service.
  */
 final class CreateContactCandidate

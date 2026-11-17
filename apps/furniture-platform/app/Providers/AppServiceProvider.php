@@ -38,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
         // Until staff policy and record visibility are designed, only the owner can read CRM records.
         Gate::define('leads.view', fn (User $user): bool => $user->is_owner === true);
         Gate::define('contacts.view', fn (User $user): bool => $user->is_owner === true);
-        // Used only by the unrouted creation candidate; no customer write UI is enabled.
+        // Experimental owner-only contact creation; the UI is feature-flagged off by default.
         Gate::define('contacts.create', fn (User $user): bool => $user->is_owner === true);
 
         // All current Livewire components are private workspace components. Future public

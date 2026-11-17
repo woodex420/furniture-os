@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\SessionController;
+use App\Http\Controllers\Workspace\ContactCreationController;
 use App\Http\Controllers\Workspace\CustomerDetailController;
 use App\Http\Middleware\PrivateWorkspaceResponse;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,13 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
     Route::get('/admin/contacts', fn () => view('workspace.contacts'))
         ->middleware(['can:workspace.view', 'can:contacts.view'])
         ->name('admin.contacts');
+    // Experimental owner-only creation remains disabled unless explicitly enabled.
+    Route::get('/admin/contacts/create', [ContactCreationController::class, 'create'])
+        ->middleware(['can:workspace.view', 'can:contacts.view', 'can:contacts.create'])
+        ->name('admin.contacts.create');
+    Route::post('/admin/contacts', [ContactCreationController::class, 'store'])
+        ->middleware(['can:workspace.view', 'can:contacts.view', 'can:contacts.create', 'throttle:20,1'])
+        ->name('admin.contacts.store');
     // Authorize before looking up a record, so denied users cannot distinguish IDs.
     Route::get('/admin/leads/{id}', [CustomerDetailController::class, 'lead'])
         ->whereNumber('id')->middleware(['can:workspace.view', 'can:leads.view'])
