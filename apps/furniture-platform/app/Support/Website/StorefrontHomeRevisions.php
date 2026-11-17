@@ -14,20 +14,20 @@ use LogicException;
 /** Transactional, append-only history for the limited connected home hero. */
 final class StorefrontHomeRevisions
 {
-    /** @param array{hero_title: string, hero_subtitle: string, revision: int|string, hero_order?: string} $data */
+    /** @param array{hero_title: string, hero_subtitle: string, revision: int|string, hero_order?: string, hero_cta_label?: string, hero_cta_path?: string} $data */
     public function edit(int $actorId, array $data): void
     {
-        $this->change($actorId, (int) $data['revision'], 'edit', $data['hero_title'], $data['hero_subtitle'], $data['hero_order'] ?? null, null);
+        $this->change($actorId, (int) $data['revision'], $data, null);
     }
 
     public function restore(int $actorId, int $expectedRevision, int $sourceRevision): void
     {
-        $this->change($actorId, $expectedRevision, 'restore', null, null, null, $sourceRevision);
+        $this->change($actorId, $expectedRevision, null, $sourceRevision);
     }
 
-    private function change(int $actorId, int $expectedRevision, string $type, ?string $title, ?string $subtitle, ?string $order, ?int $sourceRevision): void
+    private function change(int $actorId, int $expectedRevision, ?array $data, ?int $sourceRevision): void
     {
-        DB::transaction(function () use ($actorId, $expectedRevision, $type, $title, $subtitle, $order, $sourceRevision): void {
+        DB::transaction(function () use ($actorId, $expectedRevision, $data, $sourceRevision): void {
             // Recheck permissions using the current database record after acquiring its lock.
             $actor = User::query()->lockForUpdate()->find($actorId);
             if ($actor === null) {
@@ -46,7 +46,7 @@ final class StorefrontHomeRevisions
             if ($expectedRevision >= 4294967295) {
                 throw ValidationException::withMessages(['revision' => 'The revision limit has been reached.']);
             }
-            if ($type === 'restore') {
+            if ($data === null) {
                 $version = DB::table('storefront_home_versions')->where('revision', $sourceRevision)->first();
                 if ($version === null) {
                     throw ValidationException::withMessages(['source_revision' => 'That version is no longer available.']);
@@ -57,18 +57,28 @@ final class StorefrontHomeRevisions
                 $title = $version->hero_title;
                 $subtitle = $version->hero_subtitle;
                 $order = HeroTextOrder::resolve($version->hero_order);
+                $ctaLabel = $version->hero_cta_label;
+                $ctaPath = $version->hero_cta_path;
+                $type = 'restore';
             } else {
-                // Omission by an older client must preserve the current layout.
-                $order = HeroTextOrder::resolve($order ?? $home->hero_order);
+                $title = $data['hero_title'];
+                $subtitle = $data['hero_subtitle'];
+                // Older clients must not reset fields they do not know about.
+                $order = HeroTextOrder::resolve($data['hero_order'] ?? $home->hero_order);
+                $ctaLabel = $data['hero_cta_label'] ?? $home->hero_cta_label;
+                $ctaPath = $data['hero_cta_path'] ?? $home->hero_cta_path;
+                $type = 'edit';
             }
             $next = $expectedRevision + 1;
             DB::table('storefront_home_content')->where('id', 1)->update([
                 'hero_title' => $title, 'hero_subtitle' => $subtitle, 'hero_order' => $order,
+                'hero_cta_label' => $ctaLabel, 'hero_cta_path' => $ctaPath,
                 'revision' => $next, 'updated_at' => now(),
             ]);
             DB::table('storefront_home_changes')->insert(['actor_id' => $actorId, 'revision' => $next, 'created_at' => now()]);
             DB::table('storefront_home_versions')->insert([
                 'revision' => $next, 'hero_title' => $title, 'hero_subtitle' => $subtitle, 'hero_order' => $order,
+                'hero_cta_label' => $ctaLabel, 'hero_cta_path' => $ctaPath,
                 'actor_id' => $actorId, 'change_type' => $type, 'restored_from_revision' => $sourceRevision, 'created_at' => now(),
             ]);
         }, 3);

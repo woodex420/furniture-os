@@ -22,7 +22,7 @@ final class StorefrontHomeController
     public function publicContent(): JsonResponse
     {
         abort_unless(config('furniture.home_editor_enabled'), 404);
-        $content = DB::table('storefront_home_content')->where('id', 1)->first(['hero_title', 'hero_subtitle', 'hero_order', 'revision']);
+        $content = DB::table('storefront_home_content')->where('id', 1)->first(['hero_title', 'hero_subtitle', 'hero_order', 'hero_cta_label', 'hero_cta_path', 'revision']);
         abort_if($content === null, 503);
         $content->hero_order = HeroTextOrder::resolve($content->hero_order);
 
@@ -54,10 +54,18 @@ final class StorefrontHomeController
             'hero_title' => is_string($request->input('hero_title')) ? trim($request->input('hero_title')) : $request->input('hero_title'),
             'hero_subtitle' => is_string($request->input('hero_subtitle')) ? trim($request->input('hero_subtitle')) : $request->input('hero_subtitle'),
         ]);
+        foreach (['hero_cta_label', 'hero_cta_path'] as $field) {
+            if ($request->has($field) && is_string($request->input($field))) {
+                $request->merge([$field => trim($request->input($field))]);
+            }
+        }
         $data = $request->validate([
             'hero_title' => ['required', 'string', 'max:120'],
             'hero_subtitle' => ['required', 'string', 'max:240'],
             'hero_order' => ['sometimes', 'required', 'string', Rule::in(HeroTextOrder::values())],
+            'hero_cta_label' => ['sometimes', 'required', 'string', 'max:80'],
+            // Root-relative ASCII paths only: no external URLs, backslashes, percent escapes or control characters.
+            'hero_cta_path' => ['sometimes', 'required', 'string', 'max:240', 'regex:#\A/(?!/)[A-Za-z0-9._~/?=&-]*\z#D'],
             'revision' => ['required', 'integer', 'min:0', 'max:4294967294'],
         ]);
         app(StorefrontHomeRevisions::class)->edit((int) Auth::id(), $data);

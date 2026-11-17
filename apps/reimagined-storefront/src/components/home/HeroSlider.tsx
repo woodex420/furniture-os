@@ -18,16 +18,21 @@ const slides = [
 
 type HeroOrder = "title_first" | "subtitle_first";
 const isHeroOrder = (value: unknown): value is HeroOrder => value === "title_first" || value === "subtitle_first";
+// Mirrors the server's restricted root-relative path contract; never render unsafe hrefs.
+const isInternalPath = (value: unknown): value is string => typeof value === "string" && value.length <= 240 && /^\/(?!\/)[A-Za-z0-9._~/?=&-]*(?![\s\S])/.test(value);
+type HomeContent = { hero_title: string | null; hero_subtitle: string | null; hero_order: HeroOrder; hero_cta_label: string | null; hero_cta_path: string | null };
+type CanvasContent = { hero_title: string; hero_subtitle: string; hero_order: HeroOrder | null; hero_cta_label: string | null; hero_cta_path: string | null };
+type CanvasField = "hero_title" | "hero_subtitle" | "hero_cta_label";
 
 /** Shared by the current Reimagin homepage and the isolated Astro parity spike. */
 const HeroSlider = () => {
   const [current, setCurrent] = useState(0);
   const [playing, setPlaying] = useState(true);
-  const [homeContent, setHomeContent] = useState<{ hero_title: string | null; hero_subtitle: string | null; hero_order: HeroOrder } | null>(null);
+  const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
 
   const [canvasParent, setCanvasParent] = useState<string | null>(null);
-  const [canvasContent, setCanvasContent] = useState<{ hero_title: string; hero_subtitle: string; hero_order: HeroOrder | null } | null>(null);
-  const [selectedField, setSelectedField] = useState<"hero_title" | "hero_subtitle">("hero_title");
+  const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null);
+  const [selectedField, setSelectedField] = useState<CanvasField>("hero_title");
 
   // This mode only changes pixels inside an embedded preview. It has no write access.
   // A parent must send from the origin in the URL and from the actual iframe parent.
@@ -57,7 +62,11 @@ const HeroSlider = () => {
       if (!("hero_title" in data) || !("hero_subtitle" in data) || typeof data.hero_title !== "string" || typeof data.hero_subtitle !== "string") return;
       if (data.hero_title.length > 1024 || data.hero_subtitle.length > 1024) return;
       if ("hero_order" in data && !isHeroOrder(data.hero_order)) return;
-      setCanvasContent({ hero_title: data.hero_title, hero_subtitle: data.hero_subtitle, hero_order: "hero_order" in data && isHeroOrder(data.hero_order) ? data.hero_order : null });
+      if ("hero_cta_label" in data && (typeof data.hero_cta_label !== "string" || data.hero_cta_label.length > 1024)) return;
+      if ("hero_cta_path" in data && (typeof data.hero_cta_path !== "string" || data.hero_cta_path.length > 1024)) return;
+      setCanvasContent({ hero_title: data.hero_title, hero_subtitle: data.hero_subtitle, hero_order: "hero_order" in data && isHeroOrder(data.hero_order) ? data.hero_order : null,
+        hero_cta_label: "hero_cta_label" in data && typeof data.hero_cta_label === "string" ? data.hero_cta_label : null,
+        hero_cta_path: "hero_cta_path" in data && typeof data.hero_cta_path === "string" ? data.hero_cta_path : null });
     };
     // Keep this limited canvas on the homepage; it is not a navigation preview.
     const blockNavigation = (event: MouseEvent) => {
@@ -72,7 +81,7 @@ const HeroSlider = () => {
     };
   }, []);
 
-  const selectCanvasField = (field: "hero_title" | "hero_subtitle", focusInput = true) => {
+  const selectCanvasField = (field: CanvasField, focusInput = true) => {
     if (!canvasParent) return;
     setSelectedField(field);
     window.parent.postMessage({ type: "furniture-home-canvas-select", field, focus_input: focusInput }, canvasParent);
@@ -99,6 +108,8 @@ const HeroSlider = () => {
             hero_title: typeof data.hero_title === 'string' ? data.hero_title : null,
             hero_subtitle: typeof data.hero_subtitle === 'string' ? data.hero_subtitle : null,
             hero_order: 'hero_order' in data && isHeroOrder(data.hero_order) ? data.hero_order : 'title_first',
+            hero_cta_label: 'hero_cta_label' in data && typeof data.hero_cta_label === 'string' && data.hero_cta_label.length <= 80 ? data.hero_cta_label : null,
+            hero_cta_path: 'hero_cta_path' in data && isInternalPath(data.hero_cta_path) ? data.hero_cta_path : null,
           });
         }
       } catch {
@@ -124,6 +135,8 @@ const HeroSlider = () => {
   const next = () => setCurrent((c) => (c + 1) % slides.length);
   const heroOrder = current === 0 ? (canvasContent?.hero_order ?? homeContent?.hero_order ?? "title_first") : "title_first";
   const firstField = heroOrder === "title_first" ? "hero_title" : "hero_subtitle";
+  const draftPath = canvasContent?.hero_cta_path;
+  const firstCtaPath = draftPath !== null && draftPath !== undefined ? (isInternalPath(draftPath) ? draftPath : slides[0].ctaHref) : (homeContent?.hero_cta_path ?? slides[0].ctaHref);
   const moveCanvasField = (direction: "up" | "down") => {
     if (!canvasParent) return;
     window.parent.postMessage({ type: "furniture-home-canvas-move", field: selectedField, direction }, canvasParent);
@@ -136,10 +149,13 @@ const HeroSlider = () => {
           {canvasParent && (
             <div className="absolute top-3 left-3 z-20 flex flex-wrap items-center gap-2 rounded bg-primary px-3 py-2 text-xs text-primary-foreground shadow-lg" role="toolbar" aria-label="Homepage preview selection">
               <span>UNSAVED CANVAS</span>
+              <button type="button" aria-pressed={selectedField === "hero_cta_label"} onClick={() => selectCanvasField("hero_cta_label", false)} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_cta_label" ? "bg-accent text-accent-foreground" : ""}`}>Button</button>
               <button type="button" aria-pressed={selectedField === "hero_title"} onClick={() => selectCanvasField("hero_title", false)} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_title" ? "bg-accent text-accent-foreground" : ""}`}>Title</button>
               <button type="button" aria-pressed={selectedField === "hero_subtitle"} onClick={() => selectCanvasField("hero_subtitle", false)} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_subtitle" ? "bg-accent text-accent-foreground" : ""}`}>Subtitle</button>
-              <button type="button" aria-label={`Move ${selectedField === "hero_title" ? "title" : "subtitle"} up`} onClick={() => moveCanvasField("up")} disabled={selectedField === firstField} className="rounded border border-primary-foreground/50 px-2 py-1 disabled:opacity-40">↑</button>
-              <button type="button" aria-label={`Move ${selectedField === "hero_title" ? "title" : "subtitle"} down`} onClick={() => moveCanvasField("down")} disabled={selectedField !== firstField} className="rounded border border-primary-foreground/50 px-2 py-1 disabled:opacity-40">↓</button>
+              {selectedField !== "hero_cta_label" && <>
+                <button type="button" aria-label={`Move ${selectedField === "hero_title" ? "title" : "subtitle"} up`} onClick={() => moveCanvasField("up")} disabled={selectedField === firstField} className="rounded border border-primary-foreground/50 px-2 py-1 disabled:opacity-40">↑</button>
+                <button type="button" aria-label={`Move ${selectedField === "hero_title" ? "title" : "subtitle"} down`} onClick={() => moveCanvasField("down")} disabled={selectedField !== firstField} className="rounded border border-primary-foreground/50 px-2 py-1 disabled:opacity-40">↓</button>
+              </>}
             </div>
           )}
           {slides.map((slide, i) => (
@@ -153,7 +169,9 @@ const HeroSlider = () => {
               <div className="max-w-xl text-primary-foreground">
                 {heroOrder === "title_first" ? [titleNode, subtitleNode] : [subtitleNode, titleNode]}
                 <Button size="lg" className="bg-accent hover:bg-hon-green-dark text-accent-foreground font-semibold px-8" asChild>
-                  <a href={slides[current].ctaHref}>{slides[current].cta}</a>
+                  <a href={current === 0 ? firstCtaPath : slides[current].ctaHref} data-canvas-field={canvasParent && current === 0 ? "hero_cta_label" : undefined} onClick={() => current === 0 && selectCanvasField("hero_cta_label")}>
+                    {current === 0 ? (canvasContent?.hero_cta_label ?? homeContent?.hero_cta_label ?? slides[current].cta) : slides[current].cta}
+                  </a>
                 </Button>
               </div>
             </div>
