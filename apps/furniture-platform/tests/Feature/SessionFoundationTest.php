@@ -32,8 +32,9 @@ class SessionFoundationTest extends TestCase
         $this->post('/login', ['email' => 'person@example.test', 'password' => 'synthetic-password'])
             ->assertRedirect('/admin');
         $this->assertAuthenticated();
-        $this->get('/admin')->assertStatus(503)->assertSee('integration is pending')
-            ->assertHeader('Cache-Control', 'no-store, private');
+        $response = $this->withoutVite()->get('/admin')->assertOk()->assertSee('INTEGRATION IN PROGRESS');
+        $this->assertTrue($response->headers->hasCacheControlDirective('no-store'));
+        $this->assertTrue($response->headers->hasCacheControlDirective('private'));
     }
 
     public function test_validation_and_login_throttling(): void

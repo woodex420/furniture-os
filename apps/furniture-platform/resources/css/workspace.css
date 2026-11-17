@@ -1,0 +1,38 @@
+/* The tokens and layout rules are copied from the approved standalone dashboard preview.
+   This file only adapts the shell for truthful pending states and small screens. */
+@import './workspace-tokens.css';
+@import './workspace-preview.css';
+
+.sidebar details > summary { list-style: none; cursor: pointer; }
+.sidebar details > summary::-webkit-details-marker { display: none; }
+.sidebar details:not([open]) .group-chevron { transform: rotate(-90deg); }
+.nav-item.pending-item { opacity: .82; cursor: default; }
+.nav-item.pending-item:hover { background: none; color: #a8b1af; }
+.nav-item .pending-badge { flex: none; font-size: 9px; color: #aeb9ae; }
+.sidebar .workspace-icon-svg { flex: none; color: #92a09b; }
+.sidebar-bottom .profile-copy strong { overflow-wrap: anywhere; }
+.top-user, .dash-heading h1 { overflow-wrap: anywhere; }
+.top-user { max-width: 180px; }
+.workspace-signout { color: #527e40; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.dash-kpi { cursor: default; }
+.dash-kpi:hover { transform: none; }
+.workspace-pending-note { color: #8b9a8d; font-size: 11px; line-height: 1.5; margin-top: 18px; }
+.pending-placeholder { min-height: 190px; display: grid; place-items: center; text-align: center; color: #91a094; font-size: 12px; line-height: 1.6; }
+.mobile-menu[hidden], .close-mobile[hidden], .workspace-backdrop[hidden] { display: none !important; }
+.workspace-backdrop { display: none; }
+@media(max-width:900px) {
+  .workspace-backdrop { display: block; position: fixed; inset: 0; z-index: 19; background: rgba(0,0,0,.45); }
+  .top-actions { gap: 10px; }
+  .top-user { max-width: 100px; }
+}
+@media(max-width:560px) {
+  .top-user { max-width: 85px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dash-section-title > span { display: block; }
+  .dash-primary-grid { margin-top: 14px; }
+}
+@media(max-width:360px) {
+  .top-user { display: none; }
+}
+@media(max-width:900px) {
+  .no-js .sidebar { transform: none; position: static; width: 100% !important; max-height: 330px; }
+}

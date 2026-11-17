@@ -18,8 +18,8 @@ Route::middleware([PrivateWorkspaceResponse::class, 'guest'])->group(function ()
 
 Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function (): void {
     Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
-    // This is a protected development placeholder, not the approved finished admin UI.
-    Route::get('/admin', fn () => response('WOODEX OS workspace integration is pending.', 503))
+    // The shell is available to the initial owner; business modules remain pending.
+    Route::get('/admin', fn () => view('workspace.dashboard'))
         ->middleware('can:workspace.view')
         ->name('admin');
 });

@@ -14,8 +14,10 @@ final class PrivateWorkspaceResponse
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
-        $response->headers->set('Cache-Control', 'private, no-store');
-        $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        if ($request->is('admin', 'admin/*', 'login', 'logout', 'workspace/livewire/update')) {
+            $response->headers->set('Cache-Control', 'private, no-store');
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        }
 
         return $response;
     }

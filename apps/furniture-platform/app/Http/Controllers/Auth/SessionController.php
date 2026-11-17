@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
-/** Session-only authentication foundation. User provisioning and authorization remain pending. */
+/** Session-only authentication foundation. Full roles and account recovery remain pending. */
 final class SessionController
 {
     public function create(): View

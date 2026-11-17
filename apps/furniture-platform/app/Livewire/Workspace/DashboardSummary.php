@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 /**
- * Isolated, read-only integration candidate. Not routed into the admin yet.
- * Metrics are unavailable until their sources and permissions are implemented.
+ * Read-only dashboard summary; metrics remain unavailable until their sources
+ * and permissions are implemented.
  */
 class DashboardSummary extends Component
 {
