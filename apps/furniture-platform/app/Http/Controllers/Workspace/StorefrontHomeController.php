@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Workspace;
 
+use App\Support\Website\HeroTextOrder;
 use App\Support\Website\StorefrontCanvasUrl;
 use App\Support\Website\StorefrontHomeRevisions;
 use Illuminate\Http\JsonResponse;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /** First, limited connection between Furniture admin and the real homepage component. */
@@ -20,8 +22,9 @@ final class StorefrontHomeController
     public function publicContent(): JsonResponse
     {
         abort_unless(config('furniture.home_editor_enabled'), 404);
-        $content = DB::table('storefront_home_content')->where('id', 1)->first(['hero_title', 'hero_subtitle', 'revision']);
+        $content = DB::table('storefront_home_content')->where('id', 1)->first(['hero_title', 'hero_subtitle', 'hero_order', 'revision']);
         abort_if($content === null, 503);
+        $content->hero_order = HeroTextOrder::resolve($content->hero_order);
 
         return response()->json($content)->header('Cache-Control', 'no-store');
     }
@@ -31,11 +34,16 @@ final class StorefrontHomeController
         $this->authorizeEditing();
         $content = DB::table('storefront_home_content')->where('id', 1)->first();
         abort_if($content === null, 503);
+        $content->hero_order = HeroTextOrder::resolve($content->hero_order);
+        $versions = DB::table('storefront_home_versions')->orderByDesc('revision')->limit(20)->get();
+        foreach ($versions as $version) {
+            $version->hero_order = HeroTextOrder::resolve($version->hero_order);
+        }
 
         return view('workspace.storefront-home', [
             'content' => $content,
             'canvasUrl' => StorefrontCanvasUrl::configured(),
-            'versions' => DB::table('storefront_home_versions')->orderByDesc('revision')->limit(20)->get(),
+            'versions' => $versions,
         ]);
     }
 
@@ -49,6 +57,7 @@ final class StorefrontHomeController
         $data = $request->validate([
             'hero_title' => ['required', 'string', 'max:120'],
             'hero_subtitle' => ['required', 'string', 'max:240'],
+            'hero_order' => ['sometimes', 'required', 'string', Rule::in(HeroTextOrder::values())],
             'revision' => ['required', 'integer', 'min:0', 'max:4294967294'],
         ]);
         app(StorefrontHomeRevisions::class)->edit((int) Auth::id(), $data);

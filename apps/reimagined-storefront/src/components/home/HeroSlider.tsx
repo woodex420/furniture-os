@@ -16,14 +16,17 @@ const slides = [
 ];
 
 
+type HeroOrder = "title_first" | "subtitle_first";
+const isHeroOrder = (value: unknown): value is HeroOrder => value === "title_first" || value === "subtitle_first";
+
 /** Shared by the current Reimagin homepage and the isolated Astro parity spike. */
 const HeroSlider = () => {
   const [current, setCurrent] = useState(0);
   const [playing, setPlaying] = useState(true);
-  const [homeContent, setHomeContent] = useState<{ hero_title: string | null; hero_subtitle: string | null } | null>(null);
+  const [homeContent, setHomeContent] = useState<{ hero_title: string | null; hero_subtitle: string | null; hero_order: HeroOrder } | null>(null);
 
   const [canvasParent, setCanvasParent] = useState<string | null>(null);
-  const [canvasContent, setCanvasContent] = useState<{ hero_title: string; hero_subtitle: string } | null>(null);
+  const [canvasContent, setCanvasContent] = useState<{ hero_title: string; hero_subtitle: string; hero_order: HeroOrder | null } | null>(null);
   const [selectedField, setSelectedField] = useState<"hero_title" | "hero_subtitle">("hero_title");
 
   // This mode only changes pixels inside an embedded preview. It has no write access.
@@ -53,7 +56,8 @@ const HeroSlider = () => {
       if (data.type !== "furniture-home-canvas-values") return;
       if (!("hero_title" in data) || !("hero_subtitle" in data) || typeof data.hero_title !== "string" || typeof data.hero_subtitle !== "string") return;
       if (data.hero_title.length > 1024 || data.hero_subtitle.length > 1024) return;
-      setCanvasContent({ hero_title: data.hero_title, hero_subtitle: data.hero_subtitle });
+      if ("hero_order" in data && !isHeroOrder(data.hero_order)) return;
+      setCanvasContent({ hero_title: data.hero_title, hero_subtitle: data.hero_subtitle, hero_order: "hero_order" in data && isHeroOrder(data.hero_order) ? data.hero_order : null });
     };
     // Keep this limited canvas on the homepage; it is not a navigation preview.
     const blockNavigation = (event: MouseEvent) => {
@@ -89,10 +93,12 @@ const HeroSlider = () => {
         if (active && data && typeof data === 'object' &&
             ('hero_title' in data) && ('hero_subtitle' in data) &&
             (typeof data.hero_title === 'string' || data.hero_title === null) &&
-            (typeof data.hero_subtitle === 'string' || data.hero_subtitle === null)) {
+            (typeof data.hero_subtitle === 'string' || data.hero_subtitle === null) &&
+            (!('hero_order' in data) || data.hero_order === null || isHeroOrder(data.hero_order))) {
           setHomeContent({
             hero_title: typeof data.hero_title === 'string' ? data.hero_title : null,
             hero_subtitle: typeof data.hero_subtitle === 'string' ? data.hero_subtitle : null,
+            hero_order: 'hero_order' in data && isHeroOrder(data.hero_order) ? data.hero_order : 'title_first',
           });
         }
       } catch {
@@ -116,6 +122,14 @@ const HeroSlider = () => {
 
   const prev = () => setCurrent((c) => (c - 1 + slides.length) % slides.length);
   const next = () => setCurrent((c) => (c + 1) % slides.length);
+  const heroOrder = current === 0 ? (canvasContent?.hero_order ?? homeContent?.hero_order ?? "title_first") : "title_first";
+  const firstField = heroOrder === "title_first" ? "hero_title" : "hero_subtitle";
+  const moveCanvasField = (direction: "up" | "down") => {
+    if (!canvasParent) return;
+    window.parent.postMessage({ type: "furniture-home-canvas-move", field: selectedField, direction }, canvasParent);
+  };
+  const titleNode = <h1 key="title" data-canvas-field={canvasParent && current === 0 ? "hero_title" : undefined} onClick={() => current === 0 && selectCanvasField("hero_title")} className={`text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-3 leading-tight ${canvasParent && current === 0 ? "cursor-pointer outline outline-1 outline-dashed outline-white" : ""}`}>{current === 0 ? (canvasContent?.hero_title ?? homeContent?.hero_title ?? slides[current].title) : slides[current].title}</h1>;
+  const subtitleNode = <p key="subtitle" data-canvas-field={canvasParent && current === 0 ? "hero_subtitle" : undefined} onClick={() => current === 0 && selectCanvasField("hero_subtitle")} className={`text-base lg:text-lg text-primary-foreground/85 mb-6 leading-relaxed ${canvasParent && current === 0 ? "cursor-pointer outline outline-1 outline-dashed outline-white" : ""}`}>{current === 0 ? (canvasContent?.hero_subtitle ?? homeContent?.hero_subtitle ?? slides[current].subtitle) : slides[current].subtitle}</p>;
 
   return (
         <section className="relative h-[min(68vh,720px)] min-h-[390px] sm:min-h-[480px] overflow-hidden bg-primary">
@@ -124,6 +138,8 @@ const HeroSlider = () => {
               <span>UNSAVED CANVAS</span>
               <button type="button" aria-pressed={selectedField === "hero_title"} onClick={() => selectCanvasField("hero_title")} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_title" ? "bg-accent text-accent-foreground" : ""}`}>Title</button>
               <button type="button" aria-pressed={selectedField === "hero_subtitle"} onClick={() => selectCanvasField("hero_subtitle")} className={`rounded border border-primary-foreground/50 px-2 py-1 ${selectedField === "hero_subtitle" ? "bg-accent text-accent-foreground" : ""}`}>Subtitle</button>
+              <button type="button" aria-label={`Move ${selectedField === "hero_title" ? "title" : "subtitle"} up`} onClick={() => moveCanvasField("up")} disabled={selectedField === firstField} className="rounded border border-primary-foreground/50 px-2 py-1 disabled:opacity-40">↑</button>
+              <button type="button" aria-label={`Move ${selectedField === "hero_title" ? "title" : "subtitle"} down`} onClick={() => moveCanvasField("down")} disabled={selectedField !== firstField} className="rounded border border-primary-foreground/50 px-2 py-1 disabled:opacity-40">↓</button>
             </div>
           )}
           {slides.map((slide, i) => (
@@ -135,8 +151,7 @@ const HeroSlider = () => {
           <div className="absolute inset-0 flex items-end pb-20 sm:pb-24">
             <div className="container mx-auto px-4">
               <div className="max-w-xl text-primary-foreground">
-                <h1 data-canvas-field={canvasParent && current === 0 ? "hero_title" : undefined} onClick={() => current === 0 && selectCanvasField("hero_title")} className={`text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-3 leading-tight ${canvasParent && current === 0 ? "cursor-pointer outline outline-1 outline-dashed outline-white" : ""}`}>{current === 0 ? (canvasContent?.hero_title ?? homeContent?.hero_title ?? slides[current].title) : slides[current].title}</h1>
-                <p data-canvas-field={canvasParent && current === 0 ? "hero_subtitle" : undefined} onClick={() => current === 0 && selectCanvasField("hero_subtitle")} className={`text-base lg:text-lg text-primary-foreground/85 mb-6 leading-relaxed ${canvasParent && current === 0 ? "cursor-pointer outline outline-1 outline-dashed outline-white" : ""}`}>{current === 0 ? (canvasContent?.hero_subtitle ?? homeContent?.hero_subtitle ?? slides[current].subtitle) : slides[current].subtitle}</p>
+                {heroOrder === "title_first" ? [titleNode, subtitleNode] : [subtitleNode, titleNode]}
                 <Button size="lg" className="bg-accent hover:bg-hon-green-dark text-accent-foreground font-semibold px-8" asChild>
                   <a href={slides[current].ctaHref}>{slides[current].cta}</a>
                 </Button>

@@ -34,9 +34,10 @@ if (homeCanvas) {
     const status = homeCanvas.querySelector('[data-canvas-status]');
     const title = document.getElementById('hero-title');
     const subtitle = document.getElementById('hero-subtitle');
+    const order = document.getElementById('hero-order');
     try {
         const storefront = new URL(homeCanvas.dataset.storefrontOrigin);
-        if (!frame || !status || !title || !subtitle || !['http:', 'https:'].includes(storefront.protocol) || storefront.origin === window.location.origin) throw new Error('Canvas must use a separate origin');
+        if (!frame || !status || !title || !subtitle || !order || !['http:', 'https:'].includes(storefront.protocol) || storefront.origin === window.location.origin) throw new Error('Canvas must use a separate origin');
         const targetOrigin = storefront.origin;
         storefront.searchParams.set('furniture-canvas', 'home');
         storefront.searchParams.set('parent-origin', window.location.origin);
@@ -51,7 +52,7 @@ if (homeCanvas) {
             }, 12000);
         };
         const sendValues = () => {
-            frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-values', hero_title: title.value, hero_subtitle: subtitle.value }, targetOrigin);
+            frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-values', hero_title: title.value, hero_subtitle: subtitle.value, hero_order: order.value }, targetOrigin);
         };
         window.addEventListener('message', (event) => {
             if (event.source !== frame.contentWindow || event.origin !== targetOrigin || !event.data || typeof event.data !== 'object') return;
@@ -62,9 +63,18 @@ if (homeCanvas) {
             } else if (event.data.type === 'furniture-home-canvas-select') {
                 if (event.data.field === 'hero_title') title.focus();
                 if (event.data.field === 'hero_subtitle') subtitle.focus();
+            } else if (event.data.type === 'furniture-home-canvas-move') {
+                const fields = order.value === 'title_first' ? ['hero_title', 'hero_subtitle'] : order.value === 'subtitle_first' ? ['hero_subtitle', 'hero_title'] : [];
+                const index = fields.indexOf(event.data.field);
+                const next = index + (event.data.direction === 'up' ? -1 : event.data.direction === 'down' ? 1 : 0);
+                if (index < 0 || next < 0 || next >= fields.length || next === index) return;
+                [fields[index], fields[next]] = [fields[next], fields[index]];
+                order.value = fields[0] === 'hero_title' ? 'title_first' : 'subtitle_first';
+                order.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });
         for (const input of [title, subtitle]) input.addEventListener('input', sendValues);
+        order.addEventListener('change', sendValues);
         frame.addEventListener('load', () => {
             waitForCanvas();
             frame.contentWindow?.postMessage({ type: 'furniture-home-canvas-ping' }, targetOrigin);
