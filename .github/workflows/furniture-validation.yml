@@ -55,7 +55,11 @@ jobs:
           result=${PIPESTATUS[0]}
           set -e
           if [ "$result" -ne 0 ]; then
-            while IFS= read -r line; do echo "::error::$line"; done < <(tail -45 "$RUNNER_TEMP/phpunit-output.txt")
+            details=$(tail -25 "$RUNNER_TEMP/phpunit-output.txt")
+            details=${details//'%'/'%25'}
+            details=${details//$'\r'/'%0D'}
+            details=${details//$'\n'/'%0A'}
+            echo "::error::$details"
           fi
           exit "$result"
       - name: Dependency advisory check
