@@ -38,6 +38,15 @@ return [
             'report' => false,
         ],
 
+        // Never web-served or linked into public/storage. Preview files go through an owner-only route.
+        'furniture_media' => [
+            'driver' => 'local',
+            'root' => storage_path('app/furniture-media'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => true,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

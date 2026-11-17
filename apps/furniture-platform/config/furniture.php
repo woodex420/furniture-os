@@ -8,6 +8,8 @@ return [
     'contact_creation_enabled' => (bool) env('FURNITURE_CONTACT_CREATION_ENABLED', false),
     'lead_creation_enabled' => (bool) env('FURNITURE_LEAD_CREATION_ENABLED', false),
     'home_editor_enabled' => (bool) env('FURNITURE_HOME_EDITOR_ENABLED', false),
+    // Isolated, owner-only media experiment; disabled until explicitly enabled.
+    'media_library_enabled' => (bool) env('FURNITURE_MEDIA_LIBRARY_ENABLED', false),
     // Optional, explicitly configured storefront origin for the visual preview.
     // This does not enable authentication or publishing on the storefront.
     'storefront_canvas_url' => env('FURNITURE_STOREFRONT_CANVAS_URL'),

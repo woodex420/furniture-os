@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\Workspace\ContactCreationController;
 use App\Http\Controllers\Workspace\CustomerDetailController;
 use App\Http\Controllers\Workspace\LeadCreationController;
+use App\Http\Controllers\Workspace\MediaLibraryController;
 use App\Http\Controllers\Workspace\StorefrontHomeController;
 use App\Http\Middleware\PrivateWorkspaceResponse;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -55,6 +56,13 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
         ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.storefront.home.update');
     Route::post('/admin/website/home/restore', [StorefrontHomeController::class, 'restore'])
         ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.storefront.home.restore');
+    // Private image experiment: files are not publicly served or connected to the storefront.
+    Route::get('/admin/website/media', [MediaLibraryController::class, 'index'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.media');
+    Route::post('/admin/website/media', [MediaLibraryController::class, 'store'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.media.store');
+    Route::get('/admin/website/media/{id}/file', [MediaLibraryController::class, 'show'])
+        ->whereUuid('id')->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.media.file');
     // Experimental owner-only creation remains disabled unless explicitly enabled.
     Route::get('/admin/leads/create', [LeadCreationController::class, 'create'])
         ->middleware(['can:workspace.view', 'can:leads.view', 'can:leads.create'])
