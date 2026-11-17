@@ -22,4 +22,10 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
     Route::get('/admin', fn () => view('workspace.dashboard'))
         ->middleware('can:workspace.view')
         ->name('admin');
+    Route::get('/admin/leads', fn () => view('workspace.leads'))
+        ->middleware(['can:workspace.view', 'can:leads.view'])
+        ->name('admin.leads');
+    Route::get('/admin/contacts', fn () => view('workspace.contacts'))
+        ->middleware(['can:workspace.view', 'can:contacts.view'])
+        ->name('admin.contacts');
 });

@@ -30,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Provisional first-owner-only access. No blanket owner bypass for other abilities.
         Gate::define('workspace.view', fn (User $user): bool => $user->is_owner === true);
+        // Until staff policy and record visibility are designed, only the owner can read CRM records.
+        Gate::define('leads.view', fn (User $user): bool => $user->is_owner === true);
+        Gate::define('contacts.view', fn (User $user): bool => $user->is_owner === true);
 
         // All current Livewire components are private workspace components. Future public
         // components need a separately reviewed endpoint, not a relaxation of this one.

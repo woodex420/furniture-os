@@ -18,6 +18,12 @@
 .dash-kpi:hover { transform: none; }
 .workspace-pending-note { color: #8b9a8d; font-size: 11px; line-height: 1.5; margin-top: 18px; }
 .pending-placeholder { min-height: 190px; display: grid; place-items: center; text-align: center; color: #91a094; font-size: 12px; line-height: 1.6; }
+.customer-pagination { align-items: center; gap: 12px; flex-wrap: wrap; }
+.customer-pagination div { display: flex; gap: 8px; }
+.customer-pagination button { border: 1px solid #e4eae5; border-radius: 6px; padding: 7px 10px; color: #598b42; font-weight: 600; }
+.customer-pagination button:disabled { cursor: default; color: #aab5ad; }
+.customer-loading, .customer-validation { margin: 0 22px 12px; font-size: 11px; color: #6e7d70; }
+.customer-validation { color: #b55442; }
 .mobile-menu[hidden], .close-mobile[hidden], .workspace-backdrop[hidden] { display: none !important; }
 .workspace-backdrop { display: none; }
 @media(max-width:900px) {
