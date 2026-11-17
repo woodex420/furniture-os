@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\SessionController;
+use App\Http\Controllers\Workspace\BlogPostController;
 use App\Http\Controllers\Workspace\CityPageController;
 use App\Http\Controllers\Workspace\ContactCreationController;
 use App\Http\Controllers\Workspace\CustomerDetailController;
@@ -49,6 +50,14 @@ Route::get('/storefront-api/cities', [CityPageController::class, 'publicIndex'])
 Route::get('/storefront-api/cities/{slug}', [CityPageController::class, 'publicShow'])
     ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->withoutMiddleware([EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class])
     ->name('storefront.cities.show');
+
+// Published Furniture blog articles only; draft contents are never public.
+Route::get('/storefront-api/blog', [BlogPostController::class, 'publicIndex'])
+    ->withoutMiddleware([EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class])
+    ->name('storefront.blog.index');
+Route::get('/storefront-api/blog/{slug}', [BlogPostController::class, 'publicShow'])
+    ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->withoutMiddleware([EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class])
+    ->name('storefront.blog.show');
 
 // Only the currently selected public hero image is exposed, never the private library.
 Route::get('/storefront-api/home/image/{id}', [PublicHeroImageController::class, 'show'])
@@ -104,6 +113,19 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
         ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.cities.update');
     Route::post('/admin/website/cities/{slug}/restore', [CityPageController::class, 'restore'])
         ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.cities.restore');
+    // Furniture-owned plain-text blog preview; old demo data remains separate.
+    Route::get('/admin/website/blog', [BlogPostController::class, 'index'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.blog');
+    Route::get('/admin/website/blog/create', [BlogPostController::class, 'create'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.blog.create');
+    Route::post('/admin/website/blog', [BlogPostController::class, 'store'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.blog.store');
+    Route::get('/admin/website/blog/{slug}/edit', [BlogPostController::class, 'edit'])
+        ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.blog.edit');
+    Route::post('/admin/website/blog/{slug}', [BlogPostController::class, 'update'])
+        ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.blog.update');
+    Route::post('/admin/website/blog/{slug}/restore', [BlogPostController::class, 'restore'])
+        ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.website.blog.restore');
     // Private media library; the separate public route serves only the selected hero image.
     Route::get('/admin/website/media', [MediaLibraryController::class, 'index'])
         ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.website.media');

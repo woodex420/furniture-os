@@ -56,7 +56,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <div className="preview-notice" role="note">
-            <span><strong>STOREFRONT PREVIEW</strong> · Sample data. Home hero, tagline, limited service text and city pages connect to Furniture admin; other features are still in progress.</span>
+            <span><strong>STOREFRONT PREVIEW</strong> · Sample data. Home hero, tagline, limited service text, city pages and blog articles connect to Furniture admin; other features are still in progress.</span>
           </div>
           <RouteHead />
           <ChatBubble />

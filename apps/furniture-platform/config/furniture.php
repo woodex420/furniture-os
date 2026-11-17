@@ -12,6 +12,8 @@ return [
     'service_copy_enabled' => (bool) env('FURNITURE_SERVICE_COPY_ENABLED', false),
     // Independent synthetic service-area pages; off outside an explicitly enabled preview.
     'city_pages_enabled' => (bool) env('FURNITURE_CITY_PAGES_ENABLED', false),
+    // Furniture-owned blog experiment; disabled until explicitly enabled.
+    'blog_posts_enabled' => (bool) env('FURNITURE_BLOG_POSTS_ENABLED', false),
     // Isolated, owner-only media experiment; disabled until explicitly enabled.
     'media_library_enabled' => (bool) env('FURNITURE_MEDIA_LIBRARY_ENABLED', false),
     // Optional, explicitly configured storefront origin for the visual preview.

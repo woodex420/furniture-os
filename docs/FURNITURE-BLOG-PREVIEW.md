@@ -1,0 +1,26 @@
+# Furniture blog — isolated preview
+
+**Status: narrow preview integration, not a finished editorial CMS or production deployment.** Furniture owns this data. No Interior content, browser-local articles or bundled samples are imported or published. The bundled sample articles contain unverified claims and must not be treated as approved Furniture content.
+
+## What works
+
+- `FURNITURE_BLOG_POSTS_ENABLED` is off by default and enabled only in the synthetic 5176 preview. Owner-only Website Studio → **Blog** creates and edits title, immutable slug, summary, plain-text body and visibility. New articles default to published on save; choose **Private draft** before saving if not ready for public preview. Changes to a published article publish on save. Enter only approved content and do not put confidential information in this disposable preview.
+- The actual Reimagin `/blog` and `/blog/{slug}` pages read published Furniture records. List API pages contain up to 12 summaries; detail requests fetch a single article. Open pages poll while visible. Missing/unpublished articles are unavailable and API errors do not restore sample articles or stale draft content. Polling is a preview bridge, not a production freshness guarantee.
+- Owner checks, bounded validation, unique immutable slugs, stale revision conflicts, transactional actor-attributed revisions and restore are implemented. The editor displays the most recent 20 versions; history is not automatically pruned. Restore creates a new version **including its old visibility**, so restoring a published version republishes it. No delete or slug rename is provided. Text is rendered as text, not HTML.
+- Public `GET /storefront-api/blog?page=N` returns published slug/title/summary and pagination; `GET /storefront-api/blog/{slug}` returns those fields and body for a published article only. No actor, revisions or draft fields are returned. Successful responses and detail 404s are no-store and sessionless. An unavailable/disabled API does not cause old demo content to reappear.
+- Existing bundled files and browser-local demo admin records are retained and not migrated. However, old `/blog/{slug}` links **no longer display those demo articles** in this Furniture preview: they show unavailable until an owner explicitly creates and publishes verified Furniture content using that exact slug. Other forms of old links, redirects and a global route registry remain undecided. The old demo admin continues to use its own data and does not manage Furniture articles.
+- The frontend remains `noindex, nofollow` and blog canonicals use the preview origin, not the production domain. No production SEO guarantee is implied.
+
+## Limitations and safety
+
+- Plain text only: no editor canvas, structured rich content, images per article (a shared decorative sample image is used), categories, author/date, import, export, search, SEO fields, scheduling, delete, authenticated visual draft preview or AI. The previous sample article design included features that are not yet connected. Article routes render client-side and do not provide crawler-visible current initial HTML or an HTTP 404; the API itself returns 404 for absent/unpublished articles.
+- Migration rollback drops both tables and destroys articles and history. Back up and rehearse before migration/rollback. The temporary tables and per-blog slug uniqueness are not the final shared content model: preserve all revisions, resolve global route collisions and establish redirect and upgrade/rollback rules before migration to it. MySQL locking and concurrent creates are not verified.
+- Public preview content is visible to anyone with the preview link. The synthetic database has no blog records initially. Use test or approved content only; this preview is not staging or production.
+- Preview simulation is not proof of the founder's Arena browser, Hostinger, MySQL, production SEO, accessibility or full system correctness. Other inherited storefront modules still contain demo data; inherited TypeScript/security issues and production NO-GO remain.
+
+## Verification
+
+- Local partial PHPUnit on PHP 8.4/SQLite: 115 tests; the six blog tests cover default-off, owner permissions, validation, duplicates, draft isolation, bounded public fields/pagination, save/stale conflict, visibility restoration, cross-article revision isolation, escaping, and transaction rollback on failed snapshot. This modified local runner lacks `xmlwriter` and `pdo_mysql`; it is not a full native production test environment.
+- Blog parser tests reject malformed, duplicate and oversized payloads, limit accepted fields and retain text safely. Storefront Vite build passed; project-wide typecheck still has inherited failures, with no diagnostics reported for changed TypeScript files.
+- Nested HTTPS Chromium simulation with third-party-cookie phaseout used a separate synthetic SQLite copy and checked login, legacy local-data preservation, old slug behavior, private draft, save, list/detail polling, plain-text escaping, unpublish, restore, preview noindex and canonical. Main preview was backed up before migration and the test did not add articles to it. Actual Arena browser still needs user confirmation.
+- Check hosted validation for the exact commit. CI does not validate MySQL, Hostinger, real publication SEO or the full business system.

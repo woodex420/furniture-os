@@ -57,7 +57,7 @@
 Each module needs server validation, authorization, audit, safe content handling, search/list/edit states, ordering, revision/restore, public rendering, route/SEO integration, responsive accessibility and tests; mark a module complete only after all apply.
 
 - [ ] **C01** Pages and template management, global navigation, header/footer and all homepage sections/slides.
-- [ ] **C02** Blog/articles with categories, authors, image/alt text, scheduling/unlisted/draft where required and safe import/export with source/permission validation and idempotency. AI-assisted drafting/settings, provider controls, limits and human review only if approved; no keys in chat/Git.
+- [ ] **C02** Expand the limited [plain-text blog preview](FURNITURE-BLOG-PREVIEW.md) with categories, authors, image/alt text, scheduling/unlisted/draft where required and safe import/export with source/permission validation and idempotency. AI-assisted drafting/settings, provider controls, limits and human review only if approved; no keys in chat/Git.
 - [ ] **C03** Portfolio/projects, services and city/location pages, linked related items and approved Furniture assets/content.
 - [ ] **C04** FAQs, testimonials, client logos and team profiles with evidence/permission, moderation and ordering; avoid copying Interior examples as Furniture records.
 - [ ] **C05** Forms and estimator: define questions, calculations, disclaimers, validation, consent, anti-spam/rate limits, failure/duplicate handling and tested CRM intake. Estimator must not promise prices or submit fake leads.
