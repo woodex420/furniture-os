@@ -147,10 +147,11 @@ jobs:
           DB_DATABASE=furniture_imported_test php tests/mysql-roundtrip.php
       - name: Test an additive migration after manual SQL import
         run: |
+          query="SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='furniture_imported_test' AND TABLE_NAME='leads' AND COLUMN_NAME='mysql_roundtrip_probe'"
           DB_DATABASE=furniture_imported_test php artisan migrate --path=tests/fixtures/mysql-roundtrip --force
-          test "$(mysql -h 127.0.0.1 -u root -N -s -e \"SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='furniture_imported_test' AND TABLE_NAME='leads' AND COLUMN_NAME='mysql_roundtrip_probe'\")" = 1
+          test "$(mysql -h 127.0.0.1 -u root -N -s -e "$query")" = 1
           DB_DATABASE=furniture_imported_test php artisan migrate:rollback --path=tests/fixtures/mysql-roundtrip --step=1 --force
-          test "$(mysql -h 127.0.0.1 -u root -N -s -e \"SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='furniture_imported_test' AND TABLE_NAME='leads' AND COLUMN_NAME='mysql_roundtrip_probe'\")" = 0
+          test "$(mysql -h 127.0.0.1 -u root -N -s -e "$query")" = 0
 
   frontend:
     name: Locked Furniture asset build and preview tests
