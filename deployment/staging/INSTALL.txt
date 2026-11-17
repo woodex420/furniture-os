@@ -1,0 +1,79 @@
+WOODEX FURNITURE — FIRST STAGING CANDIDATE
+========================================
+Test-only, incomplete business platform. Not for production or real customers.
+The live site woodexfurniture.pk is separate and must not be changed.
+
+IMPORTANT BEFORE STARTING
+1. This is a manual ZIP installation, not a Git checkout. Pause the existing
+   Hostinger Git auto-deployment for staging so it cannot overwrite these files.
+2. Restrict the ENTIRE staging site with Hostinger's password protection before
+   uploading or enabling it; test that anonymous access is denied. Noindex and
+   the application's owner login are NOT whole-site protection. Hostinger may
+   store protection rules in public_html/.htaccess: preserve/merge those rules
+   with the supplied .htaccess rather than overwriting them. If unsure how to
+   retain protection, stop and ask Hostinger. Do not post access passwords.
+3. Back up existing staging files and database first. Confirm the database is
+   new and has NO tables; never import into an existing database. Do not delete
+   or wipe an unknown database. Use synthetic data only.
+4. The expected layout is two SIBLING directories for this staging site:
+
+      <staging-site-directory>/furniture-app/   private Laravel app
+      <staging-site-directory>/public_html/     web document root only
+
+   Verify the actual Hostinger site directory and document root before copying.
+   furniture-app, its .env and all storage MUST be outside every web document
+   root. If your account does not allow this layout, STOP; do not put the whole
+   project inside public_html or use a blanket rewrite as a workaround.
+5. PHP web AND SSH CLI need PHP 8.4.1+ within PHP 8 and the Composer-locked
+   requirements (including PDO MySQL, mbstring, curl, XML and fileinfo). The
+   initial owner command requires interactive SSH with hidden password input.
+   If SSH is unavailable, STOP: no browser installer or default owner is included.
+
+INSTALL
+1. Download the ZIP and the separate MariaDB SQL from the SAME successful
+   staging candidate GitHub Actions run. Verify the SHA256SUMS in that artifact.
+   Do not use the older synthetic SQL artifact with a different commit.
+2. Upload and extract the ZIP to a private temporary location. Copy its
+   furniture-app folder and public_html contents into the verified sibling
+   directories above. Preserve the site's password-protection rules and do not
+   overwrite existing files without the backup. Ensure furniture-app/storage and
+   furniture-app/bootstrap/cache are writable by PHP, without making them public.
+3. In phpMyAdmin choose only the NEW empty staging database, then import the
+   matching furniture-staging-mariadb.sql ONCE. It includes Laravel migration
+   history and required internal baseline rows, but no owner or business data.
+   Do not run migrate:fresh, db:wipe, or import it a second time.
+4. Inside the PRIVATE furniture-app folder, copy .env.example to .env. Set the
+   Hostinger-provided database host, database name, username and new password in
+   that file privately. Use a strong unique database password, correctly quoted
+   for dotenv; do not put it in Git or chat. Keep APP_DEBUG=false and HTTPS.
+   Verify SESSION_SECURE_COOKIE=true remains enabled for HTTPS. Mail uses the
+   log driver and integrations are not configured for real sending.
+5. In SSH, go to the private furniture-app directory. Verify PHP version and,
+   if Composer is available, run composer check-platform-reqs --no-dev. Run:
+
+      php artisan key:generate
+      php artisan migrate:status
+      php artisan furniture:provision-owner
+
+   The first command creates a unique private APP_KEY. The second must show
+   all imported migrations as applied. The last command asks for owner details
+   and a hidden password; use a unique password of 12–72 bytes and do not share
+   it. It works only for an empty installation. Never use a default/demo owner.
+6. With the site still password-protected, visit /login and sign in, then test
+   /admin, /admin/leads and /admin/website/home. Save synthetic home content and
+   verify the storefront updates. Direct routes, static assets and Livewire must
+   work. Test that unauthenticated visitors cannot reach any page, asset or API
+   without the separate site password, and that /.env and /.git are denied.
+   If a check fails, leave staging protected and do not use real data.
+
+This candidate has demo/partial catalog, forms and commerce. No real orders,
+contact details, production databases, payments or live integrations. The
+storefront is React preview, not the completed Astro migration or full platform.
+The owner login and media/CRM workflows are early foundations, not a security
+certification. Actual Hostinger PHP, Apache/LiteSpeed rewrites, HTTPS, image
+uploads, backups and browser behavior still need separate validation.
+
+ROLLBACK
+Keep protection enabled. Restore the backed-up staging files and database using
+Hostinger's verified restore procedure; do not restore over the live website.
+The ZIP and SQL do not contain a backup or automatic rollback.

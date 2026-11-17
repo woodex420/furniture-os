@@ -303,6 +303,115 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/admin)" = 302
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/unknown-page)" = 404
 
+  staging-candidate:
+    name: Build and browser-test staging candidate
+    needs: [php, mysql-roundtrip, frontend, reimagin, same-origin-smoke, astro-spike]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      mysql:
+        image: mariadb:10.5.29
+        env:
+          MYSQL_ROOT_PASSWORD: synthetic-ci-only
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_DATABASE: furniture_imported_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -psynthetic-ci-only"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    env:
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      APP_KEY: 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+      APP_URL: 'http://127.0.0.1:8098'
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: furniture_imported_test
+      DB_USERNAME: root
+      DB_PASSWORD: synthetic-ci-only
+      DB_URL: ''
+      MYSQL_PWD: synthetic-ci-only
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      SESSION_SECURE_COOKIE: 'false' # HTTP in this disposable runner only; staging must use HTTPS.
+      MAIL_MAILER: log
+      QUEUE_CONNECTION: sync
+      FURNITURE_STOREFRONT_BUNDLE_ENABLED: 'true'
+      FURNITURE_HOME_EDITOR_ENABLED: 'true'
+      FURNITURE_CANDIDATE_TEST_ORIGIN: 'http://127.0.0.1:8098'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.2'
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          extensions: curl, dom, exif, fileinfo, gd, mbstring, pdo_mysql, xml, xmlwriter, zip
+          tools: composer:v2
+          coverage: none
+      - name: Download same-commit verified MariaDB SQL
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: synthetic-mariadb-10-5-29-schema
+          path: ${{ runner.temp }}/source-sql
+      - name: Build locked app and storefront dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y mysql-client zip unzip
+          node --test scripts/build-staging-candidate.test.mjs
+          cd apps/furniture-platform
+          composer install --no-dev --no-interaction --prefer-dist --no-progress --no-scripts --no-plugins
+          composer check-platform-reqs --no-dev
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+          cd ../reimagined-storefront
+          npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+          npx vite build
+          node ../../scripts/assemble-storefront-preview.mjs dist "$RUNNER_TEMP/storefront-fragment"
+      - name: Build candidate ZIP and matching SQL
+        run: |
+          (cd "$RUNNER_TEMP/source-sql" && sha256sum -c SHA256SUMS)
+          grep -F "GitHub commit: $GITHUB_SHA" "$RUNNER_TEMP/source-sql/README.txt"
+          node scripts/build-staging-candidate.mjs "$GITHUB_WORKSPACE" "$RUNNER_TEMP/storefront-fragment" "$RUNNER_TEMP/candidate"
+          mkdir "$RUNNER_TEMP/staging-download"
+          (cd "$RUNNER_TEMP/candidate" && zip -q -r "$RUNNER_TEMP/staging-download/furniture-staging-candidate.zip" .)
+          cp "$RUNNER_TEMP/source-sql/furniture-synthetic-schema.sql" "$RUNNER_TEMP/staging-download/furniture-staging-mariadb.sql"
+          cp deployment/staging/INSTALL.txt "$RUNNER_TEMP/staging-download/INSTALL.txt"
+          printf 'Commit: %s\nDatabase: MariaDB 10.5.29\nRun: %s/%s/actions/runs/%s\n' "$GITHUB_SHA" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/staging-download/BUILD-INFO.txt"
+          (cd "$RUNNER_TEMP/staging-download" && sha256sum furniture-staging-candidate.zip furniture-staging-mariadb.sql > SHA256SUMS)
+      - name: Import SQL and test the extracted candidate in a browser
+        run: |
+          mysql -h 127.0.0.1 -u root furniture_imported_test < "$RUNNER_TEMP/staging-download/furniture-staging-mariadb.sql"
+          mkdir "$RUNNER_TEMP/extracted-candidate"
+          unzip -q "$RUNNER_TEMP/staging-download/furniture-staging-candidate.zip" -d "$RUNNER_TEMP/extracted-candidate"
+          test ! -e "$RUNNER_TEMP/extracted-candidate/furniture-app/.env"
+          test ! -e "$RUNNER_TEMP/extracted-candidate/public_html/.env"
+          test ! -e "$RUNNER_TEMP/extracted-candidate/public_html/storage"
+          cd "$RUNNER_TEMP/extracted-candidate/furniture-app"
+          php artisan migrate --force | grep -q 'Nothing to migrate'
+          php "$GITHUB_WORKSPACE/deployment/staging/tests/ci-seed-owner.php"
+          cd "$RUNNER_TEMP/extracted-candidate"
+          php -S 127.0.0.1:8098 -t public_html "$GITHUB_WORKSPACE/deployment/staging/tests/ci-server-router.php" > "$RUNNER_TEMP/candidate-http.log" 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true; cat "$RUNNER_TEMP/candidate-http.log"' EXIT
+          curl --retry 10 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:8098/ -o "$RUNNER_TEMP/candidate-home.html"
+          cd "$GITHUB_WORKSPACE/apps/reimagined-storefront"
+          node tests/staging-candidate-browser.mjs
+      - name: Upload tested staging candidate (not production)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: furniture-staging-candidate-${{ github.sha }}
+          path: ${{ runner.temp }}/staging-download/
+          if-no-files-found: error
+          retention-days: 7
+
   astro-spike:
     name: Astro shared-hero prototype
     runs-on: ubuntu-24.04
