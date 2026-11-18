@@ -12,6 +12,7 @@ import { config } from "@/config/env";
 // Landing experience stays eager (LCP); every other storefront route is a separate chunk.
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import DocumentCanvas from "./pages-builder/DocumentCanvas";
 
 const Shop = lazy(() => import("./pages/Shop"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
@@ -48,7 +49,12 @@ const RouteFallback = () => (
   </div>
 );
 
-const App = () => (
+const App = () => {
+  // The synthetic canvas is isolated from the storefront shell and cannot write.
+  if (window.parent !== window && new URLSearchParams(window.location.search).get('furniture-canvas') === 'document-proof') {
+    return <DocumentCanvas />;
+  }
+  return (
   <QueryClientProvider client={queryClient}>
     <QuoteProvider>
       <CartProvider>
@@ -99,6 +105,7 @@ const App = () => (
       </CartProvider>
     </QuoteProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

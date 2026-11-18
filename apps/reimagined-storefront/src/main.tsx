@@ -4,7 +4,10 @@ import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import { initAnalytics } from "./lib/analytics";
 import "./index.css";
 
-initAnalytics();
+// Never initialize analytics in the isolated synthetic editor frame.
+if (!(window.parent !== window && new URLSearchParams(window.location.search).get('furniture-canvas') === 'document-proof')) {
+  initAnalytics();
+}
 
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>

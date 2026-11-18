@@ -6,6 +6,20 @@
     <div class="page-heading"><h1>Article text proof</h1></div>
     @if(session('status'))<div class="form-success" role="status">{{ session('status') }}</div>@endif
     @if($errors->any())<div class="form-error" role="alert">The changes were not saved. @error('revision'){{ $message }} <a href="{{ route('admin.builder-html-proof.edit', absolute: false) }}">Reload editor</a>.@enderror @error('document'){{ $message }}@enderror @error('section'){{ $message }}@enderror @error('section_id'){{ $message }}@enderror @error('action'){{ $message }}@enderror</div>@endif
+    @php $canvasUrl = \App\Support\Website\StorefrontCanvasUrl::configured(); @endphp
+    <section class="card home-canvas" aria-labelledby="proof-canvas-heading">
+        <h2 id="proof-canvas-heading">Synthetic React canvas <span class="home-canvas-badge">Preview</span></h2>
+        <p>Preview unsaved synthetic text in the actual Reimagin article component. The configured storefront origin receives this draft; do not enter private or production data. Select a section to focus its form. Only the forms below save; structure actions reload and discard unsaved text.</p>
+        @if($canvasUrl)
+            <div class="home-canvas-frame" data-proof-canvas data-storefront-origin="{{ $canvasUrl }}">
+                <div class="home-canvas-status" role="status" data-proof-canvas-status>Loading synthetic canvas…</div>
+                <iframe title="Synthetic Reimagin article canvas" data-proof-canvas-frame sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe>
+            </div>
+            <noscript><p>JavaScript is required for the canvas; forms below still work.</p></noscript>
+        @else
+            <p class="home-canvas-unavailable">Canvas not configured. The forms below still work.</p>
+        @endif
+    </section>
     <div class="card customer-detail contact-create">
         <p class="form-help">Fixed synthetic document only. Text is not HTML. <a href="{{ route('builder-html-proof.show', absolute: false) }}">Open synthetic server-rendered HTML</a>.</p>
         <p class="form-help"><strong>Save each text form first.</strong> Add, duplicate, move and remove save immediately and reload the editor, discarding unsaved text in any form. The original section cannot be removed. Maximum ten sections.</p>

@@ -340,6 +340,7 @@ jobs:
           APP_URL: 'http://127.0.0.1:8100'
           SESSION_DRIVER: file
           FURNITURE_BUILDER_HTML_PROOF_ENABLED: 'true'
+          FURNITURE_STOREFRONT_CANVAS_URL: 'http://127.0.0.1:8101'
         run: |
           set +e
           (
@@ -349,8 +350,11 @@ jobs:
             php tests/fixtures/builder-proof-ci-seed.php
             php artisan serve --host=127.0.0.1 --port=8100 --no-reload > "$RUNNER_TEMP/furniture-builder-proof-server.log" 2>&1 &
             server=$!
-            trap 'kill "$server" 2>/dev/null || true' EXIT
+            php artisan serve --host=127.0.0.1 --port=8101 --no-reload > "$RUNNER_TEMP/furniture-builder-canvas-server.log" 2>&1 &
+            canvas_server=$!
+            trap 'kill "$server" "$canvas_server" 2>/dev/null || true' EXIT
             curl --retry 10 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:8100/experiments/builder-html-proof -o /dev/null
+            curl --retry 10 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:8101/ -o /dev/null
             node ../reimagined-storefront/tests/builder-html-proof-browser.mjs
           ) 2>&1 | tee "$RUNNER_TEMP/furniture-builder-proof-test.log"
           result=${PIPESTATUS[0]}

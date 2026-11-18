@@ -16,6 +16,28 @@ try {
   await Promise.all([owner.waitForNavigation({ waitUntil: 'networkidle2' }), owner.click('button[type=submit]')]);
   assert.equal(new URL(owner.url()).pathname, '/admin');
   await owner.goto(origin + '/admin/website/builder-html-proof', { waitUntil: 'networkidle2' });
+  const frameElement = await owner.waitForSelector('[data-proof-canvas-frame]');
+  await owner.waitForFunction(() => document.querySelector('[data-proof-canvas-status]').textContent.includes('connected'));
+  const canvas = await frameElement.contentFrame();
+  await canvas.waitForSelector('[data-canvas-section]');
+  await owner.$eval('#proof-summary', el => { el.value = 'Unsaved <b>synthetic</b> draft'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  await canvas.waitForFunction(() => document.querySelector('[data-canvas-section]')?.textContent.includes('Unsaved <b>synthetic</b> draft'));
+  assert.equal(await canvas.$('[data-canvas-section] b'), null, 'draft text must not be treated as HTML');
+  // Even a forged event naming the parent cannot bypass its origin check, and
+  // malformed drafts from the expected origin must not reach the renderer.
+  await canvas.evaluate(() => {
+    const payload = { type: 'furniture-document-canvas-values', document: { schema_version: 1, sections: [] } };
+    window.dispatchEvent(new MessageEvent('message', { source: window.parent, origin: 'https://attacker.invalid', data: payload }));
+    window.dispatchEvent(new MessageEvent('message', { source: window.parent, origin: 'http://127.0.0.1:8100', data: { ...payload, document: { schema_version: 2, sections: [] } } }));
+  });
+  assert.match(await canvas.$eval('[data-canvas-section]', el => el.textContent), /Unsaved <b>synthetic<\/b> draft/);
+  const beforeSave = await fetch(origin + '/experiments/builder-html-proof');
+  assert.doesNotMatch(await beforeSave.text(), /Unsaved synthetic draft|Unsaved &lt;b&gt;synthetic/);
+  await canvas.click('[data-canvas-section] button');
+  await owner.waitForFunction(() => document.activeElement?.id === 'proof-summary');
+  await owner.evaluate(() => { window.postMessage({ type: 'furniture-document-canvas-select', id: '06516020-34a2-4615-9b8f-d1c6fa5fb077' }, '*'); document.activeElement.blur(); });
+  await new Promise(resolve => setTimeout(resolve, 100));
+  assert.notEqual(await owner.evaluate(() => document.activeElement?.id), 'proof-summary', 'untrusted messages cannot select a field');
   // Laravel 13 also accepts a verified same-origin Fetch Metadata header. Test
   // the fallback path without either that header or the CSRF token.
   const cookie = (await owner.cookies()).map(({ name, value }) => `${name}=${value}`).join('; ');

@@ -213,3 +213,57 @@ if (homeEditor && homeHistory) {
         homeHistory.hidden = false;
     }
 }
+
+// Synthetic proof only. The configured cross-origin frame receives draft text,
+// never credentials or write capability; owner forms remain the sole writer.
+const proofCanvas = document.querySelector('[data-proof-canvas]');
+if (proofCanvas) {
+    const frame = proofCanvas.querySelector('[data-proof-canvas-frame]');
+    const status = proofCanvas.querySelector('[data-proof-canvas-status]');
+    const origin = proofCanvas.dataset.storefrontOrigin;
+    let validOrigin = false;
+    try {
+        const url = new URL(origin);
+        validOrigin = url.origin === origin && ['http:', 'https:'].includes(url.protocol) && origin !== window.location.origin;
+    } catch { /* Invalid configuration fails closed. */ }
+    if (frame && status && validOrigin) {
+        const sections = [...document.querySelectorAll('[data-proof-section]')];
+        let ready = false;
+        const sendDraft = () => {
+            if (!ready) return;
+            const draft = sections.map(section => ({
+                id: section.dataset.proofSection,
+                type: 'article_text',
+                props: { summary: section.querySelector('textarea[name="summary"]').value, body: section.querySelector('textarea[name="body"]').value },
+            }));
+            frame.contentWindow.postMessage({ type: 'furniture-document-canvas-values', document: { schema_version: 1, sections: draft } }, origin);
+        };
+        sections.forEach(section => section.addEventListener('input', sendDraft));
+        window.addEventListener('message', event => {
+            if (event.source !== frame.contentWindow || event.origin !== origin || !event.data || typeof event.data !== 'object') return;
+            if (event.data.type === 'furniture-document-canvas-ready') {
+                ready = true;
+                status.textContent = 'Preview connected. Changes are not saved until you submit a section form.';
+                sendDraft();
+            } else if (event.data.type === 'furniture-document-canvas-select' && typeof event.data.id === 'string') {
+                const section = sections.find(item => item.dataset.proofSection === event.data.id);
+                const field = section?.querySelector('textarea[name="summary"]');
+                if (field) { field.focus(); field.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            }
+        });
+        frame.addEventListener('load', () => {
+            ready = false;
+            status.textContent = 'Waiting for synthetic canvas…';
+            frame.contentWindow.postMessage({ type: 'furniture-document-canvas-ping' }, origin);
+        });
+        const url = new URL('/', origin);
+        url.searchParams.set('furniture-canvas', 'document-proof');
+        url.searchParams.set('parent-origin', window.location.origin);
+        frame.src = url.toString();
+        window.setTimeout(() => {
+            if (!ready) status.textContent = 'Canvas did not connect. Check the trusted storefront and framing configuration; forms remain available.';
+        }, 10000);
+    } else if (status) {
+        status.textContent = 'Canvas unavailable: configure a different storefront origin. Forms remain available.';
+    }
+}
