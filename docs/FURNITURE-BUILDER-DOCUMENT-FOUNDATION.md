@@ -1,6 +1,6 @@
 # Furniture builder document foundation — experimental, not published
 
-This is the first internal storage/contract slice for the multi-page builder. It does **not** replace the existing home, service, city or blog bridges; create any public/admin route; migrate existing pages; or render/publish a document. No records are seeded. The existing Reimagin preview and Astro experiments remain separate. The final route registry, publishing strategy and general builder are still required.
+This is an experimental storage/contract foundation for the multi-page builder. A subsequent **fixed, synthetic-only** HTML proof is described below. Neither replaces the existing home, service, city or blog bridges; migrates existing pages; nor publishes the storefront. No records are seeded by application migrations. The final route registry, publishing strategy and general builder are still required.
 
 ## V1 contract
 
@@ -10,14 +10,24 @@ This is deliberately narrow: it has no media, styling, links, layout nesting, ro
 
 ## Revisions and safety
 
-`BuilderDocumentRevisions` is an internal service with no HTTP entry point. It rechecks the current actor under lock against the owner workspace and storefront-edit gates, validates every document, serializes writes in a transaction, checks the expected revision and uses a conditional update, then appends a per-document version. Restore creates a new revision after validating its source; it cannot use another document's history. Corrupt/unsupported stored data is rejected rather than overwritten. A failed snapshot rolls back the content change. This is storage history, not publishing or proof of a concurrent database workload.
+`BuilderDocumentRevisions` is an internal service, used by the tightly restricted synthetic proof below but not a general HTTP API. It rechecks the current actor under lock against the owner workspace and storefront-edit gates, validates every document, serializes writes in a transaction, checks the expected revision and uses a conditional update, then appends a per-document version. Restore creates a new revision after validating its source; it cannot use another document's history. Corrupt/unsupported stored data is rejected rather than overwritten. A failed snapshot rolls back the content change. This is storage history, not publishing or proof of a concurrent database workload.
 
 The additive migration creates two new empty tables. Rolling it back **drops all documents and versions stored in these tables**. Back up first; never roll back real data without a tested recovery plan. The current home, city, service and blog tables are untouched. MySQL/MariaDB CI tests exercise synthetic create/edit/restore and SQL roundtrip; they do not prove concurrent behavior or actual Hostinger compatibility. No automatic production deployment is performed.
+
+## Synthetic save-to-HTML proof
+
+A deliberately narrow experiment serves `/experiments/builder-html-proof` and an owner form at `/admin/website/builder-html-proof` **only** when `FURNITURE_BUILDER_HTML_PROOF_ENABLED=true` and `APP_ENV` is `local` or `testing`. Both are unavailable by default and in production/staging environments even with the flag on. The reader exposes one fixed document UUID and fixed single article-text section UUID only; there is no creation UI, route registry, arbitrary-ID lookup or visibility system. Do not put real data at those reserved IDs. If accidentally enabled in a publicly accessible local/testing installation, the synthetic reader is accessible without login: `noindex` is not access control. Use isolated infrastructure and synthetic data only.
+
+The owner form uses Laravel's normal session, authorization, request forgery protection, rate limiter and revision conflict checks. Its accepted save commits the revision and the next uncached anonymous request renders from the database with escaped text and no JavaScript dependency. Invalid or unsupported stored documents fail closed. The form is a text form, **not** a visual canvas. It does not expose restore, though the internal service can restore and the next request sees that version.
+
+The Astro static experiment now dispatches the V1 section through `DocumentSections` to the **actual Reimagin `ArticleText` component**. Laravel's PHP-only proof uses a separate Blade counterpart, not React running in PHP. A shared expected-markup fixture checks both renderings for this one example; it is not a guarantee of visual parity, all input parity or a production component registry. The proof avoids a Node runtime on the serving path, but has not been tested on Hostinger. Laravel's body bound supplements rather than replaces web-server limits; normal input middleware trims text.
+
+Synthetic CI tests cover owner save, invalid/stale writes, restoration, escaping, authorization, feature/environment gates, and a real browser with JavaScript disabled, including an anonymous fresh HTTP response after a save. The proof is marked `noindex, nofollow` and `no-store`, so it demonstrates crawler-readable initial HTML, **not search indexing, production cache invalidation, or immediate publishing of real storefront pages**. Laravel 13 accepts valid same-origin Fetch Metadata as well as CSRF tokens; the browser test rejects a session write missing both. No deployment was performed.
 
 ## Remaining before use
 
 - Establish one route registry, conflict/collision handling, accessible typed component registry and shared renderer; connect actual Reimagin pages and the owner canvas.
 - Design migration for the existing hero/media/tagline and all revisions, preserving identities and older clients; test isolated round trips and rollback before a cutover.
 - Prove atomic accepted-save-to-visible publication and crawler-visible current HTML on the actual hosting model, including invalidation and rollback. No mandatory separate publish step for ordinary accepted edits.
-- Add API/controller feature gating, authorization, CSRF, rate and request-size limits, audit/access rules, robust reads, concurrency tests and browser coverage before exposing this service.
+- For any general API/controller, independently design feature gating, authorization, request forgery protection, rate and server-enforced request-size limits, audit/access rules, robust reads, concurrency tests and browser coverage. The isolated proof does not supply a general API.
 - Add remaining templates, component types and visual controls; complete CRM and business modules separately. Passing unit tests does not mean the platform or builder is complete.

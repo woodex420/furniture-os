@@ -4,7 +4,7 @@ This isolated **noindex**, static Astro + React + Tailwind 3 experiment is not t
 
 - `/` renders the real `HeroSlider`, including its temporary browser-side Furniture `/storefront-api/home` polling.
 - `/experiments/product/` renders the real product `ImageGallery` with two synthetic example images. There are no prices, cart, stock or order actions. Its inherited 360° effect is only a visual effect, not a true product rotation.
-- `/experiments/article/` renders the same plain-text `ArticleText` component used by the connected Reimagin blog detail page, with synthetic text. Its HTML is escaped and server-rendered without a JavaScript island.
+- `/experiments/article/` renders a synthetic version-1 document via `DocumentSections` and the same plain-text `ArticleText` component used by the connected Reimagin blog detail page. Its HTML is escaped and server-rendered without a JavaScript island. A shared fixture checks equivalent markup against the separate Laravel PHP-only synthetic proof; it does not synchronize live data or guarantee full visual parity.
 
 These are component experiments, **not** complete category, product or editorial pages. Prototype pages have no production canonical, authoritative catalogue or deployment setup. The hero's existing shop links are not supplied by this prototype.
 

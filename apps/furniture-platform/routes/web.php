@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\OwnerPasswordController;
 use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\Workspace\BlogPostController;
+use App\Http\Controllers\Workspace\BuilderHtmlProofController;
 use App\Http\Controllers\Workspace\CityPageController;
 use App\Http\Controllers\Workspace\ContactCreationController;
 use App\Http\Controllers\Workspace\CustomerDetailController;
@@ -48,6 +49,11 @@ Route::get('/', function () {
 Route::get('/{storefrontPath}', StorefrontBundleController::class)
     ->where('storefrontPath', '(?:shop(?:/[^/]+)?|room-packages|virtual-showroom|series(?:/[^/]+)?|projects(?:/[^/]+)?|services(?:/[^/]+)?|locations(?:/[^/]+)?|b2b|about|contact|custom-design|quotation|showrooms|materials|warranty|blog(?:/[^/]+)?|checkout)')
     ->name('storefront.bundle');
+
+// Fixed, noindex synthetic proof only. No arbitrary document ID or route is exposed.
+Route::get('/experiments/builder-html-proof', [BuilderHtmlProofController::class, 'show'])
+    ->withoutMiddleware([EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class])
+    ->name('builder-html-proof.show');
 
 // Read-only public homepage content; writes are restricted to the owner workspace.
 Route::get('/storefront-api/home', [StorefrontHomeController::class, 'publicContent'])
@@ -121,6 +127,11 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
     Route::get('/admin/contacts', fn () => view('workspace.contacts'))
         ->middleware(['can:workspace.view', 'can:contacts.view'])
         ->name('admin.contacts');
+    // Fixed synthetic proof; additionally restricted to local/testing inside the controller.
+    Route::get('/admin/website/builder-html-proof', [BuilderHtmlProofController::class, 'edit'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.builder-html-proof.edit');
+    Route::post('/admin/website/builder-html-proof', [BuilderHtmlProofController::class, 'update'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.builder-html-proof.update');
     // Small storefront integration, disabled by default until enabled for testing.
     Route::get('/admin/website/home', [StorefrontHomeController::class, 'edit'])
         ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.storefront.home');

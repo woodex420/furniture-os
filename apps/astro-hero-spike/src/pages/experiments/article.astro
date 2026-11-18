@@ -1,16 +1,22 @@
 ---
 import Prototype from '../../layouts/Prototype.astro';
-import ArticleText from '../../../../reimagined-storefront/src/components/blog/ArticleText';
+import DocumentSections from '../../../../reimagined-storefront/src/pages-builder/DocumentSections';
+import type { FurnitureDocumentV1 } from '../../../../reimagined-storefront/src/pages-builder/furniture-document-v1';
 // Deliberately synthetic; no Laravel or reference-repository article is imported.
-const summary = 'A synthetic article for testing the shared editorial layout.';
-const body = 'First example paragraph.\nSecond example line with <strong>literal text</strong> & symbols.';
+const document: FurnitureDocumentV1 = {
+  schema_version: 1,
+  sections: [{ id: '06516020-34a2-4615-9b8f-d1c6fa5fb077', type: 'article_text', props: {
+    summary: 'A synthetic article for testing the shared editorial layout.',
+    body: 'First example paragraph.\nSecond example line with <strong>literal text</strong> & symbols.',
+  } }],
+};
 ---
 <Prototype title="Synthetic article">
   <main class="container mx-auto px-4 py-10">
     <p class="text-accent text-xs font-bold uppercase tracking-[0.25em] mb-3">Prototype journal</p>
     <h1 class="text-3xl md:text-5xl font-black mb-10">Synthetic article</h1>
     <article class="max-w-3xl">
-      <ArticleText summary={summary} body={body} />
+      <DocumentSections document={document} />
     </article>
   </main>
 </Prototype>

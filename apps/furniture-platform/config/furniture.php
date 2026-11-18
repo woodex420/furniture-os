@@ -16,6 +16,8 @@ return [
     'city_pages_enabled' => (bool) env('FURNITURE_CITY_PAGES_ENABLED', false),
     // Furniture-owned blog experiment; disabled until explicitly enabled.
     'blog_posts_enabled' => (bool) env('FURNITURE_BLOG_POSTS_ENABLED', false),
+    // Synthetic local/testing-only experiment, never a production publishing switch.
+    'builder_html_proof_enabled' => (bool) env('FURNITURE_BUILDER_HTML_PROOF_ENABLED', false),
     // Experimental same-origin storefront shell, off by default. The bundle must be
     // built separately; this flag does not make demo commerce or login production-ready.
     'storefront_bundle_enabled' => (bool) env('FURNITURE_STOREFRONT_BUNDLE_ENABLED', false),

@@ -8,7 +8,7 @@ use Illuminate\Validation\ValidationException;
 use JsonException;
 use stdClass;
 
-/** Internal experimental document contract, not a route or publishing format. */
+/** Experimental document contract; not a production publishing format. */
 final class BuilderDocumentV1
 {
     public const MAX_BYTES = 65536;

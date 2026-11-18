@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
-/** Internal owner-only foundation; no routes, rendering, or publication yet. */
+/** Internal owner-only revision service; the fixed synthetic proof is not production publication. */
 final class BuilderDocumentRevisions
 {
     public function __construct(private readonly BuilderDocumentV1 $contract) {}

@@ -331,6 +331,21 @@ jobs:
           curl -fsS http://127.0.0.1:8099/storefront-api/home | grep -q 'hero_title'
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/admin)" = 302
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/unknown-page)" = 404
+      - name: Exercise synthetic saved document and fresh no-JavaScript HTML
+        working-directory: apps/furniture-platform
+        env:
+          APP_ENV: local
+          SESSION_DRIVER: file
+          FURNITURE_BUILDER_HTML_PROOF_ENABLED: 'true'
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+          php tests/fixtures/builder-proof-ci-seed.php
+          php artisan serve --host=127.0.0.1 --port=8099 --no-reload > "$RUNNER_TEMP/furniture-builder-proof.log" 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          curl --retry 10 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:8099/experiments/builder-html-proof -o /dev/null
+          node ../reimagined-storefront/tests/builder-html-proof-browser.mjs
 
   staging-candidate:
     name: Build and browser-test staging candidate

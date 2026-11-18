@@ -27,6 +27,11 @@ test('synthetic article renders shared plain text before JavaScript without inte
   assert.doesNotMatch(article, /<strong>literal text<\/strong>/);
   assert.doesNotMatch(article, /<link rel="canonical"/);
   assert.doesNotMatch(article, /<astro-island/);
+  // The same expected markup is checked against Laravel's PHP-only counterpart.
+  const expected = readFileSync(new URL('../../../shared/builder-article-render-fixture.html', import.meta.url), 'utf8').trim().replace(/>\s+</g, '><');
+  const paragraphs = article.match(/<p class="text-lg text-muted-foreground[\s\S]*?<\/p>\s*<p class="text-base text-foreground\/85[\s\S]*?<\/p>/);
+  assert.ok(paragraphs, 'document renderer must render the actual ArticleText component');
+  assert.equal(paragraphs[0].replace(/>\s+</g, '><'), expected);
 });
 
 test('synthetic product gallery has no-commerce metadata and real local images before hydration', () => {
