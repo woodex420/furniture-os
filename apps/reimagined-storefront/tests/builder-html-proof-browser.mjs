@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import puppeteer from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
 
-const origin = 'http://127.0.0.1:8099';
+const origin = 'http://127.0.0.1:8100';
 if (process.env.CI !== 'true' || process.env.GITHUB_ACTIONS !== 'true' || process.env.APP_ENV !== 'local' || process.env.DB_DATABASE !== '/tmp/furniture-smoke.sqlite') {
   throw new Error('This test requires the isolated synthetic CI proof fixture.');
 }
