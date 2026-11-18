@@ -1,0 +1,44 @@
+// Tailwind v4 configuration for Woodex OS Frontend
+@import "tailwindcss";
+
+@layer components {
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+  }
+  .records-card {
+    @apply p-6;
+  }
+  .records-title {
+    @apply flex justify-between items-center mb-4;
+  }
+  .records-tools {
+    @apply flex gap-4 mb-4;
+  }
+  .records-search, .records-filter {
+    @apply flex items-center gap-2;
+  }
+  .sample-chip {
+    @apply px-2 py-1 bg-green-100 text-green-800 rounded text-sm font-medium;
+  }
+  .customer-validation {
+    @apply text-red-600 text-sm mt-2;
+  }
+  .customer-loading {
+    @apply text-gray-500 text-sm mt-2 italic;
+  }
+  .table-wrap {
+    @apply overflow-x-auto;
+  }
+  .table-wrap table {
+    @apply w-full text-left border-collapse;
+  }
+  .table-wrap th, .table-wrap td {
+    @apply p-3 border-b border-gray-100;
+  }
+  .record-name {
+    @apply text-blue-600 font-medium hover:underline;
+  }
+  .record-status {
+    @apply px-2 py-1 bg-gray-100 rounded text-xs;
+  }
+}
