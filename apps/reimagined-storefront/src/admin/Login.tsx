@@ -63,7 +63,7 @@ export default function AdminLogin() {
         </div>
         <div className="relative flex items-center gap-2 text-xs text-utility-text">
           <ShieldCheck className="h-4 w-4 text-hon-green-light" />
-          {isSupabaseMode ? "Supabase sign-in; server-side permissions remain authoritative." : "Demo gate or Supabase Auth — the demo gate is not a security boundary."}
+          {isSupabaseMode ? "Supabase sign-in is disabled in this Furniture preview." : "Demo gate only — not a security boundary."}
         </div>
       </div>
 
@@ -83,7 +83,7 @@ export default function AdminLogin() {
 
           <h2 className="text-2xl font-bold text-foreground">Sign in</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "supabase" ? "Authenticate against your Supabase project (VITE_SUPABASE_*)." : "Use your admin credentials to continue."}
+            {mode === "supabase" ? "Supabase sign-in is unavailable in this Furniture preview." : "Use your demo admin credentials to continue."}
           </p>
 
           {supabaseEnabled && !isSupabaseMode && (

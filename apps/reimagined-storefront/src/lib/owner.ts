@@ -5,7 +5,7 @@ import { isDemoMode, isSupabaseConfigured, isSupabaseMode } from "@/config/env";
 
 function useServerPermission(kind: "publish" | "settings"): { allowed: boolean; checking: boolean } {
   const fallback = kind === "publish" ? isDemoMode : !isSupabaseMode;
-  const [state, setState] = useState({ allowed: fallback, checking: isSupabaseMode && isSupabaseConfigured });
+  const [state, setState] = useState<{ allowed: boolean; checking: boolean }>({ allowed: fallback, checking: isSupabaseMode && isSupabaseConfigured });
 
   useEffect(() => {
     if (!isSupabaseMode || !isSupabaseConfigured) return;

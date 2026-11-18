@@ -1,9 +1,8 @@
 /**
  * Storefront-side read hook for the Pages builder (Wave 1).
  *
- * Supabase mode: staff read the draft through `page_preview` (00036, `page.manage`
- * only) and everyone else falls back to `published_page`, which serves the immutable
- * snapshot. Demo mode: the local store stands in for both.
+ * The legacy Supabase reads are disabled; they return no page on failure and
+ * never substitute demo data. Demo mode uses the local store.
  * The LabPreview badge says which one you are looking at.
  */
 import { useEffect, useState } from "react";
@@ -28,8 +27,7 @@ export function usePagePreview(slug: string | undefined): { page: AdminPage | nu
     }
     const load = async () => {
       if (isSupabaseMode) {
-        // Staff preview the draft through page_preview (00036); anyone else can only
-        // ever read the published snapshot. Both paths are server-enforced.
+        // Both legacy reads fail closed in this Furniture snapshot.
         const draft = await getPagePreview(slug).catch(() => undefined);
         return draft ?? (await getPublishedPage(slug));
       }

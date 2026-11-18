@@ -12,10 +12,8 @@
  *   static  → storefront seed data, read-only (used implicitly by the storefront).
  *   bagisto → admin panel + storefront talk to a Bagisto instance over its REST API
  *             (requires VITE_BAGISTO_API_URL + keys — see docs/07-admin-integration).
- *   supabase→ admin panel talks to the converged Supabase backend via the
- *             hardened RPC surface (requires VITE_SUPABASE_URL +
- *             VITE_SUPABASE_PUBLISHABLE_KEY; see docs/08-master-plan §8.1).
- *             Never auto-flipped: the preview and the default build stay demo.
+ *   supabase→ unsupported in this Furniture snapshot; requests fail closed.
+ *             This does not change or access any connected Supabase project.
  */
 
 const raw = import.meta.env;
@@ -41,11 +39,12 @@ export const config = {
   cmsStorefrontPreview: str(raw.VITE_CMS_STOREFRONT_PREVIEW) === "1",
 
   supabase: {
-    url: str(raw.VITE_SUPABASE_URL),
-    publishableKey: str(raw.VITE_SUPABASE_PUBLISHABLE_KEY),
-    projectId: str(raw.VITE_SUPABASE_PROJECT_ID),
-    /** True when both required values are present. */
-    enabled: Boolean(str(raw.VITE_SUPABASE_URL) && str(raw.VITE_SUPABASE_PUBLISHABLE_KEY)),
+    // Do not embed legacy provider URLs or keys in the Furniture preview.
+    url: "",
+    publishableKey: "",
+    projectId: "",
+    /** Disabled until an independent Furniture integration is designed and verified. */
+    enabled: false,
   },
 
   bagisto: {

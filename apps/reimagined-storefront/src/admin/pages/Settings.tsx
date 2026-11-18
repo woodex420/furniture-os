@@ -113,7 +113,7 @@ export default function AdminSettings() {
 
   const integrations = [
     { label: "Storefront data (static catalogue)", ok: true, detail: "Products/services read from src/data/*" },
-    { label: "Supabase project", ok: isSupabaseConfigured, detail: isSupabaseConfigured ? `Project ${config.supabase.projectId || "configured"}` : "VITE_SUPABASE_* missing — running without it" },
+    { label: "Supabase project", ok: isSupabaseConfigured, detail: "Disabled in this Furniture preview; no Supabase project is connected" },
     { label: "Bagisto storefront API key", ok: isBagistoShopConfigured, detail: isBagistoShopConfigured ? config.bagisto.baseUrl : "Set VITE_API_MODE=bagisto + VITE_BAGISTO_API_URL + VITE_BAGISTO_STOREFRONT_KEY" },
     { label: "Bagisto admin integration token", ok: isBagistoAdminConfigured, detail: isBagistoAdminConfigured ? "Bearer token present (keep it server-side in production!)" : "Not configured — admin uses demo dataset" },
   ];

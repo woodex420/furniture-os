@@ -1,0 +1,3 @@
+# Unsupported historical reference — not a Furniture adapter
+
+These files are the inherited upstream adapter and its helpers, retained only for provenance. The snapshot lacks a verified database schema and they are not typechecked or imported by the Furniture app. They must not be enabled, deployed as a backend, or treated as a connection to any existing project. The active compatibility adapter rejects every call; the legacy client's HTTP transport also rejects requests and no realtime client is used. Furniture's selected backend is the independent Laravel application. Any future provider integration requires a separately designed and verified Furniture contract, authorization, migrations and tests.

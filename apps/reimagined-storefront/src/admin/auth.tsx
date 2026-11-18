@@ -27,7 +27,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return raw ? (JSON.parse(raw) as AdminUser) : null;
     } catch { return null; }
   });
-  const [checking, setChecking] = useState(isSupabaseMode && isSupabaseConfigured);
+  const [checking, setChecking] = useState<boolean>(isSupabaseMode && isSupabaseConfigured);
   const generation = useRef(0);
   const verifiedUserId = useRef<string | null>(null);
 
@@ -90,7 +90,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const loginWithSupabase: AdminAuthContextValue["loginWithSupabase"] = async (email, password) => {
-    if (!isSupabaseConfigured) return { ok: false, error: "Supabase is not configured in this build." };
+    if (!isSupabaseConfigured) return { ok: false, error: "Supabase sign-in is disabled in this Furniture preview." };
     const trimmed = email.trim();
     if (!trimmed || !password) return { ok: false, error: "Enter your email and password." };
     try {

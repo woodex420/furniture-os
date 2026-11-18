@@ -13,9 +13,10 @@ import { bagistoAdminApi } from "@/api/bagisto/admin";
 import { supabaseAdminApi } from "@/api/supabase";
 import type { AdminApi } from "@/api/types";
 import { restrictStagingSubmissions } from "@/api/restrict-staging.mjs";
+import { selectAdminAdapter } from "@/api/disabled-supabase.mjs";
 
 export function getAdminApi(): AdminApi {
-  const api = config.apiMode === "bagisto" ? bagistoAdminApi : config.apiMode === "supabase" ? supabaseAdminApi : demoAdminApi;
+  const api = selectAdminAdapter(config.apiMode, { demo: demoAdminApi, bagisto: bagistoAdminApi, disabledSupabase: supabaseAdminApi });
   return restrictStagingSubmissions(api, config.restrictedStaging) as AdminApi;
 }
 
