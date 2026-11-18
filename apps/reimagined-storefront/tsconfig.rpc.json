@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.app.json",
+  "include": ["tests/partial-rpc-contract.typecheck.ts", "src/vite-env.d.ts"]
+}

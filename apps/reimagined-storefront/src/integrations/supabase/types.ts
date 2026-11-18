@@ -19,8 +19,13 @@ export type Database = {
     Views: {
       [_ in never]: never
     }
+    // Partial reference signatures only, from the Reimagin snapshot migrations
+    // 20261107000001 and 20261108000020. This is NOT a generated or verified
+    // schema for a connected Supabase project; all other types remain missing.
     Functions: {
-      [_ in never]: never
+      has_cap: { Args: { need: string }; Returns: boolean }
+      has_role: { Args: { need: string }; Returns: boolean }
+      storefront_page_snapshot: { Args: { p_slug: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never

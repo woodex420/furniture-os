@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "bun run generate-sitemap && vite build",
-    "generate-sitemap": "bun --preload ./scripts/stub-assets.ts scripts/generate-sitemap.ts",
+    "build": "npm run build:staging",
+    "build:staging": "vite build --mode furniture-staging && node scripts/finalize-staging-build.mjs",
+    "generate-sitemap": "node scripts/production-sitemap-unavailable.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "typecheck:rpc-contract": "tsc --noEmit -p tsconfig.rpc.json",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
