@@ -132,6 +132,8 @@ Route::middleware([PrivateWorkspaceResponse::class, 'auth'])->group(function ():
         ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.builder-html-proof.edit');
     Route::post('/admin/website/builder-html-proof', [BuilderHtmlProofController::class, 'update'])
         ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.builder-html-proof.update');
+    Route::post('/admin/website/builder-html-proof/sections', [BuilderHtmlProofController::class, 'sections'])
+        ->middleware(['can:workspace.view', 'can:storefront.edit', 'throttle:20,1'])->name('admin.builder-html-proof.sections');
     // Small storefront integration, disabled by default until enabled for testing.
     Route::get('/admin/website/home', [StorefrontHomeController::class, 'edit'])
         ->middleware(['can:workspace.view', 'can:storefront.edit'])->name('admin.storefront.home');

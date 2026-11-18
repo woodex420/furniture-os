@@ -40,13 +40,15 @@ class BuilderHtmlProofTest extends TestCase
         $this->seedFixture($owner);
         $this->get(self::PUBLIC_URL)->assertNotFound();
         $this->actingAs($owner)->get(self::EDIT_URL)->assertNotFound();
+        $this->post(self::EDIT_URL.'/sections', ['revision' => 1, 'action' => 'add'])->assertNotFound();
         config(['furniture.builder_html_proof_enabled' => true]);
         app()['env'] = 'production';
         $this->get(self::PUBLIC_URL)->assertNotFound();
         $this->get(self::EDIT_URL)->assertNotFound();
         // Exercise the controller guard independently of production CSRF enforcement.
         $this->withoutMiddleware(PreventRequestForgery::class)
-            ->post(self::EDIT_URL, ['revision' => 1, 'summary' => 'Changed', 'body' => 'Changed'])->assertNotFound();
+            ->post(self::EDIT_URL, ['revision' => 1, 'section_id' => Proof::SECTION_ID, 'summary' => 'Changed', 'body' => 'Changed'])->assertNotFound();
+        $this->post(self::EDIT_URL.'/sections', ['revision' => 1, 'action' => 'add'])->assertNotFound();
         $this->assertDatabaseCount('furniture_builder_document_versions', 1);
         app()['env'] = 'testing';
         DB::table('furniture_builder_document_versions')->delete();
@@ -75,15 +77,48 @@ class BuilderHtmlProofTest extends TestCase
         $owner = User::factory()->create(['is_owner' => true]);
         $this->seedFixture($owner);
         $this->withoutVite()->actingAs($owner)->get(self::EDIT_URL)->assertOk()->assertSee('Article text proof');
-        $data = ['revision' => 1, 'summary' => 'New synthetic summary', 'body' => "New line\n<script>alert(1)</script> & Urdu فرنیچر"];
+        $data = ['revision' => 1, 'section_id' => Proof::SECTION_ID, 'summary' => 'New synthetic summary', 'body' => "New line\n<script>alert(1)</script> & Urdu فرنیچر"];
         $this->post(self::EDIT_URL, $data)->assertRedirect(self::EDIT_URL);
         auth()->logout();
         $this->get(self::PUBLIC_URL)->assertOk()->assertSee('data-builder-revision="2"', false)->assertSee('New synthetic summary')->assertSee('&lt;script&gt;alert(1)&lt;/script&gt; &amp; Urdu فرنیچر', false)->assertDontSee('<script>alert(1)</script>', false);
-        $this->actingAs($owner)->post(self::EDIT_URL, ['revision' => 1, 'summary' => 'Stale', 'body' => 'Lost'])->assertSessionHasErrors('revision');
+        $this->actingAs($owner)->post(self::EDIT_URL, ['revision' => 1, 'section_id' => Proof::SECTION_ID, 'summary' => 'Stale', 'body' => 'Lost'])->assertSessionHasErrors('revision');
         $this->get(self::PUBLIC_URL)->assertSee('New synthetic summary')->assertDontSee('Stale');
         app(BuilderDocumentRevisions::class)->restore((int) $owner->id, Proof::DOCUMENT_ID, 2, 1);
         $this->get(self::PUBLIC_URL)->assertSee('data-builder-revision="3"', false)->assertSee('A synthetic article for testing the shared editorial layout.')->assertDontSee('New synthetic summary');
         $this->assertDatabaseCount('furniture_builder_document_versions', 3);
+    }
+
+    public function test_section_operations_save_ordered_html_and_protect_required_section_and_revisions(): void
+    {
+        config(['furniture.builder_html_proof_enabled' => true]);
+        $owner = User::factory()->create(['is_owner' => true]);
+        $this->seedFixture($owner);
+        $url = self::EDIT_URL.'/sections';
+        $this->post($url, ['revision' => 1, 'action' => 'add'])->assertRedirect(route('login'));
+        $this->actingAs(User::factory()->create(['is_owner' => false]))->post($url, ['revision' => 1, 'action' => 'add'])->assertForbidden();
+        $this->actingAs($owner)->call('POST', $url, [], [], [], ['CONTENT_TYPE' => 'application/x-www-form-urlencoded'], str_repeat('x', 4097))->assertStatus(413);
+        $this->post($url, ['revision' => 1, 'action' => 'add'])->assertRedirect(self::EDIT_URL);
+        $contract = app(BuilderDocumentV1::class);
+        $current = fn () => $contract->decode(DB::table('furniture_builder_documents')->where('id', Proof::DOCUMENT_ID)->value('document'));
+        $newId = $current()['sections'][1]['id'];
+        $this->assertTrue($contract->validId($newId));
+        $this->get(self::PUBLIC_URL)->assertSeeInOrder(['data-section-id="'.Proof::SECTION_ID.'"', 'data-section-id="'.$newId.'"'], false);
+        $this->post(self::EDIT_URL, ['revision' => 2, 'section_id' => $newId, 'summary' => 'Second unique summary', 'body' => 'Second synthetic body'])->assertRedirect(self::EDIT_URL);
+        $this->post($url, ['revision' => 3, 'action' => 'up', 'section_id' => $newId])->assertRedirect(self::EDIT_URL);
+        $this->get(self::PUBLIC_URL)->assertSeeInOrder(['data-section-id="'.$newId.'"', 'Second unique summary', 'data-section-id="'.Proof::SECTION_ID.'"'], false);
+        $this->post($url, ['revision' => 4, 'action' => 'duplicate', 'section_id' => $newId])->assertRedirect(self::EDIT_URL);
+        $copyId = $current()['sections'][1]['id'];
+        $this->assertNotSame($newId, $copyId);
+        $this->assertSame('Second unique summary', $current()['sections'][1]['props']['summary']);
+        $this->post($url, ['revision' => 5, 'action' => 'remove', 'section_id' => Proof::SECTION_ID])->assertSessionHasErrors('section');
+        $this->post($url, ['revision' => 4, 'action' => 'remove', 'section_id' => $copyId])->assertSessionHasErrors('revision');
+        $this->post($url, ['revision' => 5, 'action' => 'invalid', 'section_id' => $copyId])->assertSessionHasErrors('action');
+        $this->post($url, ['revision' => 5, 'action' => 'remove', 'section_id' => $copyId])->assertRedirect(self::EDIT_URL);
+        $this->get(self::PUBLIC_URL)->assertDontSee('data-section-id="'.$copyId.'"', false);
+        $this->assertDatabaseCount('furniture_builder_document_versions', 6);
+        app(BuilderDocumentRevisions::class)->restore((int) $owner->id, Proof::DOCUMENT_ID, 6, 5);
+        $this->get(self::PUBLIC_URL)->assertSee('data-section-id="'.$copyId.'"', false);
+        $this->assertDatabaseCount('furniture_builder_document_versions', 7);
     }
 
     public function test_auth_validation_and_unknown_document_fail_closed(): void
@@ -91,11 +126,11 @@ class BuilderHtmlProofTest extends TestCase
         config(['furniture.builder_html_proof_enabled' => true]);
         $owner = User::factory()->create(['is_owner' => true]);
         $this->seedFixture($owner);
-        $data = ['revision' => 1, 'summary' => 'new', 'body' => 'new'];
+        $data = ['revision' => 1, 'section_id' => Proof::SECTION_ID, 'summary' => 'new', 'body' => 'new'];
         $this->post(self::EDIT_URL, $data)->assertRedirect(route('login'));
         $this->actingAs(User::factory()->create(['is_owner' => false]))->post(self::EDIT_URL, $data)->assertForbidden();
-        $this->actingAs($owner)->post(self::EDIT_URL, ['revision' => 1, 'summary' => str_repeat('x', 301), 'body' => 'ok'])->assertSessionHasErrors('summary');
-        $this->post(self::EDIT_URL, ['revision' => 1, 'summary' => 'ok', 'body' => str_repeat('x', 12001)])->assertSessionHasErrors('body');
+        $this->actingAs($owner)->post(self::EDIT_URL, ['revision' => 1, 'section_id' => Proof::SECTION_ID, 'summary' => str_repeat('x', 301), 'body' => 'ok'])->assertSessionHasErrors('summary');
+        $this->post(self::EDIT_URL, ['revision' => 1, 'section_id' => Proof::SECTION_ID, 'summary' => 'ok', 'body' => str_repeat('x', 12001)])->assertSessionHasErrors('body');
         $this->assertDatabaseCount('furniture_builder_document_versions', 1);
         // A valid but non-fixture document is not exposed, either.
         $otherShape = app(BuilderDocumentV1::class)->encode(['schema_version' => 1, 'sections' => []]);

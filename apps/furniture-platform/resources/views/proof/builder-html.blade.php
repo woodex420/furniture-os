@@ -20,7 +20,9 @@
     <p>Isolated experiment — not published storefront content.</p>
     <article data-builder-revision="{{ $revision }}">
         @foreach ($document['sections'] as $section)
-            @include('proof.sections.article-text', ['props' => $section['props']])
+            <section data-section-id="{{ $section['id'] }}">
+                @include('proof.sections.article-text', ['props' => $section['props']])
+            </section>
         @endforeach
     </article>
 </main>

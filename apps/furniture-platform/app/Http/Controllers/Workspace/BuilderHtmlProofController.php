@@ -6,10 +6,13 @@ namespace App\Http\Controllers\Workspace;
 
 use App\Support\Website\BuilderDocumentRevisions;
 use App\Support\Website\BuilderDocumentV1;
+use App\Support\Website\BuilderSectionOperations;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -35,7 +38,7 @@ final class BuilderHtmlProofController
         $this->requireProof();
         [$row, $document] = $this->fixture($contract);
 
-        return view('workspace.builder-html-proof', ['revision' => $row->revision, 'props' => $document['sections'][0]['props']]);
+        return view('workspace.builder-html-proof', ['revision' => $row->revision, 'sections' => $document['sections'], 'anchorId' => self::SECTION_ID]);
     }
 
     public function update(Request $request, BuilderDocumentV1 $contract, BuilderDocumentRevisions $revisions): RedirectResponse
@@ -45,14 +48,52 @@ final class BuilderHtmlProofController
         abort_if(strlen($request->getContent()) > 98304, 413);
         $data = $request->validate([
             'revision' => ['required', 'integer', 'min:1', 'max:4294967294'],
+            'section_id' => ['required', 'string', 'uuid'],
             'summary' => ['required', 'string', 'max:300'],
             'body' => ['required', 'string', 'max:12000'],
         ]);
         [, $document] = $this->fixture($contract);
-        $document['sections'][0]['props'] = ['summary' => $data['summary'], 'body' => $data['body']];
+        $index = $this->sectionIndex($document, $data['section_id']);
+        $document['sections'][$index]['props'] = ['summary' => $data['summary'], 'body' => $data['body']];
         $revisions->edit((int) $request->user()->id, self::DOCUMENT_ID, (int) $data['revision'], $document);
 
         return redirect()->route('admin.builder-html-proof.edit')->with('status', 'Synthetic section saved. The next HTML request reads the new revision.');
+    }
+
+    public function sections(Request $request, BuilderDocumentV1 $contract, BuilderDocumentRevisions $revisions, BuilderSectionOperations $operations): RedirectResponse
+    {
+        $this->requireProof();
+        abort_if(strlen($request->getContent()) > 4096, 413);
+        $data = $request->validate([
+            'revision' => ['required', 'integer', 'min:1', 'max:4294967294'],
+            'action' => ['required', 'string', Rule::in(['add', 'duplicate', 'up', 'down', 'remove'])],
+            'section_id' => ['required_unless:action,add', 'nullable', 'string', 'uuid'],
+        ]);
+        [, $document] = $this->fixture($contract);
+        $id = $data['section_id'] ?? '';
+        if ($data['action'] === 'remove' && $id === self::SECTION_ID) {
+            throw ValidationException::withMessages(['section' => 'The required synthetic section cannot be removed.']);
+        }
+        $updated = match ($data['action']) {
+            'add' => $operations->addArticle($document, (string) Str::uuid(), 'Synthetic summary', 'Synthetic article text.'),
+            'duplicate' => $operations->duplicate($document, $id, (string) Str::uuid()),
+            'up' => $operations->move($document, $id, -1),
+            'down' => $operations->move($document, $id, 1),
+            'remove' => $operations->remove($document, $id),
+        };
+        $revisions->edit((int) $request->user()->id, self::DOCUMENT_ID, (int) $data['revision'], $updated);
+
+        return redirect()->to(route('admin.builder-html-proof.edit', absolute: false))->with('status', 'Synthetic section structure saved.');
+    }
+
+    private function sectionIndex(array $document, string $id): int
+    {
+        foreach ($document['sections'] as $index => $section) {
+            if ($section['id'] === $id) {
+                return $index;
+            }
+        }
+        throw ValidationException::withMessages(['section' => 'The selected section no longer exists. Reload the editor.']);
     }
 
     private function requireProof(): void
@@ -69,8 +110,9 @@ final class BuilderHtmlProofController
         } catch (ValidationException) {
             abort(503, 'Synthetic proof document is invalid or unsupported.');
         }
-        // Never expose an arbitrary multi-page document through this experimental URL.
-        abort_unless(count($document['sections']) === 1 && $document['sections'][0]['id'] === self::SECTION_ID && $document['sections'][0]['type'] === 'article_text', 503, 'Synthetic proof fixture has an unexpected shape.');
+        // Only this fixed test document containing the required synthetic anchor is exposed.
+        $ids = array_column($document['sections'], 'id');
+        abort_unless(in_array(self::SECTION_ID, $ids, true), 503, 'Synthetic proof fixture has an unexpected shape.');
 
         return [$row, $document];
     }
