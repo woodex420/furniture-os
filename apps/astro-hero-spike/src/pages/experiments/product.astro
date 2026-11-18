@@ -1,0 +1,15 @@
+---
+import Prototype from '../../layouts/Prototype.astro';
+import ImageGallery from '../../../../reimagined-storefront/src/components/product/ImageGallery';
+import first from '../../../../reimagined-storefront/src/assets/product-office-chair.webp?url';
+import second from '../../../../reimagined-storefront/src/assets/chair-product.webp?url';
+---
+<Prototype title="Synthetic product gallery">
+  <main class="container mx-auto px-4 py-10">
+    <h1 class="text-3xl md:text-5xl font-black mb-4">Synthetic product gallery</h1>
+    <p class="mb-8 text-muted-foreground">Component parity experiment only. No prices, stock, cart or orders. The inherited 360° effect is not a real 360° product view.</p>
+    <div class="max-w-xl" data-prototype-gallery>
+      <ImageGallery images={[first, second]} productName="Synthetic chair" client:load />
+    </div>
+  </main>
+</Prototype>

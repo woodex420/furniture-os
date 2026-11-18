@@ -47,6 +47,24 @@ try {
   const response = await page.goto(`${origin}/storefront-api/home`, { waitUntil: 'networkidle2' });
   const content = JSON.parse(await response.text());
   assert.equal(content.hero_title, 'Synthetic staging headline');
+
+  // Create a disposable published article and check the real Reimagin page
+  // uses the same plain-text component exercised by the Astro experiment.
+  await page.goto(`${origin}/admin/website/blog/create`, { waitUntil: 'networkidle2' });
+  await page.type('#blog-slug', 'synthetic-shared-article');
+  await page.type('#blog-title', 'Synthetic shared article');
+  await page.type('#blog-summary', 'Synthetic summary');
+  await page.type('#blog-body', 'Synthetic text <strong>not HTML</strong>');
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'networkidle2' }),
+    page.click('form[action="/admin/website/blog"] button[type="submit"]'),
+  ]);
+  assert.match(await page.$eval('body', el => el.textContent), /Article saved/);
+  await page.goto(`${origin}/blog/synthetic-shared-article`, { waitUntil: 'networkidle2' });
+  await page.waitForFunction(() => document.querySelector('article')?.textContent.includes('Synthetic text <strong>not HTML</strong>'));
+  assert.equal(await page.$('article strong'), null);
+  assert.match(await page.$eval('article', el => el.textContent), /Synthetic summary/);
+
   await page.goto(`${origin}/`, { waitUntil: 'networkidle2' });
   await page.waitForFunction(() => document.body.textContent.includes('Synthetic staging headline'));
   assert.match(await page.$eval('body', (el) => el.textContent), /Newsletter signup is not available yet/);

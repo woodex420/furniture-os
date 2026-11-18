@@ -371,6 +371,7 @@ jobs:
       QUEUE_CONNECTION: sync
       FURNITURE_STOREFRONT_BUNDLE_ENABLED: 'true'
       FURNITURE_HOME_EDITOR_ENABLED: 'true'
+      FURNITURE_BLOG_POSTS_ENABLED: 'true'
       FURNITURE_CANDIDATE_TEST_ORIGIN: 'http://127.0.0.1:8098'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -443,7 +444,7 @@ jobs:
           retention-days: 7
 
   astro-spike:
-    name: Astro shared-hero prototype
+    name: Astro shared component prototype
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -462,3 +463,27 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           npm run build
           npm test
+      - name: Browser-test synthetic Astro components
+        working-directory: apps/astro-hero-spike
+        run: |
+          ./node_modules/.bin/astro preview --host 127.0.0.1 --port 5201 > "$RUNNER_TEMP/astro-components.log" 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:5201/experiments/product/ -o /dev/null; then break; fi
+            if ! kill -0 "$preview_pid" 2>/dev/null; then cat "$RUNNER_TEMP/astro-components.log"; exit 1; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:5201/experiments/product/ -o /dev/null
+          set +e
+          node ../reimagined-storefront/tests/astro-components-browser.mjs 2>&1 | tee "$RUNNER_TEMP/astro-components-browser.log"
+          result=${PIPESTATUS[0]}
+          set -e
+          if [ "$result" -ne 0 ]; then
+            details=$(tail -30 "$RUNNER_TEMP/astro-components-browser.log")
+            details=${details//'%'/'%25'}
+            details=${details//$'\r'/'%0D'}
+            details=${details//$'\n'/'%0A'}
+            echo "::error::$details"
+          fi
+          exit "$result"

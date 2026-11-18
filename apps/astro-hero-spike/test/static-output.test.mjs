@@ -18,6 +18,35 @@ test('Astro renders the real hero and its prototype metadata before JavaScript',
   assert.doesNotMatch(html, /<link rel="canonical"/);
 });
 
+test('synthetic article renders shared plain text before JavaScript without interpreting markup', () => {
+  const article = readFileSync(path.join(root, 'experiments/article/index.html'), 'utf8');
+  assert.match(article, /<meta name="robots" content="noindex, nofollow">/);
+  assert.match(article, /<h1[^>]*>Synthetic article<\/h1>/);
+  assert.match(article, /A synthetic article for testing the shared editorial layout/);
+  assert.match(article, /&lt;strong&gt;literal text&lt;\/strong&gt; &amp; symbols/);
+  assert.doesNotMatch(article, /<strong>literal text<\/strong>/);
+  assert.doesNotMatch(article, /<link rel="canonical"/);
+  assert.doesNotMatch(article, /<astro-island/);
+});
+
+test('synthetic product gallery has no-commerce metadata and real local images before hydration', () => {
+  const product = readFileSync(path.join(root, 'experiments/product/index.html'), 'utf8');
+  assert.match(product, /<meta name="robots" content="noindex, nofollow">/);
+  assert.match(product, /<h1[^>]*>Synthetic product gallery<\/h1>/);
+  assert.match(product, /No prices, stock, cart or orders/);
+  assert.match(product, /not a real 360° product view/);
+  assert.match(product, /alt="Synthetic chair - View 1"/);
+  assert.match(product, /alt="Synthetic chair thumbnail 2"/);
+  assert.doesNotMatch(product, /\[object Object\]|<link rel="canonical"/);
+  const images = [...product.matchAll(/<img src="([^"]+)"/g)].map(match => match[1]);
+  assert.equal(images.length, 3);
+  assert.equal(new Set(images).size, 2);
+  for (const url of images) {
+    assert.match(url, /^\/_astro\/[\w.-]+\.webp$/);
+    assert.ok(existsSync(path.join(root, url.slice(1))), `missing ${url}`);
+  }
+});
+
 test('server-rendered image and stylesheet paths refer to generated files', () => {
   const images = [...html.matchAll(/<img src="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(images.length, 5);

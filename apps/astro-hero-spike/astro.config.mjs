@@ -13,6 +13,7 @@ export default defineConfig({
       alias: { '@': path.resolve(root, '../reimagined-storefront/src') },
       dedupe: ['react', 'react-dom'],
     },
+    preview: { allowedHosts: process.env.ARENA_PREVIEW === '1' ? ['.e2b.app'] : [] },
     server: {
       ws: process.env.ARENA_PREVIEW === '1' ? { clientPort: 443 } : undefined,
       proxy: process.env.FURNITURE_PREVIEW_API ? {

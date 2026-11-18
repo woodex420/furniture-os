@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ArticleText from "@/components/blog/ArticleText";
 import { useFurnitureBlog, type Article } from "@/lib/useFurnitureBlog";
 import blogErgonomic from "@/assets/blog-ergonomic.webp";
 
@@ -32,8 +33,7 @@ const BlogPost = () => {
             </div></div>
           </section>
           <section className="py-16 bg-background"><div className="container mx-auto px-4"><article className="max-w-3xl">
-            <p className="text-lg text-muted-foreground leading-relaxed mb-10 pb-10 border-b border-border">{post.summary}</p>
-            <p className="text-base text-foreground/85 leading-[1.8] whitespace-pre-line">{post.body}</p>
+            <ArticleText summary={post.summary} body={post.body} />
             <Link to="/blog" className="inline-flex items-center gap-2 text-accent font-bold mt-10"><ArrowLeft className="h-4 w-4" />Back to all articles</Link>
           </article></div></section>
         </>}

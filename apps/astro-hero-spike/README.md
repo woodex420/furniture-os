@@ -1,6 +1,12 @@
-# Astro shared-hero prototype
+# Astro shared-component prototype
 
-This is an isolated **noindex**, static Astro + React + Tailwind 3 experiment. It renders the **same** `HeroSlider` component used by the actual Reimagin Vite homepage, including its temporary Furniture `/storefront-api/home` polling integration. It is not the completed Astro storefront, visual builder, production release or hosting decision. There is deliberately no production canonical, catalogue or deployment setup here. Its CTA points to a storefront route not provided by this one-page prototype.
+This isolated **noindex**, static Astro + React + Tailwind 3 experiment is not the completed storefront, visual builder, release package or hosting decision. It reuses selected components from the actual Reimagin preview:
+
+- `/` renders the real `HeroSlider`, including its temporary browser-side Furniture `/storefront-api/home` polling.
+- `/experiments/product/` renders the real product `ImageGallery` with two synthetic example images. There are no prices, cart, stock or order actions. Its inherited 360° effect is only a visual effect, not a true product rotation.
+- `/experiments/article/` renders the same plain-text `ArticleText` component used by the connected Reimagin blog detail page, with synthetic text. Its HTML is escaped and server-rendered without a JavaScript island.
+
+These are component experiments, **not** complete category, product or editorial pages. Prototype pages have no production canonical, authoritative catalogue or deployment setup. The hero's existing shop links are not supplied by this prototype.
 
 ## Run locally
 
@@ -16,11 +22,11 @@ npm test
 FURNITURE_PREVIEW_API=http://127.0.0.1:5176 npm run dev -- --host 0.0.0.0 --port 5177
 ```
 
-The backend address is used **only by the dev server**, not by visitors' browsers. Omit `FURNITURE_PREVIEW_API` to see the original hero fallback without a backend. Arena preview uses `ARENA_PREVIEW=1` to allow the preview host and configure its HMR port. The Reimagin app remains on port 5174; the separate Furniture admin runs on port 5176. The prototype depends on sibling source and packages; CI installs both.
+The backend address is used **only by the dev server**, not by visitors' browsers. Omit `FURNITURE_PREVIEW_API` to see the original hero fallback without a backend. Arena preview uses `ARENA_PREVIEW=1` to allow the preview host and configure its HMR port. A static preview may be started with `ARENA_PREVIEW=1 ./node_modules/.bin/astro preview --host 0.0.0.0 --port 5201`. This is a synthetic open preview, not staging access control. The prototype depends on sibling source and packages; CI installs both.
 
 ## Verified and not verified
 
-- Astro prerenders the actual hero markup, fallback text, five valid emitted images and noindex metadata. React hydrates it for carousel interaction. The shared Tailwind config is adapted from Reimagin. The source asset imports use `?url` because Astro's normal image imports produce metadata objects rather than the strings the original React component expects.
-- The current hero reads the first title/subtitle from Laravel in the browser; it polls while the tab is visible. Its **initial static HTML always contains the build-time fallback**, not the current Laravel revision. This is not sufficient for production SEO or immediate crawler-visible publishing. CMS schema, full templates and save/publish pipeline remain future work.
-- Local static tests assert output and emitted assets. Manual automated browser tests compared hero geometry at 320/375/768/1440 widths, image loading, carousel and a simulated API update; an authenticated synthetic admin save/update/restore also propagated to both preview pages. Browsers under localhost may log the expected Arena HMR websocket warning because that proxy is not present in localhost tests. Actual Arena browser, Hostinger and MySQL have not been independently verified.
-- Astro's own locked dependency audit returned zero advisories when checked. Reimagin's separate inherited dependencies still have advisories including `xlsx`, and its pre-existing TypeScript errors remain. This experiment must not be deployed without a fresh audit and full release gates.
+- Static output tests check noindex metadata, hero and gallery assets, and literal, escaped article text without JavaScript. A synthetic browser test exercises gallery hydration, thumbnail and previous-image controls and responsive widths of 320, 375, 768 and 1440 pixels, and blocks external requests. It does not establish full design parity, accessibility, all interactions or production readiness.
+- The hero reads first-slide text from Laravel in the browser, but its **initial static HTML always contains the build-time fallback**, not the current revision. The article experiment uses a static fixture, not published Laravel content. Neither demonstrates crawler-visible immediate publishing, which remains a hard requirement.
+- The existing Furniture preview remains React/Vite; Astro is not included in the staging candidate. Full shared page templates, category and product data, editorial publishing, safe catalog/commerce contracts, page schema, visual editor and hosting strategy remain open. Preserve the owner's requirement for immediate publication.
+- Reimagin and Astro have separate lockfiles and dependency risks. Re-run audits for the actual release; see the current production readiness checklist. Tests use synthetic data and do not validate Hostinger.

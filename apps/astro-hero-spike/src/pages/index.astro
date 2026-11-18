@@ -12,12 +12,16 @@ import '../../../reimagined-storefront/src/index.css';
     <meta name="description" content="Isolated Reimagin hero rendering prototype; not the Furniture storefront." />
   </head>
   <body>
-    <div class="preview-notice" role="note"><strong>ASTRO PROTOTYPE</strong> · The real Reimagin hero only. Not the complete storefront or a production release.</div>
+    <div class="preview-notice" role="note"><strong>ASTRO PROTOTYPE</strong> · Shared storefront components only. Not the complete storefront or a production release.</div>
     <main>
       <HeroSlider client:load />
       <section class="container mx-auto px-4 py-10">
         <h2 class="text-2xl font-bold">Astro + React rendering experiment</h2>
         <p class="mt-3 text-muted-foreground">This isolated page reuses the live preview's hero component. The full storefront and visual editor remain in development.</p>
+        <nav aria-label="Prototype component experiments" class="mt-4 flex flex-wrap gap-4 text-accent font-semibold text-sm">
+          <a href="/experiments/product/">Synthetic product gallery</a>
+          <a href="/experiments/article/">Synthetic article</a>
+        </nav>
       </section>
     </main>
   </body>
