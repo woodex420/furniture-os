@@ -203,7 +203,7 @@ jobs:
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npm run build
-          node --test tests/canvas-controls.test.mjs
+          node --test tests/canvas-controls.test.mjs tests/home-edit-history.test.mjs
       - name: Preview and preflight regression tests
         run: |
           npm ci --ignore-scripts --no-audit --no-fund

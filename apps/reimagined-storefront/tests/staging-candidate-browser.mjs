@@ -39,6 +39,13 @@ try {
   await page.type('#hero-title', 'Synthetic staging headline');
   await page.$eval('#hero-subtitle', (el) => { el.value = ''; });
   await page.type('#hero-subtitle', 'Synthetic staging subtitle');
+  assert.equal(await page.$eval('[data-home-undo]', el => el.disabled), false);
+  const savedBeforeUndo = await page.evaluate(async () => (await (await fetch('/storefront-api/home', { cache: 'no-store' })).json()).hero_subtitle);
+  await page.click('[data-home-undo]');
+  assert.equal(await page.$eval('#hero-subtitle', el => el.value), 'Synthetic staging subtitl');
+  await page.click('[data-home-redo]');
+  assert.equal(await page.$eval('#hero-subtitle', el => el.value), 'Synthetic staging subtitle');
+  assert.equal(await page.evaluate(async () => (await (await fetch('/storefront-api/home', { cache: 'no-store' })).json()).hero_subtitle), savedBeforeUndo, 'undo/redo must not publish');
   await Promise.all([
     page.waitForNavigation({ waitUntil: 'networkidle2' }),
     page.click('form[action="/admin/website/home"] button[type="submit"]'),

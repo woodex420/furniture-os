@@ -45,8 +45,13 @@
             <h2 id="home-editor-heading">Homepage content</h2>
             <p class="form-help">Save the first slide and tagline to the connected storefront preview. Other slides and page sections are unchanged.</p>
             @if ($errors->any())<div class="form-error" role="alert">Please check the fields below. @error('revision'){{ $message }} <a href="{{ route('admin.storefront.home', absolute: false) }}">Reload editor</a>.@enderror @error('source_revision'){{ $message }}@enderror @error('hero_media_id'){{ $message }}@enderror</div>@endif
-            <form method="POST" action="{{ route('admin.storefront.home.update', absolute: false) }}">
+            <form method="POST" action="{{ route('admin.storefront.home.update', absolute: false) }}" data-home-editor-form>
                 @csrf
+                <div class="home-history-controls" data-home-history hidden role="group" aria-label="Unsaved edit history">
+                    <button type="button" data-home-undo disabled>Undo</button>
+                    <button type="button" data-home-redo disabled>Redo</button>
+                    <span>Unsaved edits only; history resets after save or reload.</span>
+                </div>
                 <input type="hidden" name="revision" value="{{ is_scalar($revisionValue) ? $revisionValue : '' }}">
                 <div class="form-field"><label for="hero-title">First slide title</label><input id="hero-title" name="hero_title" type="text" maxlength="120" required value="{{ is_string($titleValue) ? $titleValue : '' }}" @error('hero_title') aria-invalid="true" aria-describedby="title-error" @enderror>@error('hero_title')<p class="field-error" id="title-error">{{ $message }}</p>@enderror</div>
                 <div class="form-field"><label for="hero-subtitle">First slide subtitle</label><input id="hero-subtitle" name="hero_subtitle" type="text" maxlength="240" required value="{{ is_string($subtitleValue) ? $subtitleValue : '' }}" @error('hero_subtitle') aria-invalid="true" aria-describedby="subtitle-error" @enderror>@error('hero_subtitle')<p class="field-error" id="subtitle-error">{{ $message }}</p>@enderror</div>

@@ -156,3 +156,60 @@ if (homeCanvas) {
         if (status) status.textContent = 'Canvas configuration is invalid. You can still use the fields below.';
     }
 }
+
+// In-memory history for the currently rendered home editor only. This is not a
+// publisher, persistent revision history, or a replacement for server checks.
+const homeEditor = document.querySelector('[data-home-editor-form]');
+const homeHistory = homeEditor?.querySelector('[data-home-history]');
+if (homeEditor && homeHistory) {
+    const undo = homeHistory.querySelector('[data-home-undo]');
+    const redo = homeHistory.querySelector('[data-home-redo]');
+    const fields = [
+        ['hero-title', 'input'], ['hero-subtitle', 'input'], ['hero-order', 'change'],
+        ['hero-cta-label', 'input'], ['hero-cta-path', 'input'], ['hero-image', 'change'],
+        ['hero-media', 'change'], ['home-tagline', 'input'],
+    ].map(([id, event]) => ({ element: document.getElementById(id), event })).filter(({ element }) => element && homeEditor.contains(element));
+
+    if (undo && redo && fields.length > 0) {
+        const limit = 100; // bounded snapshots, not unlimited text or image bytes
+        const snapshot = () => fields.map(({ element }) => element.value);
+        let states = [snapshot()];
+        let index = 0;
+        let applying = false;
+        const updateButtons = () => {
+            undo.disabled = index === 0;
+            redo.disabled = index === states.length - 1;
+        };
+        const record = () => {
+            if (applying) return;
+            const next = snapshot();
+            if (next.every((value, i) => value === states[index][i])) return;
+            states = states.slice(0, index + 1);
+            states.push(next);
+            if (states.length > limit + 1) states.shift();
+            index = states.length - 1;
+            updateButtons();
+        };
+        const apply = (nextIndex) => {
+            if (nextIndex < 0 || nextIndex >= states.length) return;
+            index = nextIndex;
+            applying = true;
+            try {
+                fields.forEach(({ element, event }, i) => {
+                    if (element.value === states[index][i]) return;
+                    element.value = states[index][i];
+                    // Notify the existing canvas bridge, including media fetching.
+                    element.dispatchEvent(new Event(event, { bubbles: true }));
+                });
+            } finally {
+                applying = false;
+                updateButtons();
+            }
+        };
+        for (const { element, event } of fields) element.addEventListener(event, record);
+        undo.addEventListener('click', () => apply(index - 1));
+        redo.addEventListener('click', () => apply(index + 1));
+        updateButtons();
+        homeHistory.hidden = false;
+    }
+}

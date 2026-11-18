@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 const script = readFileSync(new URL('../resources/js/workspace.js', import.meta.url), 'utf8');
 
-function setup(fetchOverride) {
+function setup(fetchOverride, historyEnabled = false) {
     class Element {
         constructor() { this.handlers = {}; this.attributes = {}; this.dataset = {}; this.style = {}; this.value = ''; this.hidden = true; }
         addEventListener(type, handler) { (this.handlers[type] ??= []).push(handler); }
@@ -22,7 +22,11 @@ function setup(fetchOverride) {
     controls.querySelectorAll = () => buttons;
     const home = new Element(); home.dataset.storefrontOrigin = 'https://store.example';
     home.querySelector = selector => ({ '[data-canvas-frame]': frame, '[data-canvas-status]': status, '[data-canvas-controls]': controls })[selector];
-    const doc = { documentElement: { classList: { remove() {} } }, querySelector: selector => selector === '[data-home-canvas]' ? home : null, getElementById: id => ({ 'hero-title': title, 'hero-subtitle': subtitle, 'hero-order': order, 'hero-cta-label': ctaLabel, 'hero-cta-path': ctaPath, 'hero-image': image, 'hero-media': media, 'home-tagline': tagline })[id], addEventListener() {} };
+    const undo = new Element(), redo = new Element(), history = new Element(), form = new Element();
+    history.querySelector = selector => ({ '[data-home-undo]': undo, '[data-home-redo]': redo })[selector];
+    form.querySelector = selector => selector === '[data-home-history]' ? history : null;
+    form.contains = element => [title, subtitle, order, ctaLabel, ctaPath, image, media, tagline].includes(element);
+    const doc = { documentElement: { classList: { remove() {} } }, querySelector: selector => selector === '[data-home-canvas]' ? home : (historyEnabled && selector === '[data-home-editor-form]' ? form : null), getElementById: id => ({ 'hero-title': title, 'hero-subtitle': subtitle, 'hero-order': order, 'hero-cta-label': ctaLabel, 'hero-cta-path': ctaPath, 'hero-image': image, 'hero-media': media, 'home-tagline': tagline })[id], addEventListener() {} };
     const win = new Element(); win.location = { origin: 'https://admin.example' }; win.timers = []; win.setTimeout = fn => { win.timers.push(fn); return win.timers.length; };
     const requests = [];
     const fetch = async (url, options) => {
@@ -31,7 +35,7 @@ function setup(fetchOverride) {
     };
     vm.runInNewContext(script, { document: doc, window: win, URL, AbortController, fetch, Event: class { constructor(type) { this.type = type; } } });
     const message = data => win.dispatchEvent({ type: 'message', source: frame.contentWindow, origin: 'https://store.example', data });
-    return { buttons, controls, frame, title, subtitle, order, ctaLabel, ctaPath, image, media, tagline, status, messages, requests, win, message };
+    return { buttons, controls, frame, title, subtitle, order, ctaLabel, ctaPath, image, media, tagline, status, messages, requests, win, message, undo, redo, history };
 }
 
 test('viewport presets change the real frame width without reloading or changing draft', () => {
@@ -162,4 +166,22 @@ test('tagline updates and separate component readiness use only the approved fra
     assert.equal(messages.at(-1)[1], 'https://store.example');
     message({ type: 'furniture-home-canvas-select', field: 'home_tagline', focus_input: true });
     assert.equal(tagline.focused, true);
+});
+
+test('undo and redo update the canvas after edits and canvas reorder without publishing', () => {
+    const { title, order, messages, message, undo, redo } = setup(undefined, true);
+    message({ type: 'furniture-home-canvas-ready' });
+    title.value = 'Edited title';
+    title.dispatchEvent({ type: 'input' });
+    message({ type: 'furniture-home-canvas-move', field: 'hero_title', direction: 'down' });
+    assert.equal(order.value, 'subtitle_first');
+    undo.click();
+    assert.equal(order.value, 'title_first');
+    assert.equal(messages.at(-1)[0].hero_order, 'title_first');
+    undo.click();
+    assert.equal(title.value, 'Draft');
+    assert.equal(messages.at(-1)[0].hero_title, 'Draft');
+    redo.click();
+    assert.equal(title.value, 'Edited title');
+    assert.equal(messages.at(-1)[0].hero_title, 'Edited title');
 });

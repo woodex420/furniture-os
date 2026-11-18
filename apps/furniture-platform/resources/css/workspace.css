@@ -68,6 +68,11 @@
   .no-js .sidebar { transform: none; position: static; width: 100% !important; max-height: 330px; }
 }
 
+.home-history-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; color: #526056; font-size: 12px; }
+.home-history-controls[hidden] { display: none; }
+.home-history-controls button { border: 1px solid #c5d3c5; border-radius: 5px; padding: 6px 10px; background: #fff; color: #35503a; cursor: pointer; }
+.home-history-controls button:disabled { opacity: .45; cursor: not-allowed; }
+.home-history-controls button:focus-visible { outline: 3px solid #8ab764; outline-offset: 2px; }
 .home-editor-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 18px; max-width: 1100px; margin-bottom: 20px; }
 @media(min-width: 1250px) { .home-editor-grid { grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); } }
 .home-canvas { min-width: 0; padding: 22px; }

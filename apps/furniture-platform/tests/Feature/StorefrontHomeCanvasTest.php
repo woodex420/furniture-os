@@ -18,7 +18,8 @@ class StorefrontHomeCanvasTest extends TestCase
         config(['furniture.home_editor_enabled' => true, 'furniture.storefront_canvas_url' => null]);
         $owner = User::factory()->create(['is_owner' => true]);
         $this->withoutVite()->actingAs($owner)->get('/admin/website/home')->assertOk()
-            ->assertSee('Canvas not configured')->assertDontSee('data-canvas-frame', false);
+            ->assertSee('Canvas not configured')->assertDontSee('data-canvas-frame', false)
+            ->assertSee('data-home-history hidden', false)->assertSee('Unsaved edits only; history resets after save or reload.');
         config(['furniture.storefront_canvas_url' => 'https://storefront.example.test']);
         $this->get('/admin/website/home')->assertOk()->assertSee('data-canvas-frame', false)
             ->assertSee('data-storefront-origin="https://storefront.example.test"', false)

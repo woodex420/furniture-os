@@ -4,6 +4,10 @@ Site Overview now optionally embeds the **actual Reimagin homepage** for selecti
 
 The experimental upload/list is described in `FURNITURE-PRIVATE-MEDIA-PREVIEW.md`. Uploaded images can now be selected for this hero; saving or restoring an image-bearing version makes that image public. See `FURNITURE-HERO-UPLOADED-MEDIA.md`.
 
+## Unsaved edit history
+
+The homepage form offers Undo and Redo for the current first-slide fields, background selection and tagline, including canvas-driven text ordering. It retains at most 100 in-memory edit steps; a new change after undo discards the redo branch. Undo/redo updates the canvas where available but **does not save or publish**. It resets when the page reloads, including after a form submission; persisted revisions and restore remain separate server features. Without JavaScript the controls stay hidden and the regular form remains usable. Text entry is recorded per input event and does not intercept the browser's native keyboard shortcuts. This is a limited first step toward builder undo/redo, not multi-page or persistent history, and does not meet the full immediate-publication requirement.
+
 ## Configuration and boundary
 
 - `FURNITURE_HOME_EDITOR_ENABLED` remains false by default. `FURNITURE_STOREFRONT_CANVAS_URL` is an optional explicitly configured **origin only** (no path, credentials, query or fragment); HTTPS is required except localhost/127.0.0.1 in local/test environments. If absent/invalid, the existing form and history work without a canvas. Configure the appropriate storefront preview origin on the trusted server; never send a sandbox localhost URL to the user's browser.
