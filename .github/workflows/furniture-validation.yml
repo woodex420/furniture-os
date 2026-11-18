@@ -208,6 +208,8 @@ jobs:
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npm test
+          npm run build
+          node --test scripts/vercel-preview.test.mjs
           npm run test:preflight
           node --test scripts/report-composer-audit.test.mjs
 
