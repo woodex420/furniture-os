@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Models\User;
 use App\Support\Customers\CreateLeadCandidate;
 use App\Support\Customers\EditLeadCandidate;
+use App\Support\Website\BuilderDocumentRevisions;
+use App\Support\Website\BuilderDocumentV1;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -81,9 +83,21 @@ try {
     $edited = app(EditLeadCandidate::class)->update((int) $lead->id, ['title' => 'Synthetic updated', 'source' => 'CI', 'edit_revision' => 0]);
     verify($edited->title === 'Synthetic updated' && (int) $edited->edit_revision === 1, 'Imported lead write failed.');
     verify($imported->table('lead_audit_events')->where('lead_id', $lead->id)->count() === 2, 'Expected lead audit events missing.');
+
+    $documentId = 'c6ae6052-11ad-4d16-8a18-56541c735d8c';
+    $document = ['schema_version' => 1, 'sections' => [['id' => 'e38c052c-f2e0-43ca-85d0-a5760caa7d03', 'type' => 'article_text', 'props' => ['summary' => 'خلاصہ', 'body' => 'Synthetic <text>']]]];
+    $builder = app(BuilderDocumentRevisions::class);
+    $builder->create((int) $owner->id, $documentId, $document);
+    $updated = $document;
+    $updated['sections'][0]['props']['body'] = 'Updated synthetic text';
+    $builder->edit((int) $owner->id, $documentId, 1, $updated);
+    $builder->restore((int) $owner->id, $documentId, 2, 1);
+    $row = $imported->table('furniture_builder_documents')->where('id', $documentId)->first();
+    verify((int) $row->revision === 3 && app(BuilderDocumentV1::class)->decode($row->document) === $document, 'Builder document restore failed.');
+    verify($imported->table('furniture_builder_document_versions')->where('document_id', $documentId)->count() === 3, 'Builder revision history missing.');
 } finally {
     $imported->rollBack();
     Auth::forgetGuards();
 }
-verify($imported->table('users')->count() === 0 && $imported->table('leads')->count() === 0, 'Synthetic write rollback failed.');
-echo "PASS: schema, keys, empty-install defaults, migration history and transactional lead writes on disposable imported MySQL.\n";
+verify($imported->table('users')->count() === 0 && $imported->table('leads')->count() === 0 && $imported->table('furniture_builder_documents')->count() === 0 && $imported->table('furniture_builder_document_versions')->count() === 0, 'Synthetic write rollback failed.');
+echo "PASS: schema, keys, defaults, lead writes and builder document revisions on disposable imported MySQL/MariaDB.\n";
