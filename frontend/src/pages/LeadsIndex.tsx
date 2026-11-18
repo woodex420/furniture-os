@@ -1,13 +1,22 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Service to interact with Laravel API
-const API_URL = import.meta.env.VITE_API_URL || 'https://api.woodex.com.pk';
+const API_URL = (import.meta as any).env.VITE_API_URL || 'https://api.staging.blackibex.net';
+
+export interface Lead {
+  id: string | number;
+  title: string;
+  contact?: { name: string };
+  source?: string;
+  status: string;
+  created_at: string;
+}
 
 export const useLeadService = () => {
-  const [leads, setLeads] = useState([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchLeads = async (search = '', status = '') => {
     setLoading(true);
@@ -17,8 +26,8 @@ export const useLeadService = () => {
       if (!response.ok) throw new Error('Failed to fetch leads');
       const data = await response.json();
       setLeads(data.data || []);
-    } catch (err) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -99,7 +108,7 @@ export const LeadsIndex = () => {
                 </td>
               </tr>
             ) : (
-              leads.map((lead) => (
+              leads.map((lead: Lead) => (
                 <tr key={lead.id}>
                   <td><a className="record-name customer-record-link" href={`/admin/leads/${lead.id}`}>{lead.title}</a></td>
                   <td>{lead.contact?.name || '—'}</td>
