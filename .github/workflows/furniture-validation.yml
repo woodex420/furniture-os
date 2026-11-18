@@ -251,7 +251,18 @@ jobs:
             sleep 1
           done
           curl -fsS http://127.0.0.1:5199/ -o /dev/null
-          node tests/disabled-supabase-browser.mjs
+          set +e
+          node tests/disabled-supabase-browser.mjs 2>&1 | tee "$RUNNER_TEMP/disabled-supabase-browser.log"
+          result=${PIPESTATUS[0]}
+          set -e
+          if [ "$result" -ne 0 ]; then
+            details=$(tail -30 "$RUNNER_TEMP/disabled-supabase-browser.log")
+            details=${details//'%'/'%25'}
+            details=${details//$'\r'/'%0D'}
+            details=${details//$'\n'/'%0A'}
+            echo "::error::$details"
+          fi
+          exit "$result"
 
   same-origin-smoke:
     name: Synthetic same-origin storefront and Laravel smoke
