@@ -17,6 +17,9 @@ try {
   await page.evaluate(() => localStorage.setItem('woodex.admin.session', JSON.stringify({ email: 'synthetic@example.test', name: 'Synthetic', signedInAt: 'now' })));
   await page.reload({ waitUntil: 'networkidle2' });
   await page.waitForFunction(() => document.querySelector('#auth-probe')?.textContent === 'signed-out' && window.testAuth);
+  const importNotice = await page.$eval('section[aria-labelledby="import-title"]', el => el.textContent);
+  assert.match(importNotice, /Import is unavailable/);
+  assert.equal(await page.$('section[aria-labelledby="import-title"] input, section[aria-labelledby="import-title"] button, section[aria-labelledby="import-title"] form'), null, 'disabled import must not offer upload or commit controls');
   await page.waitForFunction(() => localStorage.getItem('woodex.admin.session') === null);
   const auth = await page.evaluate(async () => ({ demo: await window.testAuth.login('synthetic@example.test', 'synthetic-password'), hosted: await window.testAuth.loginWithSupabase('synthetic@example.test', 'synthetic-password') }));
   assert.equal(auth.demo.ok, false);
@@ -25,7 +28,7 @@ try {
   const result = await page.evaluate(() => window.testAdapter());
   assert.deepEqual(result, { mode: 'supabase', enabled: false, url: '', key: '', failures: [true, true, true, true, true], clientBlocked: true });
   assert.equal(external.some(url => /synthetic-provider|unconfigured\.invalid/.test(url)), false, 'legacy client attempted an external request');
-  console.log('PASS: unsupported Supabase mode rejects auth, reads and writes without demo fallback or provider network access.');
+  console.log('PASS: unsupported Supabase mode rejects auth, reads and writes; legacy spreadsheet import has no controls.');
 } finally {
   await browser.close();
 }

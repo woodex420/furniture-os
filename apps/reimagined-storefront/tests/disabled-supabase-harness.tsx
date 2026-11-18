@@ -6,6 +6,7 @@ import { config } from '../src/config/env';
 import { getAdminApi } from '../src/api';
 import { getPublishedPage, getPagePreview, listPublishedProjects } from '../src/api/supabase';
 import { supabase } from '../src/integrations/supabase/client';
+import AdminImport from '../src/admin/pages/Import';
 
 function Probe() {
   const auth = useAdminAuth();
@@ -25,4 +26,4 @@ Object.assign(window, {
     return { mode: config.apiMode, enabled: config.supabase.enabled, url: config.supabase.url, key: config.supabase.publishableKey, failures, clientBlocked };
   },
 });
-createRoot(document.body.appendChild(document.createElement('div'))).render(<AdminAuthProvider><Probe /></AdminAuthProvider>);
+createRoot(document.body.appendChild(document.createElement('div'))).render(<AdminAuthProvider><Probe /><AdminImport /></AdminAuthProvider>);

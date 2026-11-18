@@ -229,7 +229,7 @@ jobs:
         run: |
           npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
           npx vite build
-          node --test tests/service-copy-parser.test.mjs tests/city-page-parser.test.mjs tests/blog-preview-parser.test.mjs tests/preview-proxy.test.mjs tests/storefront-route-inventory.test.mjs tests/restrict-staging.test.mjs tests/disabled-supabase.test.mjs tests/finalize-staging-build.test.mjs ../../scripts/assemble-storefront-preview.test.mjs ../../scripts/storefront-route-sync.test.mjs
+          node --test tests/service-copy-parser.test.mjs tests/city-page-parser.test.mjs tests/blog-preview-parser.test.mjs tests/preview-proxy.test.mjs tests/storefront-route-inventory.test.mjs tests/restrict-staging.test.mjs tests/disabled-supabase.test.mjs tests/disabled-spreadsheet-import.test.mjs tests/finalize-staging-build.test.mjs ../../scripts/assemble-storefront-preview.test.mjs ../../scripts/storefront-route-sync.test.mjs
           npm run build
           npm run typecheck:rpc-contract
           npm run typecheck

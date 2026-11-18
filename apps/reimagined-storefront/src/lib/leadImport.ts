@@ -4,8 +4,8 @@
  * Pure client-side mapping from the owner's real spreadsheet layout
  * (`Sr · Date · Company · Name · Contact · Designation · Location · Lead Source ·
  *  Status · Assassin to · Quotation · Last Contact · Action · Meeting Schedule · Note`)
- * into the CRM's `LeadImportRow` contract. The file never leaves the browser —
- * XLSX parsing happens in a lazy chunk and the adapter only ever sees rows.
+ * into the legacy `LeadImportRow` contract. This mapping is retained as reference;
+ * the unsafe demo spreadsheet upload/parser is disabled, not a Furniture import.
  *
  * Status/source vocabulary is mapped case-insensitively; unknown non-empty
  * statuses degrade to "new" with the original value preserved in `note`.

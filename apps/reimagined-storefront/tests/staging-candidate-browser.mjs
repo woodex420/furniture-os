@@ -52,6 +52,15 @@ try {
   assert.match(await page.$eval('body', (el) => el.textContent), /Newsletter signup is not available yet/);
   assert.equal(await page.$('button[aria-label="Open live chat"]'), null);
 
+  // Verify the updated router handles an actual storefront link, query and reload.
+  await page.$eval('a[href="/shop?category=chairs"]', el => el.click());
+  await page.waitForFunction(() => location.pathname === '/shop' && location.search === '?category=chairs');
+  await page.waitForSelector('main');
+  const shopResponse = await page.reload({ waitUntil: 'networkidle2' });
+  assert.equal(shopResponse.status(), 200);
+  assert.equal(new URL(page.url()).search, '?category=chairs');
+  await page.waitForSelector('main');
+
   // Staging mode must not advertise fake successful submissions, even when
   // an event is dispatched directly rather than clicking a disabled control.
   await page.goto(`${origin}/contact`, { waitUntil: 'networkidle2' });
